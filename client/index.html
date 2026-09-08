@@ -1,9 +1,17 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weave</title>
-  </head>
-  <body></body>
-</html>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+    const firebaseConfig = {
+        apiKey: "...",
+        authDomain: "weave-68219.firebaseapp.com",
+        projectId: "weave-68219",
+        storageBucket: "weave-68219.firebasestorage.app",
+        messagingSenderId: "855925043974",
+        appId: "1:855925043974:web:e248aa3108d5cccf802487",
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    console.log("Firebase 연결 성공!");
+    console.log(app);
+</script>
