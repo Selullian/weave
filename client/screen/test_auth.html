@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>auth 기능 테스트</title>
+    </head>
+
+    <body>
+        <h1>회원가입 테스트</h1>
+
+        <input type="email" id="signUpEmail" placeholder="이메일" />
+        <input type="password" id="signUpPassword" placeholder="비밀번호" />
+        <button id="signUpButton">회원가입</button><br />
+        <span id="signUpMessage">결과 메시지가 표시됨.</span>
+
+        <h1>로그인 테스트</h1>
+
+        <input type="email" id="signInEmail" placeholder="이메일" />
+        <input type="password" id="signInPassword" placeholder="비밀번호" />
+        <button id="signInButton">로그인</button><br />
+        <span id="signInMessage">결과 메시지가 표시됨.</span>
+
+        <script type="module">
+            import { signUp, signIn } from "../src/services/auth.js";
+
+            // signUp 요소들
+            const signUpEmailInput = document.getElementById("signUpEmail");
+            const signUpPasswordInput =
+                document.getElementById("signUpPassword");
+            const signUpButton = document.getElementById("signUpButton");
+
+            // signIn 요소들
+            const signInEmailInput = document.getElementById("signInEmail");
+            const signInPasswordInput =
+                document.getElementById("signInPassword");
+            const signInButton = document.getElementById("signInButton");
+
+            // signUp 실행
+            signUpButton.addEventListener("click", async () => {
+                const email = signUpEmailInput.value;
+                const password = signUpPasswordInput.value;
+
+                console.log("회원가입 실행됨.", email);
+
+                let message = document.getElementById("signUpMessage");
+
+                try {
+                    const user = await signUp(email, password);
+                    message.innerHTML = `${user.email} 회원가입 성공`;
+                } catch (error) {
+                    if (error === "auth/email-already-in-use") {
+                        message.innerHTML = "이미 등록된 회원입니다.";
+                        console.log("이미 등록된 회원입니다.");
+                    } else {
+                        console.error("회원가입 실패:", error);
+                    }
+                }
+            });
+
+            // signIn 실행
+            signInButton.addEventListener("click", async () => {
+                const email = signInEmailInput.value;
+                const password = signInButton.value;
+
+                console.log("로그인 실행 : " + email);
+
+                try {
+                    const user = await signIn(email, password);
+
+                    console.log("로그인 성공:", user.email);
+                    document.getElementById("signUpMessage").innerHTML =
+                        `${user.email} 로그인 성공`;
+                } catch (error) {
+                    console.log("로그인 실패 : ", error);
+                }
+            });
+        </script>
+    </body>
+</html>

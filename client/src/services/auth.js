@@ -31,16 +31,17 @@ export async function signUp(email, password) {
         const user = userCredential.user;
 
         console.log("회원가입 성공!");
-        console.log("UID:", user.uid);
-        console.log("이메일:", user.email);
 
         return user;
     } catch (error) {
-        console.error("회원가입 실패!");
-        console.error("에러 코드:", error.code);
-        console.error("에러 메시지:", error.message);
+        if (error.code === "auth/email-already-in-use") {
+            console.error("이미 등록된 사용자", error);
+        } else {
+            console.error("회원가입 실패!");
+            console.error(error);
+        }
 
-        throw error;
+        throw error.code;
     }
 }
 
