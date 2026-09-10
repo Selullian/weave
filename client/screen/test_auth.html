@@ -42,17 +42,19 @@
 
                 console.log("회원가입 실행됨.", email);
 
+                // 사용자 출력 칸
                 let message = document.getElementById("signUpMessage");
 
                 try {
                     const user = await signUp(email, password);
                     message.innerHTML = `${user.email} 회원가입 성공`;
                 } catch (error) {
-                    if (error === "auth/email-already-in-use") {
+                    if (error.code === "auth/email-already-in-use") {
+                        // 이미 있는 회원
                         message.innerHTML = "이미 등록된 회원입니다.";
                         console.log("이미 등록된 회원입니다.");
                     } else {
-                        console.error("회원가입 실패:", error);
+                        console.error("회원가입 실패:", error.code);
                     }
                 }
             });
@@ -60,18 +62,29 @@
             // signIn 실행
             signInButton.addEventListener("click", async () => {
                 const email = signInEmailInput.value;
-                const password = signInButton.value;
+                const password = signInPasswordInput.value;
 
                 console.log("로그인 실행 : " + email);
-
+                // 사용자 출력 칸
+                let message = document.getElementById("signInMessage");
                 try {
                     const user = await signIn(email, password);
 
                     console.log("로그인 성공:", user.email);
-                    document.getElementById("signUpMessage").innerHTML =
-                        `${user.email} 로그인 성공`;
+                    message.innerHTML = `${user.email} 로그인 성공`;
                 } catch (error) {
-                    console.log("로그인 실패 : ", error);
+                    if (error.code === "auth/missing-password") {
+                        // 비밀번호 입력X
+                        console.error("비밀번호 미입력");
+                        message.innerHTML = "비밀번호가 입력되지 않았습니다.";
+                    } else if (error.code === "auth/weak-password") {
+                        // 너무 약한 비번(6자리, 특수문자, 소문자, 숫자)
+                        console.error("너무 약한 비밀번호");
+                        message.innerHTML = "너무 약한 비밀번호 입니다.";
+                    } else {
+                        message.innerHTML = `로그인 실패`;
+                        console.log("로그인 실패 : ", error);
+                    }
                 }
             });
         </script>

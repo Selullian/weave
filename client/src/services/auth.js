@@ -29,9 +29,7 @@ export async function signUp(email, password) {
 
         // 생성된 사용자 정보
         const user = userCredential.user;
-
         console.log("회원가입 성공!");
-
         return user;
     } catch (error) {
         if (error.code === "auth/email-already-in-use") {
@@ -41,7 +39,7 @@ export async function signUp(email, password) {
             console.error(error);
         }
 
-        throw error.code;
+        throw error;
     }
 }
 
@@ -57,14 +55,16 @@ export async function signIn(email, password) {
         const user = userCredential.user;
 
         console.log("로그인 성공!");
-        console.log("UID:", user.uid);
-        console.log("이메일:", user.email);
 
         return user;
     } catch (error) {
-        console.error("로그인 실패!");
-        console.error("에러 코드:", error.code);
-        console.error("에러 메시지:", error.message);
+        if (error.code === "auth/missing-password") {
+            console.error("로그인 실패 : 비밀번호 미입력");
+        } else if (error.code === "auth/weak-password") {
+            console.error("로그인 실패 : 너무 약한 비밀번호");
+        } else {
+            console.error("로그인 실패", error);
+        }
 
         throw error;
     }
