@@ -4,42 +4,35 @@
         <meta charset="UTF-8" />
         <title>회원가입 테스트</title>
     </head>
+
     <body>
+        <h1>회원가입 테스트</h1>
+
         <input type="email" id="email" placeholder="이메일" />
         <input type="password" id="password" placeholder="비밀번호" />
-
         <button id="signupButton">회원가입</button>
 
         <script type="module">
-            import { signUp } from "../../server/auth.js";
+            import { signUp } from "../src/services/auth.js";
 
-            try {
-                const user = await signUp("test123@gmail.com", "12345678");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const signupButton = document.getElementById("signupButton");
 
-                console.log("프론트에서 회원가입 성공:", user);
-            } catch (error) {
-                console.error("프론트에서 회원가입 실패:", error);
-            }
-            // import { signUp } from "../../server/auth.js";
+            signupButton.addEventListener("click", async () => {
+                const email = emailInput.value;
+                const password = passwordInput.value;
 
-            // const emailInput = document.getElementById("email");
-            // const passwordInput = document.getElementById("password");
-            // const signupButton = document.getElementById("signupButton");
+                console.log("④ 입력값 확인:", email);
 
-            // signupButton.addEventListener("click", async () => {
-            //     const email = emailInput.value;
-            //     const password = passwordInput.value;
+                try {
+                    const user = await signUp(email, password);
 
-            //     try {
-            //         const user = await signUp(email, password);
-
-            //         console.log("회원가입 성공!");
-            //         console.log("UID:", user.uid);
-            //         console.log("이메일:", user.email);
-            //     } catch (error) {
-            //         console.error("회원가입 실패:", error);
-            //     }
-            // });
+                    console.log("회원가입 성공:", user.uid);
+                } catch (error) {
+                    console.error("회원가입 실패:", error);
+                }
+            });
         </script>
     </body>
 </html>
