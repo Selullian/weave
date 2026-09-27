@@ -1,6 +1,7 @@
 import { db } from "../../app.js";
 import {
     setDoc,
+    getDoc,
     doc,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -8,8 +9,10 @@ import {
 =================================
 회원 인증 관리 (이름/이메일/비밀번호)
 
-1. 회원가입 - 기초 기능 완료
-2. 회원 정보 조회 - 구현 전
+1. 회원 문서 생성
+  - createUserDoc(uid, email, name) - 기초 기능 완료
+2. 회원 정보 조회
+  - getUserDoc(uid) - 기초 기능 완료
 3. 회원명 수정 - 구현 전
 =================================
 */
@@ -51,5 +54,24 @@ export async function createUserDoc(uid, email, name) {
         console.log("Document 생성 완료, name : ", name);
     } catch (e) {
         console.error("Document 생성 오류 : ", e);
+    }
+}
+
+// 회원 정보 조회
+export async function getUserDoc(uid) {
+    try {
+        console.log("uid로 회원 정보 조회 실행");
+        const docRef = doc(db, "users", uid);
+        const docSnap = await getDoc(docRef);
+
+        // 문서 존재 분기
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            return userData;
+        } else {
+            return null;
+        }
+    } catch (e) {
+        console.error("DB 사용자 조회 실패 : ", e);
     }
 }

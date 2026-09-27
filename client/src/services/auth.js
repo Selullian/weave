@@ -2,10 +2,14 @@
 =================================
 회원 인증 관리 (이름/이메일/비밀번호)
 
-1. 회원가입 - DB 연동 완료
-2. 로그인 - 기초 기능 완료
-3. 로그아웃 - 기능 완료
+1. 회원가입
+  - signUp(name, email, password) - DB 연동 완료
+2. 로그인
+  - signIn(email, password) - 기초 기능 완료
+3. 로그아웃
+  - logOut() - 기초 기능 완료
 4. 회원 정보 조회
+  - getUserInfo(uid) - 기초 기능 완료
 =================================
 */
 
@@ -16,7 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import { auth } from "../../app.js";
-import { createUserDoc } from "../repository/auth_repository.js";
+import { createUserDoc, getUserDoc } from "../repository/auth_repository.js";
 
 // 회원가입
 export async function signUp(name, email, password) {
@@ -94,10 +98,22 @@ export async function logOut() {
         console.log(`로그아웃 성공!`);
         // todo : 로그아웃 후 로그인 페이지로 이동
     } catch (error) {
-        console.error(`로그아웃 실패`, error);
+        console.error("로그아웃 실패", error);
     }
 }
 
+// 사용자 정보 조회
 export async function getUserInfo() {
-    const userName = "";
+    const user = auth.currentUser;
+    try {
+        const userData = await getUserDoc(user.uid);
+        if (userData === null) {
+            return null;
+        } else {
+            const userInfo = { name: userData.name, email: userData.email };
+            return userInfo;
+        }
+    } catch (e) {
+        console.error("사용자 조회 실패", e);
+    }
 }
