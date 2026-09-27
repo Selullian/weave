@@ -8,8 +8,10 @@ import {
 =================================
 회원 인증 관리 (이름/이메일/비밀번호)
 
-1. 회원가입 - 기초 기능 완료
-2. 회원 정보 조회 - 구현 전
+1. 회원 문서 생성
+  - createUserDoc(uid, email, name) - 기초 기능 완료
+2. 회원 정보 조회
+  - getUserInfo(uid) - 구현 중
 3. 회원명 수정 - 구현 전
 =================================
 */
@@ -38,7 +40,7 @@ import {
  └────────────┴───────────┴──────────────────────────────────────────────
 */
 
-// User 컬렉션, 문서 생성
+// 회원 문서 생성
 export async function createUserDoc(uid, email, name) {
     try {
         console.log("문서 생성 실행");
@@ -51,5 +53,14 @@ export async function createUserDoc(uid, email, name) {
         console.log("Document 생성 완료, name : ", name);
     } catch (e) {
         console.error("Document 생성 오류 : ", e);
+    }
+}
+
+// 회원 정보 조회
+export async function getUserInfo(uid) {
+    try {
+        console.log("uid 회원 정보 조회");
+    } catch (e) {
+        console.error("사용자 조회 실패");
     }
 }
