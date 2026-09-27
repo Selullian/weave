@@ -41,7 +41,7 @@ import {
  └────────────┴───────────┴──────────────────────────────────────────────
 */
 
-// User 컬렉션, 문서 생성
+// 회원 문서 생성
 export async function createUserDoc(uid, email, name) {
     try {
         console.log("문서 생성 실행");
