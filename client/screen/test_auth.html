@@ -10,6 +10,7 @@
 
         <input type="email" id="signUpEmail" placeholder="이메일" />
         <input type="password" id="signUpPassword" placeholder="비밀번호" />
+        <input type="name" id="signUpName" placeholder="이름" />
         <button id="signUpButton">회원가입</button><br />
         <span id="signUpMessage">결과 메시지가 표시됨.</span>
 
@@ -19,14 +20,18 @@
         <input type="password" id="signInPassword" placeholder="비밀번호" />
         <button id="signInButton">로그인</button><br />
         <span id="signInMessage">결과 메시지가 표시됨.</span>
+        <br />
+        <br />
+        <button id="logOutButton">로그아웃</button>
 
         <script type="module">
-            import { signUp, signIn } from "../src/services/auth.js";
+            import { signUp, signIn, logOut } from "../src/services/auth.js";
 
             // signUp 요소들
             const signUpEmailInput = document.getElementById("signUpEmail");
             const signUpPasswordInput =
                 document.getElementById("signUpPassword");
+            const signUpNameInput = document.getElementById("signUpName");
             const signUpButton = document.getElementById("signUpButton");
 
             // signIn 요소들
@@ -35,10 +40,14 @@
                 document.getElementById("signInPassword");
             const signInButton = document.getElementById("signInButton");
 
+            // logOut 버튼
+            const logOutButton = document.getElementById("logOutButton");
+
             // signUp 실행
             signUpButton.addEventListener("click", async () => {
                 const email = signUpEmailInput.value;
                 const password = signUpPasswordInput.value;
+                const name = signUpNameInput.value;
 
                 console.log("회원가입 실행됨.", email);
 
@@ -46,7 +55,7 @@
                 let message = document.getElementById("signUpMessage");
 
                 try {
-                    const user = await signUp(email, password);
+                    const user = await signUp(name, email, password);
                     message.innerHTML = `${user.email} 회원가입 성공`;
                 } catch (error) {
                     if (error.code === "auth/email-already-in-use") {
@@ -85,6 +94,14 @@
                         message.innerHTML = `로그인 실패`;
                         console.log("로그인 실패 : ", error);
                     }
+                }
+            });
+
+            logOutButton.addEventListener("click", async () => {
+                try {
+                    logOut();
+                } catch (error) {
+                    alert("로그아웃 실패");
                 }
             });
         </script>

@@ -1,28 +1,32 @@
 /*
 =================================
+회원 인증 관리 (이름/이메일/비밀번호)
 
-회원 인증 관리 (이메일/비밀번호)
-
-1. 회원가입 - 기초 기능 완료
+1. 회원가입 - DB 연동 완료
 2. 로그인 - 기초 기능 완료
-3. 로그아웃
+3. 로그아웃 - 기능 완료
 4. 회원 정보 조회
 =================================
 */
 
-// Firebase Authentication 기능 가져오기
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signOut,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import { auth } from "../../app.js";
+import { createUserDoc } from "../repository/auth_repository.js";
 
 // 회원가입
-export async function signUp(email, password) {
+export async function signUp(name, email, password) {
     try {
         // 입력값 유효성 검사
-        if (email.trim() === "" || password.trim() === "") {
+        if (
+            email.trim() === "" ||
+            password.trim() === "" ||
+            name.trim() === ""
+        ) {
             throw new Error("모든 항목을 입력해주세요.");
         }
 
@@ -35,7 +39,10 @@ export async function signUp(email, password) {
 
         // 생성된 사용자 정보
         const user = userCredential.user;
-        console.log("회원가입 성공!");
+        console.log("회원가입 auth 성공!");
+
+        createUserDoc(user.uid, user.email, name);
+
         return user;
     } catch (error) {
         if (error.code === "auth/email-already-in-use") {
@@ -51,6 +58,10 @@ export async function signUp(email, password) {
 
 // 로그인
 export async function signIn(email, password) {
+    let user = auth.currentUser;
+    if (user) {
+        throw "이미 로그인 된 사용자";
+    }
     try {
         const userCredential = await signInWithEmailAndPassword(
             auth,
@@ -74,4 +85,19 @@ export async function signIn(email, password) {
 
         throw error;
     }
+}
+
+//로그아웃
+export async function logOut() {
+    try {
+        signOut(auth);
+        console.log(`로그아웃 성공!`);
+        // todo : 로그아웃 후 로그인 페이지로 이동
+    } catch (error) {
+        console.error(`로그아웃 실패`, error);
+    }
+}
+
+export async function getUserInfo() {
+    const userName = "";
 }
