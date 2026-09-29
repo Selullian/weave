@@ -8,8 +8,10 @@
   - signIn(email, password) - 기초 기능 완료
 3. 로그아웃
   - logOut() - 기초 기능 완료
-4. 회원 정보 조회
+4. 사용자 정보 조회
   - getUserInfo(uid) - 기초 기능 완료
+5. 사용자 그룹 목록 조회
+  - getUserGroupIds(uid) - 기초 기능 완료
 =================================
 */
 
@@ -104,8 +106,8 @@ export async function logOut() {
 
 // 사용자 정보 조회
 export async function getUserInfo() {
-    const user = auth.currentUser;
     try {
+        const user = auth.currentUser;
         const userData = await getUserDoc(user.uid);
         if (userData === null) {
             return null;
@@ -114,6 +116,22 @@ export async function getUserInfo() {
             return userInfo;
         }
     } catch (e) {
-        console.error("사용자 조회 실패", e);
+        console.error("사용자 정보 조회 실패", e);
+    }
+}
+
+// 사용자 그룹 목록 조회
+export async function getUserGroupIds() {
+    try {
+        const user = auth.currentUser;
+        const userData = await getUserDoc(user.uid);
+        if (userData === null) {
+            return null;
+        } else {
+            const userGroups = userData.groupIds;
+            return userGroups;
+        }
+    } catch (e) {
+        console.error("사용자의 그룹 목록 조회 실패", e);
     }
 }

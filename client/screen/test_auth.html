@@ -28,12 +28,17 @@
         <span id="getUserInfoMessage">결과 메시지가 표시됨.</span><br /><br />
         <button id="getUserInfoButton">사용자 정보 조회</button>
 
+        <h1>사용자 그룹 조회 테스트</h1>
+        <span id="getUserGroupMessage">결과 메시지가 표시됨.</span><br /><br />
+        <button id="getUserGroupButton">사용자 정보 조회</button>
+
         <script type="module">
             import {
                 signUp,
                 signIn,
                 logOut,
                 getUserInfo,
+                getUserGroupIds,
             } from "../src/services/auth.js";
 
             // signUp 요소들
@@ -55,6 +60,9 @@
             // getUserInfo 버튼
             const getUserInfoButton =
                 document.getElementById("getUserInfoButton");
+            // getUserGroup 버튼
+            const getUserGroupButton =
+                document.getElementById("getUserGroupButton");
 
             // signUp 실행
             signUpButton.addEventListener("click", async () => {
@@ -121,9 +129,8 @@
 
             // 사용자 정보 조회 실행
             getUserInfoButton.addEventListener("click", async () => {
+                let message = document.getElementById("getUserInfoMessage");
                 try {
-                    let message = document.getElementById("getUserInfoMessage");
-
                     const userInfo = await getUserInfo();
 
                     if (userInfo === null) {
@@ -135,6 +142,28 @@
                     }
                 } catch (e) {
                     console.error("사용자 정보 조회 실패", e);
+                }
+            });
+
+            // 사용자 그룹 목록 조회
+            getUserGroupButton.addEventListener("click", async () => {
+                let message = document.getElementById("getUserGroupMessage");
+                try {
+                    const groupIds = await getUserGroupIds();
+                    if (groupIds === null) {
+                        console.log("사용자 그룹 조회 실패");
+                        message.innerHTML = "사용자 그룹 조회 실패";
+                    } else {
+                        console.log(groupIds);
+                        if (Object.keys(groupIds).length === 0) {
+                            message.innerHTML = "소속된 그룹 없음";
+                        } else {
+                            message.innerHTML = groupIds;
+                        }
+                    }
+                } catch (e) {
+                    message.innerHTML = "사용자 그룹 조회 실패";
+                    console.error("사용자 그룹 조회 실패", e);
                 }
             });
         </script>
