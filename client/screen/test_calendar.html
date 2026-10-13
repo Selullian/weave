@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>event 기능 테스트</title>
+    </head>
+
+    <body>
+        <h1>일정 추가 테스트</h1>
+        <input type="text" id="createTitle" placeholder="제목" />
+        <input type="datetime-local" id="createStartAt" />
+        <input type="datetime-local" id="createEndAt" />
+        <input type="text" id="createMemo" placeholder="메모" />
+        <input type="text" id="createGroupId" placeholder="그룹 ID" />
+        <label><input type="checkbox" id="createIsPublic" /> 공개</label>
+        <select id="createSource">
+            <option value="manual">manual</option>
+            <option value="ics">ics</option>
+        </select>
+        <button id="createEventButton">일정 추가</button><br />
+        <span id="createEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 조회 테스트</h1>
+        <input
+            type="text"
+            id="getGroupId"
+            placeholder="그룹 ID (비우면 내 일정)"
+        />
+        <button id="getEventsButton">일정 조회</button><br />
+        <pre id="getEventsMessage">결과 메시지가 표시됨.</pre>
+
+        <h1>일정 수정 테스트</h1>
+        <input type="text" id="updateEventId" placeholder="일정 ID" />
+        <input type="text" id="updateTitle" placeholder="새 제목" />
+        <input type="datetime-local" id="updateStartAt" />
+        <input type="datetime-local" id="updateEndAt" />
+        <input type="text" id="updateMemo" placeholder="새 메모" />
+        <button id="updateEventButton">일정 수정</button><br />
+        <span id="updateEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 삭제 테스트</h1>
+        <input type="text" id="deleteEventId" placeholder="일정 ID" />
+        <button id="deleteEventButton">일정 삭제</button><br />
+        <span id="deleteEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 검색 테스트</h1>
+        <input type="text" id="searchKeyword" placeholder="검색어" />
+        <button id="searchEventsButton">일정 검색</button><br />
+        <pre id="searchEventsMessage">결과 메시지가 표시됨.</pre>
+
+        <h1>ics 파일로 일정 덮어쓰기 테스트</h1>
+        <input type="file" id="icsFile" accept=".ics" />
+        <button id="importIcsButton">ics 불러오기</button><br />
+        <span id="importIcsMessage">결과 메시지가 표시됨.</span>
+
+        <h1>소유자 확인 테스트</h1>
+        <input type="text" id="ownerEventId" placeholder="일정 ID" />
+        <button id="checkOwnerButton">소유자 확인</button><br />
+        <span id="checkOwnerMessage">결과 메시지가 표시됨.</span>
+
+        <script type="module">
+            // 함수 이름이 다르면 여기만 수정하면 됨
+            import { createEvent } from "../src/services/calendar.js";
+
+            const $ = (id) => document.getElementById(id);
+
+            // datetime-local 값 -> Date (비어 있으면 null)
+            const toDate = (value) => (value ? new Date(value) : null);
+
+            // 일정 추가
+            $("createEventButton").addEventListener("click", async () => {
+                const message = $("createEventMessage");
+                try {
+                    await createEvent(
+                        $("createTitle").value,
+                        toDate($("createStartAt").value),
+                        toDate($("createEndAt").value),
+                        $("createMemo").value,
+                        $("createIsPublic").checked,
+                        $("createSource").value,
+                        $("createGroupId").value,
+                    );
+                    message.innerHTML = "일정 추가 요청 완료 (콘솔 확인)";
+                } catch (e) {
+                    message.innerHTML = "일정 추가 실패";
+                    console.error("일정 추가 실패", e);
+                }
+            });
+
+            // // 일정 조회
+            // $("getEventsButton").addEventListener("click", async () => {
+            //     const message = $("getEventsMessage");
+            //     try {
+            //         const events = await getEvents($("getGroupId").value);
+            //         console.log("조회된 일정 : ", events);
+            //         if (!events || events.length === 0) {
+            //             message.innerHTML = "조회된 일정 없음";
+            //         } else {
+            //             message.innerHTML = JSON.stringify(events, null, 2);
+            //         }
+            //     } catch (e) {
+            //         message.innerHTML = "일정 조회 실패";
+            //         console.error("일정 조회 실패", e);
+            //     }
+            // });
+
+            // // 일정 수정
+            // $("updateEventButton").addEventListener("click", async () => {
+            //     const message = $("updateEventMessage");
+            //     try {
+            //         await updateEvent($("updateEventId").value, {
+            //             title: $("updateTitle").value,
+            //             startAt: toDate($("updateStartAt").value),
+            //             endAt: toDate($("updateEndAt").value),
+            //             memo: $("updateMemo").value,
+            //         });
+            //         message.innerHTML = "일정 수정 요청 완료 (콘솔 확인)";
+            //     } catch (e) {
+            //         message.innerHTML = "일정 수정 실패";
+            //         console.error("일정 수정 실패", e);
+            //     }
+            // });
+
+            // // 일정 삭제
+            // $("deleteEventButton").addEventListener("click", async () => {
+            //     const message = $("deleteEventMessage");
+            //     try {
+            //         await deleteEvent($("deleteEventId").value);
+            //         message.innerHTML = "일정 삭제 요청 완료 (콘솔 확인)";
+            //     } catch (e) {
+            //         message.innerHTML = "일정 삭제 실패";
+            //         console.error("일정 삭제 실패", e);
+            //     }
+            // });
+
+            // // 일정 검색
+            // $("searchEventsButton").addEventListener("click", async () => {
+            //     const message = $("searchEventsMessage");
+            //     try {
+            //         const results = await searchEvents($("searchKeyword").value);
+            //         console.log("검색 결과 : ", results);
+            //         if (!results || results.length === 0) {
+            //             message.innerHTML = "검색 결과 없음";
+            //         } else {
+            //             message.innerHTML = JSON.stringify(results, null, 2);
+            //         }
+            //     } catch (e) {
+            //         message.innerHTML = "일정 검색 실패";
+            //         console.error("일정 검색 실패", e);
+            //     }
+            // });
+
+            // // ics 불러오기 (파일 내용을 문자열로 읽어서 전달)
+            // $("importIcsButton").addEventListener("click", async () => {
+            //     const message = $("importIcsMessage");
+            //     const file = $("icsFile").files[0];
+            //     if (!file) {
+            //         message.innerHTML = "파일을 선택해주세요.";
+            //         return;
+            //     }
+            //     try {
+            //         const text = await file.text();
+            //         await importIcs(text);
+            //         message.innerHTML = "ics 불러오기 요청 완료 (콘솔 확인)";
+            //     } catch (e) {
+            //         message.innerHTML = "ics 불러오기 실패";
+            //         console.error("ics 불러오기 실패", e);
+            //     }
+            // });
+
+            // // 소유자 확인
+            // $("checkOwnerButton").addEventListener("click", async () => {
+            //     const message = $("checkOwnerMessage");
+            //     try {
+            //         const isOwner = await isEventOwner($("ownerEventId").value);
+            //         message.innerHTML = isOwner
+            //             ? "내 일정입니다."
+            //             : "내 일정이 아닙니다.";
+            //     } catch (e) {
+            //         message.innerHTML = "소유자 확인 실패";
+            //         console.error("소유자 확인 실패", e);
+            //     }
+            // });
+        </script>
+    </body>
+</html>
