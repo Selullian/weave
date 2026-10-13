@@ -54,15 +54,15 @@ export async function signUp(name, email, password) {
         createUserDoc(user.uid, user.email, name);
 
         return user;
-    } catch (error) {
-        if (error.code === "auth/email-already-in-use") {
-            console.error("이미 등록된 사용자", error);
+    } catch (e) {
+        if (e.code === "auth/email-already-in-use") {
+            console.error("이미 등록된 사용자", e);
         } else {
             console.error("회원가입 실패!");
-            console.error(error);
+            console.error(e);
         }
 
-        throw error;
+        throw e;
     }
 }
 
@@ -84,16 +84,16 @@ export async function signIn(email, password) {
         console.log("로그인 성공!");
 
         return user;
-    } catch (error) {
-        if (error.code === "auth/missing-password") {
+    } catch (e) {
+        if (e.code === "auth/missing-password") {
             console.error("로그인 실패 : 비밀번호 미입력");
         } else if (error.code === "auth/weak-password") {
             console.error("로그인 실패 : 너무 약한 비밀번호");
         } else {
-            console.error("로그인 실패", error);
+            console.error("로그인 실패", e);
         }
 
-        throw error;
+        throw e;
     }
 }
 
@@ -103,8 +103,8 @@ export async function logOut() {
         signOut(auth);
         console.log(`로그아웃 성공!`);
         // todo : 로그아웃 후 로그인 페이지로 이동
-    } catch (error) {
-        console.error("로그아웃 실패", error);
+    } catch (e) {
+        console.error("로그아웃 실패", e);
     }
 }
 
