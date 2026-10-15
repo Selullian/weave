@@ -2,9 +2,11 @@
 ========================
 일정 관리
 1. 일정 추가
-  - createEvent(title, startAt, endAt, [memo], [isPublic], [source], [groupId]) - 구현 중
+  - createEvent(title, startAt, endAt, [memo], [isPublic], [source], [groupId]) - 기초 구현 완료
 2. 유저의 모든 일정 조회 ()
-  - getUserEvents() - 구현 중
+  - getUserEvents() - 기초 구현 완료
+3. 그룹의 모든 일정 조회 ()
+  - getGroupEvents() - 구현 중
 3. 일정 수정
 4. 일정 삭제
 5. 일정 검색
@@ -61,12 +63,28 @@ export async function createEvent(
 }
 
 // 2. 유저의 모든 일정 조회 가능
-export async function getUserEvents(groupId = "") {
+export async function getUserEvents() {
     try {
         let uid = auth.currentUser.uid;
         if (!uid) throw new Error("유저 확인 실패");
 
-        let result = await getUserEventDocs(uid);
+        let result = await getEventDocs(uid);
+
+        // 데이터 없으면 null
+        if (result) return result;
+        else return null;
+    } catch (e) {
+        console.error("유저 일정 조회 실패 :", e);
+    }
+}
+
+// 3. 그룹의 모든 일정 조회 가능
+export async function getGroupEvents(groupId) {
+    try {
+        let uid = auth.currentUser.uid;
+        if (!uid) throw new Error("유저 확인 실패");
+
+        let result = await getEventDocs(uid, groupId);
 
         // 데이터 없으면 null
         if (result) return result;

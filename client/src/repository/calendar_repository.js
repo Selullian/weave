@@ -15,9 +15,9 @@ import {
 일정 문서 관리
 
 1. 일정 문서 추가
-  - createEventDoc(uid, title, startAt, endAt, memo, isPublic, source, groupId) - 구현 중
+  - createEventDoc(uid, title, startAt, endAt, memo, isPublic, source, groupId) - 기초 구현 완료
 2. 일정 문서 조회
-  - getUserEventDoc(uid, [groupId]) - 구현 전
+  - getEventDoc(uid, [groupId]) - 기초 구현 완료
 3. 일정 문서 삭제
 4. 일정 문서 검색?
 =====================
@@ -62,18 +62,20 @@ export async function createEventDoc(
     }
 }
 
-// 2. 유저의 모든 일정 조회
-export async function getUserEventDocs(uid, groupId = "") {
+// 2. 유저 혹은 그룹의 모든 일정 조회
+export async function getEventDocs(uid, groupId = "") {
     try {
-        console.log(uid);
-
         // uid 존재 검증
         if (!uid) throw new Error("uid는 필수 매개변수입니다.");
         let eventRef = await collection(db, "events");
 
-        // 사용자 uid와 일치하는 문서 쿼리
-        const q = query(eventRef, where("uid", "==", uid));
-
+        if (groupId === "") {
+            // 사용자의 모든 문서 쿼리
+            const q = query(eventRef, where("uid", "==", uid));
+        } else {
+            // 그룹 내의 모든 일정 조회
+            const q = query(eventRef, where("groupId", "==", groupId));
+        }
         // 문서 데이터 가져오기(객체 변환)
         let result = await getDocs(q);
         const dataList = result.docs.map((doc) => ({
