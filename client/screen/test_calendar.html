@@ -60,7 +60,10 @@
 
         <script type="module">
             // 함수 이름이 다르면 여기만 수정하면 됨
-            import { createEvent } from "../src/services/calendar.js";
+            import {
+                createEvent,
+                getUserEvents,
+            } from "../src/services/calendar.js";
 
             const $ = (id) => document.getElementById(id);
 
@@ -80,6 +83,7 @@
                         $("createSource").value,
                         $("createGroupId").value,
                     );
+
                     message.innerHTML = "일정 추가 요청 완료 (콘솔 확인)";
                 } catch (e) {
                     message.innerHTML = "일정 추가 실패";
@@ -87,22 +91,24 @@
                 }
             });
 
-            // // 일정 조회
-            // $("getEventsButton").addEventListener("click", async () => {
-            //     const message = $("getEventsMessage");
-            //     try {
-            //         const events = await getEvents($("getGroupId").value);
-            //         console.log("조회된 일정 : ", events);
-            //         if (!events || events.length === 0) {
-            //             message.innerHTML = "조회된 일정 없음";
-            //         } else {
-            //             message.innerHTML = JSON.stringify(events, null, 2);
-            //         }
-            //     } catch (e) {
-            //         message.innerHTML = "일정 조회 실패";
-            //         console.error("일정 조회 실패", e);
-            //     }
-            // });
+            // 일정 조회
+            $("getEventsButton").addEventListener("click", async () => {
+                const message = $("getEventsMessage");
+                try {
+                    let events = await getUserEvents();
+                    console.log("조회된 일정 : ", events);
+                    if (!events || events.length === 0) {
+                        message.innerHTML = "조회된 일정 없음";
+                    } else {
+                        let result = events.map((event) => {
+                            console.log(event);
+                        });
+                    }
+                } catch (e) {
+                    message.innerHTML = "일정 조회 실패";
+                    console.error("일정 조회 실패", e);
+                }
+            });
 
             // // 일정 수정
             // $("updateEventButton").addEventListener("click", async () => {
