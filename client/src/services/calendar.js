@@ -18,7 +18,7 @@
 import { auth } from "../../app.js";
 import {
     createEventDoc,
-    getUserEventDocs,
+    getEventDocs,
 } from "../repository/calendar_repository.js";
 
 // 1. 일정 추가
@@ -65,6 +65,7 @@ export async function createEvent(
 // 2. 유저의 모든 일정 조회 가능
 export async function getUserEvents() {
     try {
+        console.log("유저 일정 조회 실행");
         let uid = auth.currentUser.uid;
         if (!uid) throw new Error("유저 확인 실패");
 
@@ -81,6 +82,8 @@ export async function getUserEvents() {
 // 3. 그룹의 모든 일정 조회 가능
 export async function getGroupEvents(groupId) {
     try {
+        console.log("그룹 일정 조회 실행");
+
         let uid = auth.currentUser.uid;
         if (!uid) throw new Error("유저 확인 실패");
 

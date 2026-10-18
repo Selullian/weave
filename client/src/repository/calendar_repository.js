@@ -69,13 +69,15 @@ export async function getEventDocs(uid, groupId = "") {
         if (!uid) throw new Error("uid는 필수 매개변수입니다.");
         let eventRef = await collection(db, "events");
 
+        let q;
         if (groupId === "") {
             // 사용자의 모든 문서 쿼리
-            const q = query(eventRef, where("uid", "==", uid));
+            q = query(eventRef, where("uid", "==", uid));
         } else {
             // 그룹 내의 모든 일정 조회
-            const q = query(eventRef, where("groupId", "==", groupId));
+            q = query(eventRef, where("groupId", "==", groupId));
         }
+
         // 문서 데이터 가져오기(객체 변환)
         let result = await getDocs(q);
         const dataList = result.docs.map((doc) => ({

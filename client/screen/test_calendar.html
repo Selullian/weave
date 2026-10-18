@@ -93,6 +93,7 @@
 
             // 일정 조회
             $("getEventsButton").addEventListener("click", async () => {
+                console.log("일정 조회 실행");
                 const message = $("getEventsMessage");
                 try {
                     let events = await getUserEvents();
