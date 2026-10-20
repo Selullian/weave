@@ -1,4 +1,5 @@
 import { db } from "../../app.js";
+import { getUserDoc } from "../repository/auth_repository.js";
 import {
     addDoc,
     updateDoc,
@@ -22,6 +23,7 @@ import {
 3. 일정 문서 수정
   - updateEventDoc(eventId, contents) - 기초 구현 완료
 4. 일정 문서 검색
+  - findEventDoc(title) - 구현 중
 5. 일정 문서 삭제
 =====================
 */
@@ -115,33 +117,78 @@ async function getToUpdateContent(eventId, contents) {
 }
 
 // 3. 일정 수정
-export async function updateEventDoc(eventId, contents) {
+export async function updateEventDoc(uid, eventId, contents) {
     try {
-        console.log("일정 수정 db 실행");
+        console.log("일정 수정 DB 실행");
 
         // 문서 존재 검증
         let docRef = doc(db, "events", eventId);
         let docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            // 변경된 필드만 추출
-            let updateData = await getToUpdateContent(eventId, contents);
-            console.log(updateData);
+        if (!docSnap.exists()) {
+            console.warn("해당 일정이 존재하지 않습니다.");
+            return false;
+        }
 
-            if (Object.keys(updateData).length === 0) {
-                console.warn("일정에 변경 사항이 없습니다.");
-                return;
-            }
+        // 수정 권한 확인
+        let originData = docSnap.data();
+        let userInfo = await getUserDoc(uid);
+        let userGroups = userInfo.groupIds;
+        console.log(userGroups);
 
-            await updateDoc(docRef, {
-                ...updateData,
-                updateAt: serverTimestamp(),
-            });
+        if (
+            originData.uid !== uid ||
+            !Object.keys(userGroups).includes(originData.groupId)
+        ) {
+            throw new Error("일정 수정 권한이 없습니다");
+        }
 
+        // 변경된 필드만 추출
+        let updateData = await getToUpdateContent(eventId, contents);
+
+        if (Object.keys(updateData).length === 0) {
+            console.warn("일정에 변경 사항이 없습니다.");
             return true;
         }
-        return false;
+
+        // 변경사항과 업데이트 시각 문서 수정
+        await updateDoc(docRef, {
+            ...updateData,
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
     } catch (e) {
         console.error("일정 수정 실패", e);
+        throw e;
+    }
+}
+
+// 4. 일정 검색
+export async function findEventDoc(uid, title) {
+    try {
+        if (!title) throw new Error("검색할 제목을 입력해주세요");
+
+        let keywords = title.split(" ");
+
+        let eventRef = await collection(db, "events");
+        let q = query(
+            eventRef,
+            where("uid", "==", uid),
+            where("title", "array-contains", keywords),
+        );
+
+        let result = await getDocs(q);
+        if (result) {
+            const dataList = result.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+
+            // 없으면 null
+            if (!dataList) return null;
+            else return dataList;
+        } else throw new Error("cal-repo/result 없음");
+    } catch (e) {
+        console.error("일정 검색 실패", e);
     }
 }

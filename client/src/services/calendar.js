@@ -21,6 +21,7 @@ import {
     createEventDoc,
     getEventDocs,
     updateEventDoc,
+    findEventDoc,
 } from "../repository/calendar_repository.js";
 
 // 1. 일정 추가
@@ -34,16 +35,17 @@ export async function createEvent(
     groupId = "",
 ) {
     try {
-        console.log(title, startAt, endAt);
-
         if (title.trim() === "" || startAt === null || endAt === null) {
             throw new Error("필수 항목을 입력해주세요.");
         } else if (source != "manual" && source != "ics") {
             throw new Error("잘못된 출처 입력");
         }
-        let uid = auth.currentUser.uid;
 
-        let docs = createEventDoc(
+        const user = auth.currentUser;
+        if (!user) throw new Error("로그인이 필요합니다.");
+        const uid = user.uid;
+
+        let docs = await createEventDoc(
             uid,
             title,
             startAt,
@@ -68,8 +70,10 @@ export async function createEvent(
 export async function getUserEvents() {
     try {
         console.log("유저 일정 조회 실행");
-        let uid = auth.currentUser.uid;
-        if (!uid) throw new Error("유저 확인 실패");
+
+        let user = auth.currentUser;
+        if (!user) throw new Error("유저 확인 실패");
+        let uid = user.uid;
 
         let result = await getEventDocs(uid);
 
@@ -85,8 +89,9 @@ export async function getGroupEvents(groupId) {
     try {
         console.log("그룹 일정 조회 실행");
 
-        let uid = auth.currentUser.uid;
-        if (!uid) throw new Error("유저 확인 실패");
+        let user = auth.currentUser;
+        if (!user) throw new Error("유저 확인 실패");
+        let uid = user.uid;
 
         let result = await getEventDocs(uid, groupId);
 
@@ -103,13 +108,33 @@ export async function updateEvent(eventId, contents = {}) {
         console.log("일정 수정 실행");
         if (!eventId || !contents) throw new Error("필수 항목을 입력해주세요.");
 
-        let uid = auth.currentUser.uid;
-        if (!uid) throw new Error("유저 확인 실패");
+        let user = auth.currentUser;
+        if (!user) throw new Error("유저 확인 실패");
+        let uid = user.uid;
 
-        let result = await updateEventDoc(eventId, contents);
+        let result = await updateEventDoc(uid, eventId, contents);
         // 성공 시 true
         return result;
     } catch (e) {
         console.error("일정 수정 실패", e);
+    }
+}
+
+// 5. 일정 검색
+export async function findEventByTitle(title) {
+    try {
+        title = title.trim();
+        if (!title) return null;
+
+        let user = auth.currentUser;
+        if (!user) throw new Error("유저 확인 실패");
+        let uid = user.uid;
+
+        let result = await findEventDoc(uid, title);
+
+        // 없으면 null
+        return result;
+    } catch (e) {
+        console.error("일정 검색 실패", e);
     }
 }
