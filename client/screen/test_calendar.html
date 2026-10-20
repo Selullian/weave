@@ -63,6 +63,7 @@
             import {
                 createEvent,
                 getUserEvents,
+                updateEvent,
             } from "../src/services/calendar.js";
 
             const $ = (id) => document.getElementById(id);
@@ -111,22 +112,22 @@
                 }
             });
 
-            // // 일정 수정
-            // $("updateEventButton").addEventListener("click", async () => {
-            //     const message = $("updateEventMessage");
-            //     try {
-            //         await updateEvent($("updateEventId").value, {
-            //             title: $("updateTitle").value,
-            //             startAt: toDate($("updateStartAt").value),
-            //             endAt: toDate($("updateEndAt").value),
-            //             memo: $("updateMemo").value,
-            //         });
-            //         message.innerHTML = "일정 수정 요청 완료 (콘솔 확인)";
-            //     } catch (e) {
-            //         message.innerHTML = "일정 수정 실패";
-            //         console.error("일정 수정 실패", e);
-            //     }
-            // });
+            // 일정 수정
+            $("updateEventButton").addEventListener("click", async () => {
+                const message = $("updateEventMessage");
+                try {
+                    await updateEvent($("updateEventId").value, {
+                        title: $("updateTitle").value,
+                        startAt: toDate($("updateStartAt").value),
+                        endAt: toDate($("updateEndAt").value),
+                        memo: $("updateMemo").value,
+                    });
+                    message.innerHTML = "일정 수정 요청 완료 (콘솔 확인)";
+                } catch (e) {
+                    message.innerHTML = "일정 수정 실패";
+                    console.error("일정 수정 실패", e);
+                }
+            });
 
             // // 일정 삭제
             // $("deleteEventButton").addEventListener("click", async () => {

@@ -8,6 +8,7 @@ import {
     doc,
     query,
     where,
+    serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 /*
@@ -18,8 +19,10 @@ import {
   - createEventDoc(uid, title, startAt, endAt, memo, isPublic, source, groupId) - 기초 구현 완료
 2. 일정 문서 조회
   - getEventDoc(uid, [groupId]) - 기초 구현 완료
-3. 일정 문서 삭제
-4. 일정 문서 검색?
+3. 일정 문서 수정
+  - updateEventDoc(eventId, contents) - 기초 구현 완료
+4. 일정 문서 검색
+5. 일정 문서 삭제
 =====================
 */
 
@@ -50,6 +53,7 @@ export async function createEventDoc(
             console.log("Document 생성 완료, title : ", title);
             await updateDoc(docRef, {
                 id: docRef.id,
+                updateAt: serverTimestamp(),
             });
             console.log("id 추가 완료");
             return docRef;
@@ -89,5 +93,55 @@ export async function getEventDocs(uid, groupId = "") {
         else return null;
     } catch (e) {
         console.error("유저 db 일정 조회 실패 :", e);
+    }
+}
+
+// 변경된 필드만 추출하는 함수
+async function getToUpdateContent(eventId, contents) {
+    let originalRef = await getDoc(doc(db, "events", eventId));
+    let originalData = originalRef.data();
+
+    const newData = {
+        ...contents,
+    };
+    const updates = {};
+    Object.keys(newData).forEach((key) => {
+        if (originalData[key] !== newData[key]) {
+            updates[key] = newData[key];
+        }
+    });
+
+    return updates;
+}
+
+// 3. 일정 수정
+export async function updateEventDoc(eventId, contents) {
+    try {
+        console.log("일정 수정 db 실행");
+
+        // 문서 존재 검증
+        let docRef = doc(db, "events", eventId);
+        let docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            // 변경된 필드만 추출
+            let updateData = await getToUpdateContent(eventId, contents);
+            console.log(updateData);
+
+            if (Object.keys(updateData).length === 0) {
+                console.warn("일정에 변경 사항이 없습니다.");
+                return;
+            }
+
+            await updateDoc(docRef, {
+                ...updateData,
+                updateAt: serverTimestamp(),
+            });
+
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error("일정 수정 실패", e);
     }
 }

@@ -6,8 +6,9 @@
 2. 유저의 모든 일정 조회 ()
   - getUserEvents() - 기초 구현 완료
 3. 그룹의 모든 일정 조회 ()
-  - getGroupEvents() - 구현 중
+  - getGroupEvents() - 테스트 미확인 (아직 그룹 없음)
 3. 일정 수정
+  - updateEvent() - 기초 구현 완료
 4. 일정 삭제
 5. 일정 검색
 6. ics 확장자로 일정 덮어쓰기
@@ -19,6 +20,7 @@ import { auth } from "../../app.js";
 import {
     createEventDoc,
     getEventDocs,
+    updateEventDoc,
 } from "../repository/calendar_repository.js";
 
 // 1. 일정 추가
@@ -72,8 +74,7 @@ export async function getUserEvents() {
         let result = await getEventDocs(uid);
 
         // 데이터 없으면 null
-        if (result) return result;
-        else return null;
+        return result;
     } catch (e) {
         console.error("유저 일정 조회 실패 :", e);
     }
@@ -90,9 +91,25 @@ export async function getGroupEvents(groupId) {
         let result = await getEventDocs(uid, groupId);
 
         // 데이터 없으면 null
-        if (result) return result;
-        else return null;
+        return result;
     } catch (e) {
         console.error("유저 일정 조회 실패 :", e);
+    }
+}
+
+//4. 일정 수정
+export async function updateEvent(eventId, contents = {}) {
+    try {
+        console.log("일정 수정 실행");
+        if (!eventId || !contents) throw new Error("필수 항목을 입력해주세요.");
+
+        let uid = auth.currentUser.uid;
+        if (!uid) throw new Error("유저 확인 실패");
+
+        let result = await updateEventDoc(eventId, contents);
+        // 성공 시 true
+        return result;
+    } catch (e) {
+        console.error("일정 수정 실패", e);
     }
 }
