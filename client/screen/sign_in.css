@@ -1,0 +1,119 @@
+/*body 태그 (screenbox를 상하좌우 정렬하기 위한 설정)*/
+body {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+/*화면이 담길 박스 (비율을 고려해 높이를 약간 조정)*/
+#screen_box {
+  display: flex;
+  width: 60%;
+  height: 80%;
+  border-radius: 20px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 50%);
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0;
+  padding: 0;
+  background-image: url("../assets/background.png");
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+
+/*로그인 요소가 담길 박스*/
+#signin_element {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  height: 65%;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  gap: 3%;
+}
+
+/*로고 이미지*/
+#logo {
+  display: flex;
+  margin: 0;
+  width: 65%;
+  height: 15%;
+}
+
+/*맨 위에 시작하기 텍스트*/
+#start_text {
+  text-align: center;
+  width: 100%;
+  font-size: 25px;
+  margin: 0;
+}
+
+/*그 아래 회색 텍스트*/
+#information_text {
+  color: #b3b3b3;
+  text-align: center;
+  font-size: 15px;
+  width: 100%;
+  margin: 0;
+}
+
+/*로그인 입력 요소 텍스트+상자*/
+#signin_input_box {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+/*입력창 위에 올라가는 텍스트*/
+#signin_input_box p {
+  margin-bottom: 3%;
+  font-size: 15px;
+}
+
+/*입력창*/
+#signin_input_box input {
+  width: 97%;
+  height: 40%;
+  outline: none;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+  border-radius: 5px;
+  padding-left: 3%;
+}
+
+/*로그인 버튼*/
+#signin_button {
+  display: inline-block;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  background-color: #7940ff;
+  color: white;
+  font-size: 18px;
+  padding: 2%;
+  margin-top: 5%;
+}
+
+/*회원가입 안내 문구*/
+#signup_text {
+  font-size: 13px;
+}
+
+/*회원가입으로 가는 문구*/
+#signup_text a {
+  font-weight: bold;
+  color: #7940ff;
+  text-decoration: none;
+}
+
+#signup_text a:hover {
+  text-decoration: underline;
+}
