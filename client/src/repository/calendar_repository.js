@@ -9,6 +9,10 @@ import {
     doc,
     query,
     where,
+    or,
+    startAt,
+    endAt,
+    orderBy,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -137,7 +141,7 @@ export async function updateEventDoc(uid, eventId, contents) {
         console.log(userGroups);
 
         if (
-            originData.uid !== uid ||
+            originData.uid !== uid &&
             !Object.keys(userGroups).includes(originData.groupId)
         ) {
             throw new Error("일정 수정 권한이 없습니다");
@@ -168,14 +172,26 @@ export async function updateEventDoc(uid, eventId, contents) {
 export async function findEventDoc(uid, title) {
     try {
         if (!title) throw new Error("검색할 제목을 입력해주세요");
+        let userDoc = await getDoc(doc(db, "users", uid));
+        let groupIds = Object.keys(userDoc.data().groupIds);
+        console.log(groupIds);
 
-        let keywords = title.split(" ");
+        let eventRef = collection(db, "events");
+        let comparer =
+            groupIds.length === 0
+                ? where("uid", "==", uid)
+                : or(
+                      where("uid", "==", uid),
+                      where("groupId", "array-contains-any", groupIds),
+                  );
 
-        let eventRef = await collection(db, "events");
-        let q = query(
+        // 사용자
+        const q = query(
             eventRef,
-            where("uid", "==", uid),
-            where("title", "array-contains", keywords),
+            comparer,
+            orderBy("title"),
+            startAt(title),
+            endAt(title + "\uf8ff"),
         );
 
         let result = await getDocs(q);
@@ -185,7 +201,7 @@ export async function findEventDoc(uid, title) {
             }));
 
             // 없으면 null
-            if (!dataList) return null;
+            if (dataList.length === 0) return null;
             else return dataList;
         } else throw new Error("cal-repo/result 없음");
     } catch (e) {
