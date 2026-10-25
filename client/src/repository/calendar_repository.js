@@ -27,8 +27,9 @@ import {
 3. 일정 문서 수정
   - updateEventDoc(eventId, contents) - 기초 구현 완료
 4. 일정 문서 검색
-  - findEventDoc(title) - 구현 중
+  - findEventDoc(uid, title) - 기초 구현 완료
 5. 일정 문서 삭제
+  - deleteEventDoc(eventId) - 구현 전
 =====================
 */
 
@@ -68,7 +69,7 @@ export async function createEventDoc(
         }
     } catch (e) {
         console.error("문서 생성 실패 :", e);
-        return null;
+        throw e;
     }
 }
 
@@ -93,12 +94,14 @@ export async function getEventDocs(uid, groupId = "") {
         const dataList = result.docs.map((doc) => ({
             ...doc.data(),
         }));
+        console.log(dataList);
 
         // 데이터 없으면 null
         if (dataList) return dataList;
         else return null;
     } catch (e) {
         console.error("유저 db 일정 조회 실패 :", e);
+        throw e;
     }
 }
 
@@ -199,6 +202,7 @@ export async function findEventDoc(uid, title) {
             const dataList = result.docs.map((doc) => ({
                 ...doc.data(),
             }));
+            console.log(dataList);
 
             // 없으면 null
             if (dataList.length === 0) return null;
@@ -206,5 +210,6 @@ export async function findEventDoc(uid, title) {
         } else throw new Error("cal-repo/result 없음");
     } catch (e) {
         console.error("일정 검색 실패", e);
+        throw e;
     }
 }

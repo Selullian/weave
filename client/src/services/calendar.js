@@ -10,9 +10,11 @@
 3. 일정 수정
   - updateEvent() - 기초 구현 완료
 4. 일정 삭제
+  - deleteEvent() - 구현 전
 5. 일정 검색
+  - findEventByTitle() - 기초 구현 완료
 6. ics 확장자로 일정 덮어쓰기
-7. 소유자 확인
+7. 소유자 확인(왜 넣었더라?)
 ========================
 */
 
@@ -130,10 +132,19 @@ export async function findEventByTitle(title) {
         if (!user) throw new Error("유저 확인 실패");
         let uid = user.uid;
 
-        let result = await findEventDoc(uid, title);
+        let events = await findEventDoc(uid, title);
+        console.log(events[0].startAt);
+
+        const result = events.map((event) => ({
+            ...event,
+            startAt: new Date(event.startAt.seconds * 1000),
+            endAt: new Date(event.endAt.seconds * 1000),
+            updateAt: new Date(event.updateAt.seconds * 1000),
+        }));
+        console.log(result);
 
         // 없으면 null
-        return result;
+        return events;
     } catch (e) {
         console.error("일정 검색 실패", e);
     }
