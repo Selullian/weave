@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./combinedPage.css" />
+  </head>
+  <body>
+    <div id="top_menu">
+      <div id="logo">
+        <img
+          src="../assets/logo.png"
+          alt="로고 이미지"
+          width="100%"
+          height="100%"
+        />
+      </div>
+      <!--로고 이미지-->
+      <div id="texts">
+        <div id="my_calendar">
+          <p>내 캘린더</p>
+        </div>
+        <div id="group">
+          <p>그룹</p>
+        </div>
+      </div>
+      <!--위에 내 캘린더 그룹 글자-->
+    </div>
+
+    <!--탑 메뉴-->
+    <div id="side_bar">
+      <div id="sidebar_elements">
+        <div id="title_side">
+          <div id="title_alarm">
+            <h1>내 캘린더</h1>
+            <div id="title_alarm_img">
+              <img
+                src="../assets/alarm.png"
+                alt="알람 이미지"
+                width="100%"
+                height="100%"
+              />
+            </div>
+          </div>
+          <!--제목 및 알람-->
+          <div id="group_search_box">
+            <input type="text" placeholder="그룹 검색" />
+            <button>
+              <img
+                src="../assets/Search.png"
+                alt="검색 버튼"
+                width="100%"
+                height="100%"
+              />
+            </button>
+          </div>
+          <!--검색 도구-->
+        </div>
+        <!--위쪽에 있는 제목-->
+
+        <div id="group_box">
+          <div id="title_button">
+            <p>그룹 검색</p>
+            <button id="add_btn">+그룹추가</button>
+          </div>
+          <!--제목 및 그룹추가 버튼-->
+          <div id="result_group"></div>
+        </div>
+        <!--아래쪽에 있는 그룹박스-->
+      </div>
+      <!--모든 요소가 들어가는 div-->
+    </div>
+    <script>
+      let temp = [
+        {
+          groupid: "123",
+          groupname: "그룹명1",
+          groupinfo: "그룹 설명1",
+          color: "white",
+        },
+        {
+          groupid: "456",
+          groupname: "그룹명2",
+          groupinfo: "그룹 설명2",
+          color: "#D5FFCE",
+        },
+      ];
+      function renderGroup(arr) {
+        if (arr.length === 0) {
+          document.getElementById("result_group").innerHTML =
+            `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
+        } else {
+          let render_group = arr.map(
+            (group) =>
+              `<div class="render_group" style="background-color: ${group.color};" key=${group.groupid}>
+                <div class="title_more">
+                  <h3>${group.groupname}</h3>
+                  <div class="title_more_img">
+                    <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
+                  </div>
+                </div>
+                <p>${group.groupinfo}</p>
+              </div>`,
+          );
+          console.log(render_group);
+          document.getElementById("result_group").innerHTML =
+            render_group.join("");
+        }
+      }
+      renderGroup(temp);
+    </script>
+  </body>
+</html>

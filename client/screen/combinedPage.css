@@ -1,0 +1,223 @@
+body {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/*탑메뉴 부모 div*/
+#top_menu {
+  display: flex;
+  height: 6%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 25%);
+}
+
+/*로고 이미지*/
+#logo {
+  width: 12%;
+  height: 80%;
+  align-content: center;
+  padding-left: 6%;
+}
+
+/*오른쪽에 있는 텍스트들*/
+#texts {
+  display: flex;
+  width: 14%;
+  height: 100%;
+  margin-right: 10%;
+  margin-left: auto;
+  align-content: center;
+  flex-direction: row;
+  gap: 30%;
+  flex-wrap: wrap;
+}
+
+/*내 캘린더 버튼*/
+#my_calendar {
+  text-decoration: underline;
+}
+
+/*버튼에 마우스 올릴 시 커서 모양 바꾸기*/
+#my_calendar,
+#group:hover {
+  cursor: pointer;
+}
+
+/*사이드바*/
+#side_bar {
+  position: absolute;
+  display: flex;
+  width: 21%;
+  height: 94%;
+  margin-left: 0;
+  bottom: 0;
+  border-right: 1px solid black;
+  justify-content: center;
+}
+
+/*사이드바 요소*/
+#sidebar_elements {
+  display: flex;
+  top: 0;
+  bottom: auto;
+  width: 90%;
+  height: 100%;
+  margin-top: 6%;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 5%;
+}
+
+/*제목+알람+검색 기록*/
+#title_side {
+  width: 100%;
+  height: 15%;
+}
+
+/*제목+알람*/
+#title_alarm {
+  display: flex;
+  width: 100%;
+  height: 54%;
+  align-items: center;
+}
+
+/*제목 텍스트*/
+#title_alarm h1 {
+  font-size: 28px;
+}
+
+/*알람 이미지*/
+#title_alarm_img {
+  height: 100%;
+  width: 19%;
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/*그룹 검색 박스*/
+#group_search_box {
+  position: relative;
+  width: 100%;
+  height: 36%;
+  margin-top: 5%;
+}
+
+/*그룹 검색창*/
+#group_search_box input {
+  width: 83%;
+  height: 100%;
+  padding-right: 10%;
+  padding-left: 12px;
+  border-radius: 8px;
+  outline: none;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+}
+
+/*그룹 검색 이미지*/
+#group_search_box button {
+  border: none;
+  background: none;
+  outline: none;
+  position: absolute;
+  width: 10%;
+  height: 50%;
+  top: 30%;
+  transform: translateX(-125%);
+  cursor: pointer;
+}
+
+/*그룹 박스 전체 div*/
+#group_box {
+  margin-top: 10%;
+  width: 100%;
+  height: auto;
+}
+
+/*그룹 선택*/
+#title_button {
+  display: flex;
+  width: 100%;
+  height: 25px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/*그룹 선택 글자*/
+#title_button p {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+/*그룹 추가 버튼*/
+#add_btn {
+  width: 34%;
+  height: 100%;
+  font-size: 13px;
+  margin-right: 0;
+  margin-left: auto;
+  color: #7940ff;
+  background-color: white;
+  outline: none;
+  border: 1px solid #e3e3e3;
+  border-radius: 5px;
+}
+
+/*그룹 결과*/
+#result_group {
+  display: flex;
+  width: 100%;
+  height: auto;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/*렌더링된 그룹박스*/
+.render_group {
+  height: 70px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #b3b3b3;
+}
+
+/*박스 내부 그룹명+그룹 설명*/
+.render_group p,
+.title_more h3 {
+  padding-left: 16px;
+  margin: 0;
+}
+
+/*그룹명*/
+.title_more h3 {
+  padding-top: 3px;
+  font-size: 18px;
+}
+
+/*그룹 설명*/
+.render_group p {
+  font-size: 16px;
+  padding-top: 0;
+}
+
+/*그룹설명+아이콘*/
+.title_more {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+}
+
+/**/
+.title_more_img {
+  margin-right: 16px;
+  margin-left: auto;
+  width: 11%;
+  height: 11%;
+}
