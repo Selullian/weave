@@ -27,8 +27,8 @@
       </div>
       <!--위에 내 캘린더 그룹 글자-->
     </div>
-
     <!--탑 메뉴-->
+
     <div id="side_bar">
       <div id="sidebar_elements">
         <div id="title_side">
@@ -61,7 +61,7 @@
 
         <div id="group_box">
           <div id="title_button">
-            <p>그룹 검색</p>
+            <p>그룹_</p>
             <button id="add_btn">+그룹추가</button>
           </div>
           <!--제목 및 그룹추가 버튼-->
@@ -71,8 +71,29 @@
       </div>
       <!--모든 요소가 들어가는 div-->
     </div>
+    <!--사이드바 끝-->
+
+    <div id="main_board">
+      <div id="header_profile_btn">
+        <!--가로 1137, 세로 962-->
+        <div id="header">
+          <p>통합캘린더</p>
+        </div>
+        <!--통합캘린더 헤더 부분-->
+        <div id="profile_btn">
+          <div id="profile"></div>
+          <button>.ics 파일로 불러오기</button>
+        </div>
+        <!--헤더 옆에 같이 있는 버튼 2개-->
+      </div>
+      <!--헤더+버튼 2개-->
+      <div id="calendar">아무거나?</div>
+    </div>
+    <!--사이드바와 탑 메뉴를 제외한 나머지 부분들-->
+
     <script>
-      let temp = [
+      /*초반 더미데이터들*/
+      let temp_group1 = [
         {
           groupid: "123",
           groupname: "그룹명1",
@@ -86,6 +107,12 @@
           color: "#D5FFCE",
         },
       ];
+      let temp_group2 = [];
+
+      let user1 = { name: "김연서", email: "userkim@gmail.com" };
+      let user2 = { name: "김서연", email: "otherkim@gmail.com" };
+
+      /*그룹 렌더링 함수*/
       function renderGroup(arr) {
         if (arr.length === 0) {
           document.getElementById("result_group").innerHTML =
@@ -108,7 +135,21 @@
             render_group.join("");
         }
       }
-      renderGroup(temp);
+      renderGroup(temp_group1);
+
+      /*유저 렌더링 함수*/
+      let renderUser = (arr) => {
+        let { name, email } = arr;
+        let str = `<div id="name_btn">
+                      <p>${name}</p> 
+                      <div id="user_more_img">
+                        <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%" />
+                      </div>
+                    </div>
+                      <p id="email">${email}</p>`;
+        document.getElementById("profile").innerHTML = str;
+      };
+      renderUser(user1);
     </script>
   </body>
 </html>
