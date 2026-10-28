@@ -39,6 +39,14 @@ const toEntity = (doc) => ({
     ...doc.data(),
 });
 
+export async function isExistEvent(eventId) {
+    // 문서 존재 검증
+    const docRef = doc(db, "events", eventId);
+    let docSnap = await getDoc(docRef);
+
+    return docSnap.exists();
+}
+
 // 1. 일정 생성
 export async function createEventDoc(
     uid,
@@ -146,17 +154,8 @@ export async function updateEventDoc(eventId, contents) {
     try {
         console.log("일정 수정 DB 실행");
 
-        // 문서 존재 검증
-        let docRef = doc(db, "events", eventId);
-        let docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
-            console.warn("해당 일정이 존재하지 않습니다.");
-            return false;
-        }
-
         // 변경사항과 업데이트 시각 문서 수정
-        await updateDoc(docRef, {
+        await updateDoc(doc(db, "events", eventId), {
             ...contents,
             updateAt: serverTimestamp(),
         });
@@ -206,8 +205,9 @@ export async function findEventDoc(uid, title) {
 // 5. 일정 삭제
 export async function deleteEventDoc(eventId) {
     try {
-        const docRef = doc(db, "events", eventId);
-        await deleteDoc(docRef);
+        console.log("일정 삭제 DB 실행");
+
+        await deleteDoc(doc(db, "events", eventId));
 
         return true;
     } catch (e) {

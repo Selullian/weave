@@ -34,6 +34,7 @@ import {
     findEventDoc,
     deleteEventDoc,
     getDocById,
+    isExistEvent,
 } from "../repository/calendar_repository.js";
 
 const ok = (data) => {
@@ -153,18 +154,20 @@ export async function getGroupEvents(groupId) {
 // 변경된 필드만 추출하는 함수
 async function getToUpdateContent(eventId, contents) {
     let originalData = await getDocById(eventId);
+    if (originalData) {
+        const newData = {
+            ...contents,
+        };
+        const updates = {};
+        Object.keys(newData).forEach((key) => {
+            if (originalData[key] !== newData[key]) {
+                updates[key] = newData[key];
+            }
+        });
 
-    const newData = {
-        ...contents,
-    };
-    const updates = {};
-    Object.keys(newData).forEach((key) => {
-        if (originalData[key] !== newData[key]) {
-            updates[key] = newData[key];
-        }
-    });
-
-    return updates;
+        return updates;
+    }
+    return null;
 }
 
 //4. 일정 수정
@@ -178,14 +181,18 @@ export async function updateEvent(eventId, contents = {}) {
             });
 
         requiredUid();
-
-        const updateField = await getToUpdateContent(eventId, contents);
-        let result = await updateEventDoc(eventId, updateField);
-        if (!result)
+        if (!(await isExistEvent(eventId))) {
             return fail({
                 code: 400,
                 message: "수정할 일정이 존재하지 않습니다.",
             });
+        }
+
+        const updateField = await getToUpdateContent(eventId, contents);
+        if (!updateField) {
+            return fail({ code: 400, message: "변경된 항목이 없습니다." });
+        }
+        let result = await updateEventDoc(eventId, updateField);
 
         // 성공 시 true
         return ok(result);
@@ -198,13 +205,14 @@ export async function updateEvent(eventId, contents = {}) {
 // 5. 일정 검색
 export async function findEventByTitle(title) {
     try {
+        console.log("일정 검색 실행");
+
         title = title.trim();
         if (!title) return ok(null); // 검색어 없으면 그냥 null
 
         let uid = requiredUid();
 
         let events = await findEventDoc(uid, title);
-        console.log(events[0].startAt);
 
         const result = events.map((event) => ({
             ...event,
@@ -225,11 +233,20 @@ export async function findEventByTitle(title) {
 // 6. 일정 삭제
 export async function deleteEvent(eventId) {
     try {
-        if (!eventId)
+        console.log("일정 삭제 실행");
+
+        if (!eventId) {
             return fail({ code: 400, message: "필수 항목을 입력해주세요" });
+        } else if (!(await isExistEvent(eventId))) {
+            return fail({
+                code: 400,
+                message: "삭제할 일정이 존재하지 않습니다.",
+            });
+        }
         let result = await deleteEventDoc(eventId);
 
-        return ok(result);
+        if (result) return ok(result);
+        else return fail({ code: 400, message: "존재하지 않는 일정입니다." });
     } catch (e) {
         console.error("일정 삭제 실패: ", e);
         return fail(e);
