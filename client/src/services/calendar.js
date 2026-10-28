@@ -28,10 +28,12 @@ import { getUserGroupIds } from "../services/auth.js";
 import {
     createEventDoc,
     getUserEventDocs,
+    getUserPublicEventDocs,
     getGroupEventDocs,
     updateEventDoc,
     findEventDoc,
     deleteEventDoc,
+    getDocById,
 } from "../repository/calendar_repository.js";
 
 const ok = (data) => {
@@ -110,15 +112,19 @@ export async function getUserEvents() {
     }
 }
 
+// 유저의 공개 일정 조회
 export async function getUserPublicEvents() {
     try {
         let uid = requiredUid();
 
-        // 일단 모든 정보 조회
-        let events = await getUserEventDocs(uid);
+        // 정보 조회
+        let events = await getUserPublicEventDocs(uid);
 
-        return ok();
-    } catch (e) {}
+        return ok(events);
+    } catch (e) {
+        console.error("유저 공개 일정 조회 실패 : ", e);
+        return fail(e);
+    }
 }
 
 // 3. 그룹 일정 조회 가능
@@ -127,7 +133,7 @@ export async function getGroupEvents(groupId) {
         console.log("그룹 일정 조회 실행");
         let uid = requiredUid();
         let groupIds = await getUserGroupIds(uid);
-        if (!groupIds.includes(groupId)) {
+        if (!Object.keys(groupIds).includes(groupId)) {
             return fail({
                 code: 400,
                 message: "사용자가 속한 그룹이 아닙니다.",
@@ -146,8 +152,7 @@ export async function getGroupEvents(groupId) {
 
 // 변경된 필드만 추출하는 함수
 async function getToUpdateContent(eventId, contents) {
-    let originalRef = await getDoc(doc(db, "events", eventId));
-    let originalData = originalRef.data();
+    let originalData = await getDocById(eventId);
 
     const newData = {
         ...contents,
@@ -172,10 +177,15 @@ export async function updateEvent(eventId, contents = {}) {
                 message: "필수 입력 사항을 확인해주세요.",
             });
 
-        let uid = requiredUid();
+        requiredUid();
 
-        const updateField = getToUpdateContent(eventId, contents);
-        let result = await updateEventDoc(uid, eventId, updateField);
+        const updateField = await getToUpdateContent(eventId, contents);
+        let result = await updateEventDoc(eventId, updateField);
+        if (!result)
+            return fail({
+                code: 400,
+                message: "수정할 일정이 존재하지 않습니다.",
+            });
 
         // 성공 시 true
         return ok(result);

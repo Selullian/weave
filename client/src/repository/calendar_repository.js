@@ -75,6 +75,21 @@ export async function createEventDoc(
     }
 }
 
+// 특정 일정 조회하기
+export async function getDocById(eventId) {
+    try {
+        let docRef = await getDoc(doc(db, "events", eventId));
+        if (docRef.exists()) {
+            const event = toEntity(docRef);
+
+            return event;
+        } else return null;
+    } catch (e) {
+        console.error("eventId로 일정 조회 실패 : ", e);
+        throw e;
+    }
+}
+
 // 2. 유저의 모든 일정 조회
 export async function getUserEventDocs(uid) {
     try {
@@ -92,7 +107,8 @@ export async function getUserEventDocs(uid) {
     }
 }
 
-export async function getUserPublicEventDoc(uid) {
+// 유저의 공개 일정 조회
+export async function getUserPublicEventDocs(uid) {
     try {
         let result = await getDocs(
             query(
@@ -133,9 +149,11 @@ export async function updateEventDoc(eventId, contents) {
         // 문서 존재 검증
         let docRef = doc(db, "events", eventId);
         let docSnap = await getDoc(docRef);
+        console.log(docSnap);
+
         if (!docSnap.exists()) {
-            console.error("해당 일정이 존재하지 않습니다.");
-            throw new Error("수정할 일정 데이터가 존재하지 않습니다.");
+            console.warn("해당 일정이 존재하지 않습니다.");
+            return false;
         }
 
         // 변경사항과 업데이트 시각 문서 수정
@@ -144,7 +162,7 @@ export async function updateEventDoc(eventId, contents) {
             updateAt: serverTimestamp(),
         });
 
-        return;
+        return true;
     } catch (e) {
         console.error("일정 수정 실패", e);
         throw e;
