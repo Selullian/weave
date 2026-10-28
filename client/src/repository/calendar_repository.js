@@ -149,7 +149,6 @@ export async function updateEventDoc(eventId, contents) {
         // 문서 존재 검증
         let docRef = doc(db, "events", eventId);
         let docSnap = await getDoc(docRef);
-        console.log(docSnap);
 
         if (!docSnap.exists()) {
             console.warn("해당 일정이 존재하지 않습니다.");
