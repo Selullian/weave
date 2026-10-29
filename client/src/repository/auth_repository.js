@@ -7,7 +7,7 @@ import {
 
 /*
 =================================
-회원 인증 관리 (이름/이메일/비밀번호)
+회원 문서 관리 (이름/이메일/비밀번호)
 
 1. 회원 문서 생성
   - createUserDoc(uid, email, name) - 기초 기능 완료
@@ -55,8 +55,10 @@ export async function createUserDoc(uid, email, name) {
             groupIds: {},
         });
         console.log("Document 생성 완료, name : ", name);
+        return true;
     } catch (e) {
         console.error("Document 생성 오류 : ", e);
+        throw e;
     }
 }
 
@@ -76,5 +78,6 @@ export async function getUserDoc(uid) {
         }
     } catch (e) {
         console.error("DB 사용자 조회 실패 : ", e);
+        throw e;
     }
 }
