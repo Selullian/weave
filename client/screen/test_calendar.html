@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>event 기능 테스트</title>
+    </head>
+
+    <body>
+        <h1>일정 추가 테스트</h1>
+        <input type="text" id="createTitle" placeholder="제목" />
+        <input type="datetime-local" id="createStartAt" />
+        <input type="datetime-local" id="createEndAt" />
+        <input type="text" id="createMemo" placeholder="메모" />
+        <input type="text" id="createGroupId" placeholder="그룹 ID" />
+        <label><input type="checkbox" id="createIsPublic" /> 공개</label>
+        <select id="createSource">
+            <option value="manual">manual</option>
+            <option value="ics">ics</option>
+        </select>
+        <button id="createEventButton">일정 추가</button><br />
+        <span id="createEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 조회 테스트</h1>
+        <input
+            type="text"
+            id="getGroupId"
+            placeholder="그룹 ID (비우면 내 일정)"
+        />
+        <button id="getEventsButton">일정 조회</button><br />
+        <pre id="getEventsMessage">결과 메시지가 표시됨.</pre>
+
+        <h1>일정 수정 테스트</h1>
+        <input type="text" id="updateEventId" placeholder="일정 ID" />
+        <input type="text" id="updateTitle" placeholder="새 제목" />
+        <input type="datetime-local" id="updateStartAt" />
+        <input type="datetime-local" id="updateEndAt" />
+        <input type="text" id="updateMemo" placeholder="새 메모" />
+        <button id="updateEventButton">일정 수정</button><br />
+        <span id="updateEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 삭제 테스트</h1>
+        <input type="text" id="deleteEventId" placeholder="일정 ID" />
+        <button id="deleteEventButton">일정 삭제</button><br />
+        <span id="deleteEventMessage">결과 메시지가 표시됨.</span>
+
+        <h1>일정 검색 테스트</h1>
+        <input type="text" id="searchKeyword" placeholder="검색어" />
+        <button id="searchEventsButton">일정 검색</button><br />
+        <pre id="searchEventsMessage">결과 메시지가 표시됨.</pre>
+
+        <h1>ics 파일로 일정 덮어쓰기 테스트</h1>
+        <input type="file" id="icsFile" accept=".ics" />
+        <button id="importIcsButton">ics 불러오기</button><br />
+        <span id="importIcsMessage">결과 메시지가 표시됨.</span>
+
+        <h1>소유자 확인 테스트</h1>
+        <input type="text" id="ownerEventId" placeholder="일정 ID" />
+        <button id="checkOwnerButton">소유자 확인</button><br />
+        <span id="checkOwnerMessage">결과 메시지가 표시됨.</span>
+
+        <script type="module">
+            import {
+                createEvent,
+                getUserEvents,
+                getGroupEvents,
+                updateEvent,
+                findEventByTitle,
+            } from "../src/services/calendar.js";
+
+            const $ = (id) => document.getElementById(id);
+
+            // datetime-local 문자열을 Date 객체로 변환
+            const toDate = (value) => (value ? new Date(value) : null);
+
+            // 결과를 안전하게 텍스트로 표시
+            const showResult = (id, value) => {
+                $(id).textContent =
+                    typeof value === "string"
+                        ? value
+                        : JSON.stringify(value, null, 2);
+            };
+
+            const showError = (id, error) => {
+                console.error(error);
+                showResult(
+                    id,
+                    `실패: ${error?.message ?? "자세한 내용은 콘솔을 확인하세요."}`,
+                );
+            };
+
+            // 1. 일정 추가
+            $("createEventButton").addEventListener("click", async () => {
+                const message = "createEventMessage";
+
+                try {
+                    const title = $("createTitle").value.trim();
+                    const startAt = toDate($("createStartAt").value);
+                    const endAt = toDate($("createEndAt").value);
+
+                    if (!title || !startAt || !endAt) {
+                        throw new Error(
+                            "제목, 시작 시간, 종료 시간을 입력해주세요.",
+                        );
+                    }
+
+                    if (endAt <= startAt) {
+                        throw new Error(
+                            "종료 시간은 시작 시간보다 늦어야 합니다.",
+                        );
+                    }
+
+                    const result = await createEvent(
+                        title,
+                        startAt,
+                        endAt,
+                        $("createMemo").value,
+                        $("createIsPublic").checked,
+                        $("createSource").value,
+                        $("createGroupId").value.trim(),
+                    );
+
+                    if (!result) {
+                        throw new Error(
+                            "일정 생성에 실패했습니다. 콘솔을 확인해주세요.",
+                        );
+                    }
+
+                    showResult(
+                        message,
+                        `일정 추가 성공!\n문서 ID: ${result.id}`,
+                    );
+                } catch (error) {
+                    showError(message, error);
+                }
+            });
+
+            // 2. 내 일정 / 그룹 일정 조회
+            $("getEventsButton").addEventListener("click", async () => {
+                const message = "getEventsMessage";
+
+                try {
+                    const groupId = $("getGroupId").value.trim();
+
+                    const events = groupId
+                        ? await getGroupEvents(groupId)
+                        : await getUserEvents();
+
+                    if (!events || events.length === 0) {
+                        showResult(message, "조회된 일정이 없습니다.");
+                        return;
+                    }
+
+                    showResult(
+                        message,
+                        events.map((event, index) => ({
+                            번호: index + 1,
+                            일정ID: event.id,
+                            제목: event.title,
+                            시작: event.startAt?.toDate
+                                ? event.startAt.toDate().toLocaleString()
+                                : event.startAt instanceof Date
+                                  ? event.startAt.toLocaleString()
+                                  : event.startAt,
+                            종료: event.endAt?.toDate
+                                ? event.endAt.toDate().toLocaleString()
+                                : event.endAt instanceof Date
+                                  ? event.endAt.toLocaleString()
+                                  : event.endAt,
+                            메모: event.memo,
+                            공개: event.isPublic,
+                            출처: event.source,
+                            그룹ID: event.groupId,
+                        })),
+                    );
+                } catch (error) {
+                    showError(message, error);
+                }
+            });
+
+            // 3. 일정 수정
+            $("updateEventButton").addEventListener("click", async () => {
+                const message = "updateEventMessage";
+
+                try {
+                    const eventId = $("updateEventId").value.trim();
+
+                    if (!eventId) {
+                        throw new Error("수정할 일정 ID를 입력해주세요.");
+                    }
+
+                    // 입력된 항목만 수정 대상으로 추가
+                    const contents = {};
+                    const title = $("updateTitle").value.trim();
+                    const startValue = $("updateStartAt").value;
+                    const endValue = $("updateEndAt").value;
+                    const memo = $("updateMemo").value;
+
+                    if (title) contents.title = title;
+                    if (startValue) contents.startAt = toDate(startValue);
+                    if (endValue) contents.endAt = toDate(endValue);
+                    if (memo.trim()) contents.memo = memo;
+
+                    if (Object.keys(contents).length === 0) {
+                        throw new Error(
+                            "수정할 항목을 하나 이상 입력해주세요.",
+                        );
+                    }
+
+                    if (
+                        contents.startAt &&
+                        contents.endAt &&
+                        contents.endAt <= contents.startAt
+                    ) {
+                        throw new Error(
+                            "종료 시간은 시작 시간보다 늦어야 합니다.",
+                        );
+                    }
+
+                    const result = await updateEvent(eventId, contents);
+
+                    if (result === true) {
+                        showResult(message, "일정 수정 성공!");
+                    } else if (result === false) {
+                        showResult(message, "해당 일정이 존재하지 않습니다.");
+                    } else {
+                        showResult(
+                            message,
+                            "수정 결과를 확인할 수 없습니다. 변경 사항이 없거나 오류가 발생했을 수 있습니다.",
+                        );
+                    }
+                } catch (error) {
+                    showError(message, error);
+                }
+            });
+
+            // 4. 일정 검색
+            $("searchEventsButton").addEventListener("click", async () => {
+                const message = "searchEventsMessage";
+
+                try {
+                    const keyword = $("searchKeyword").value.trim();
+
+                    if (!keyword) {
+                        throw new Error("검색어를 입력해주세요.");
+                    }
+
+                    const results = await findEventByTitle(keyword);
+
+                    if (!results || results.length === 0) {
+                        showResult(message, "검색 결과가 없습니다.");
+                        return;
+                    }
+
+                    showResult(message, results);
+                } catch (error) {
+                    showError(message, error);
+                }
+            });
+
+            // 5. 아직 서비스 함수가 없는 기능
+            $("deleteEventButton").addEventListener("click", () => {
+                showResult(
+                    "deleteEventMessage",
+                    "아직 deleteEvent() 함수가 구현되지 않았습니다.",
+                );
+            });
+
+            $("importIcsButton").addEventListener("click", () => {
+                showResult(
+                    "importIcsMessage",
+                    "아직 ICS 가져오기 서비스가 구현되지 않았습니다.",
+                );
+            });
+
+            $("checkOwnerButton").addEventListener("click", () => {
+                showResult(
+                    "checkOwnerMessage",
+                    "아직 소유자 확인 함수가 구현되지 않았습니다.",
+                );
+            });
+        </script>
+    </body>
+</html>
