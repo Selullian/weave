@@ -1,6 +1,6 @@
-import { auth } from "../../app.js";
-import { createGroupDoc } from "../repository/group_repository.js";
+import { ok, fail, requiredUid } from "../services/common.js";
 import { getUserGroupIds } from "../services/auth.js";
+import { createGroupDoc } from "../repository/group_repository.js";
 
 /*
 ===================================
@@ -25,23 +25,10 @@ import { getUserGroupIds } from "../services/auth.js";
 ===================================
 */
 
-const ok = (data) => {
-    return { success: true, data: data };
-};
-const fail = (e) => {
-    return { success: false, error: { code: e.code, message: e.message } };
-};
-
-function requiredUid() {
-    const user = auth.currentUser;
-    if (!user) throw new Error("로그인이 필요합니다.");
-    return user.uid;
-}
-
 // 1. 그룹 생성
 export async function createGroup({ name, description, color }) {
     try {
-        if (!name && !description && !color) {
+        if (!name || !description || !color) {
             return fail({
                 code: 400,
                 message: "필수 항목을 모두 입력해주세요.",
