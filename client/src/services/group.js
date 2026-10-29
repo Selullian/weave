@@ -41,7 +41,7 @@ function requiredUid() {
 // 1. 그룹 생성
 export async function createGroup({ name, description, color }) {
     try {
-        if (name && description && color) {
+        if (!name && !description && !color) {
             return fail({
                 code: 400,
                 message: "필수 항목을 모두 입력해주세요.",

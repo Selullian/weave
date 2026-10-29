@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>그룹 테스트 화면</title>
+        <title>그룹 테스트</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link
             rel="stylesheet"
@@ -12,72 +12,115 @@
     </head>
     <body class="bg-slate-900 text-slate-100 min-h-screen p-6 font-sans">
         <div class="max-w-7xl mx-auto space-y-6">
-            <!-- 헤더 -->
+            <!-- 헤더 영역 -->
             <header
                 class="flex justify-between items-center bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-lg backdrop-blur"
             >
                 <div>
                     <h1
-                        class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent"
+                        class="text-2xl font-bold bg-gradient-to-r from-teal-400 to-indigo-400 bg-clip-text text-transparent"
                     >
-                        Firestore Group API Tester
+                        Group Service Layer Tester
                     </h1>
                     <p class="text-xs text-slate-400 mt-1">
-                        Firebase v12.1.0 그룹 CRUD 및 멤버 관리 통합 테스트
+                        인증 및 그룹 비즈니스 로직 연동 테스트 환경
                     </p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <span
-                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+
+                <!-- Auth 상태 모의 컨트롤러 -->
+                <div
+                    class="flex items-center space-x-3 bg-slate-900/80 p-2 px-4 rounded-xl border border-slate-700"
+                >
+                    <span class="text-xs text-slate-400"
+                        >Auth 상태 (Mocking):</span
                     >
-                        <span
-                            class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"
-                        ></span>
-                        Firestore SDK Loaded
-                    </span>
+                    <label
+                        class="relative inline-flex items-center cursor-pointer"
+                    >
+                        <input
+                            type="checkbox"
+                            id="auth-toggle"
+                            class="sr-only peer"
+                            checked
+                            onchange="toggleAuth(this.checked)"
+                        />
+                        <div
+                            class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"
+                        ></div>
+                    </label>
+                    <span
+                        id="auth-status-label"
+                        class="text-xs font-semibold text-teal-400"
+                        >로그인됨 (uid: user_test_01)</span
+                    >
                 </div>
             </header>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- 왼쪽 패널: API 컨트롤러 -->
+                <!-- 좌측 패널: 서비스 함수 실행 폼 -->
                 <div class="lg:col-span-7 space-y-6">
-                    <!-- Tab 메뉴 -->
+                    <!-- Tab 버튼 -->
                     <div
                         class="flex space-x-2 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/60 overflow-x-auto"
                     >
                         <button
                             onclick="switchTab('create')"
                             id="tab-create"
-                            class="tab-btn active-tab flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all"
+                            class="tab-btn active-tab flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all"
                         >
-                            1. 그룹 생성
+                            1. 그룹 생성 (createGroup)
                         </button>
                         <button
                             onclick="switchTab('read')"
                             id="tab-read"
-                            class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-slate-200"
+                            class="tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200"
                         >
-                            2. 조회/수정
+                            2. 그룹 조회 (getGroups/getGroup)
                         </button>
                         <button
                             onclick="switchTab('members')"
                             id="tab-members"
-                            class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-slate-200"
+                            class="tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200"
                         >
-                            3. 멤버/색상
+                            3. 멤버 & 색상 관리
                         </button>
                     </div>
 
-                    <!-- 1. 그룹 생성 폼 -->
+                    <!-- 1. 그룹 생성 패널 -->
                     <div
                         id="panel-create"
                         class="tab-panel bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4"
                     >
-                        <h2
-                            class="text-lg font-bold text-slate-200 border-b border-slate-700 pb-2"
+                        <div
+                            class="flex items-center justify-between border-b border-slate-700 pb-3"
                         >
-                            새 그룹 생성 (createGroupDoc)
-                        </h2>
+                            <h2 class="text-base font-bold text-slate-200">
+                                1. createGroup({ name, description, color })
+                            </h2>
+                            <span
+                                class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono"
+                                >구현 완료</span
+                            >
+                        </div>
+
+                        <!-- 코드 내 조건문 검증용 가이드 -->
+                        <div
+                            class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-300/90 flex items-start space-x-2"
+                        >
+                            <i
+                                class="fa-solid fa-triangle-exclamation mt-0.5"
+                            ></i>
+                            <div>
+                                <strong>코드 유의사항:</strong> 작성하신
+                                <code class="text-amber-200"
+                                    >if (name && description && color)</code
+                                >
+                                조건문은 3개의 값이 모두 들어왔을 때
+                                <code class="text-amber-200">fail()</code>을
+                                반환하도록 작성되어 있습니다. 하단 테스트 시 이
+                                예외 동작을 바로 확인할 수 있습니다.
+                            </div>
+                        </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -88,21 +131,29 @@
                                 <input
                                     type="text"
                                     id="create-name"
-                                    value="개발팀 프로젝트"
-                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                                    value="개발 스터디"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500"
                                 />
                             </div>
                             <div>
                                 <label
                                     class="block text-xs font-medium text-slate-400 mb-1"
-                                    >소유자 ID (ownerId)</label
+                                    >그룹 색상 (color)</label
                                 >
-                                <input
-                                    type="text"
-                                    id="create-owner"
-                                    value="user_admin_01"
-                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-                                />
+                                <div class="flex items-center space-x-2">
+                                    <input
+                                        type="color"
+                                        id="create-color"
+                                        value="#0d9488"
+                                        class="bg-transparent border-0 w-8 h-8 cursor-pointer"
+                                    />
+                                    <input
+                                        type="text"
+                                        id="create-color-hex"
+                                        value="#0d9488"
+                                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -114,320 +165,317 @@
                             <textarea
                                 id="create-desc"
                                 rows="2"
-                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500"
                             >
-2026 신규 프로젝트 워크스페이스</textarea
+Firebase & React 공부 모임</textarea
                             >
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-medium text-slate-400 mb-1"
-                                >기본 색상 (color)</label
-                            >
-                            <div class="flex items-center space-x-3">
-                                <input
-                                    type="color"
-                                    id="create-color"
-                                    value="#3b82f6"
-                                    class="bg-transparent border-0 w-10 h-10 cursor-pointer rounded"
-                                />
-                                <span
-                                    id="create-color-hex"
-                                    class="text-xs font-mono text-slate-400"
-                                    >#3b82f6</span
-                                >
-                            </div>
                         </div>
 
                         <button
                             onclick="handleCreateGroup()"
-                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm transition shadow-lg shadow-blue-600/30 flex items-center justify-center space-x-2"
+                            class="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold py-2.5 rounded-lg text-sm transition shadow-lg shadow-teal-600/20 flex items-center justify-center space-x-2"
                         >
-                            <i class="fa-solid fa-plus"></i>
-                            <span>그룹 생성 실행</span>
+                            <i class="fa-solid fa-play text-xs"></i>
+                            <span>createGroup() 호출</span>
                         </button>
                     </div>
 
-                    <!-- 2. 조회 / 수정 / 삭제 폼 -->
+                    <!-- 2. 그룹 조회 패널 -->
                     <div
                         id="panel-read"
                         class="tab-panel hidden bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4"
                     >
-                        <h2
-                            class="text-lg font-bold text-slate-200 border-b border-slate-700 pb-2"
+                        <div
+                            class="flex items-center justify-between border-b border-slate-700 pb-3"
                         >
-                            그룹 조회 / 수정 / 삭제
-                        </h2>
-
-                        <div>
-                            <label
-                                class="block text-xs font-medium text-slate-400 mb-1"
-                                >타겟 그룹 ID (groupId)</label
+                            <h2 class="text-base font-bold text-slate-200">
+                                2. getGroups() & getGroup(groupId)
+                            </h2>
+                            <span
+                                class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono"
+                                >구현 예정</span
                             >
-                            <div class="flex space-x-2">
-                                <input
-                                    type="text"
-                                    id="target-group-id"
-                                    placeholder="그룹 ID를 입력하거나 우측 목록에서 선택"
-                                    class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500"
-                                />
-                                <button
-                                    onclick="handleGetGroup()"
-                                    class="bg-slate-700 hover:bg-slate-600 text-xs px-4 rounded-lg font-medium transition"
-                                >
-                                    조회
-                                </button>
-                            </div>
                         </div>
 
-                        <div
-                            class="border-t border-slate-700/50 pt-4 space-y-3"
-                        >
-                            <h3
-                                class="text-xs font-bold text-slate-400 uppercase tracking-wider"
-                            >
-                                수정 필드
-                            </h3>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input
-                                    type="text"
-                                    id="update-name"
-                                    placeholder="새 그룹 이름"
-                                    class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm"
-                                />
-                                <input
-                                    type="color"
-                                    id="update-color"
-                                    value="#10b981"
-                                    class="bg-transparent border-0 w-full h-9 cursor-pointer"
-                                />
+                        <div class="space-y-3">
+                            <div class="flex space-x-2">
+                                <button
+                                    onclick="handleGetGroups()"
+                                    class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-lg text-xs transition"
+                                >
+                                    내 그룹 목록 전체 조회 (getGroups)
+                                </button>
                             </div>
-                            <textarea
-                                id="update-desc"
-                                rows="2"
-                                placeholder="새 설명"
-                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm"
-                            ></textarea>
 
-                            <div class="flex space-x-3 pt-2">
-                                <button
-                                    onclick="handleUpdateGroup()"
-                                    class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2 rounded-lg text-sm transition"
+                            <div
+                                class="border-t border-slate-700/60 pt-3 space-y-2"
+                            >
+                                <label
+                                    class="block text-xs font-medium text-slate-400"
+                                    >단일 그룹 상세 조회 (getGroup)</label
                                 >
-                                    정보 수정 (updateDoc)
-                                </button>
-                                <button
-                                    onclick="handleDeleteGroup()"
-                                    class="bg-rose-600/20 border border-rose-500/30 text-rose-400 hover:bg-rose-600 hover:text-white font-semibold px-4 rounded-lg text-sm transition"
-                                >
-                                    삭제
-                                </button>
+                                <div class="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        id="target-group-id"
+                                        placeholder="groupId 입력"
+                                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono"
+                                    />
+                                    <button
+                                        onclick="handleGetGroup()"
+                                        class="bg-slate-700 hover:bg-slate-600 text-xs px-4 rounded-lg transition"
+                                    >
+                                        조회
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 3. 멤버 및 멤버 색상 관리 폼 -->
+                    <!-- 3. 멤버 및 색상 관리 패널 -->
                     <div
                         id="panel-members"
                         class="tab-panel hidden bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4"
                     >
-                        <h2
-                            class="text-lg font-bold text-slate-200 border-b border-slate-700 pb-2"
+                        <div
+                            class="flex items-center justify-between border-b border-slate-700 pb-3"
                         >
-                            그룹 멤버 & 멤버별 색상 관리
-                        </h2>
-
-                        <div>
-                            <label
-                                class="block text-xs font-medium text-slate-400 mb-1"
-                                >대상 그룹 ID</label
+                            <h2 class="text-base font-bold text-slate-200">
+                                3. 멤버 추가 / 삭제 / 개인 색상 설정
+                            </h2>
+                            <span
+                                class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono"
+                                >구현 예정</span
                             >
-                            <input
-                                type="text"
-                                id="member-target-group-id"
-                                placeholder="그룹 ID"
-                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono"
-                            />
                         </div>
 
-                        <div
-                            class="grid grid-cols-2 gap-4 border-t border-slate-700/50 pt-4"
-                        >
-                            <!-- 멤버 추가/삭제 -->
-                            <div class="space-y-3">
-                                <h3 class="text-xs font-bold text-slate-400">
-                                    멤버 추가/제거
-                                </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-400 mb-1"
+                                    >대상 Group ID</label
+                                >
                                 <input
                                     type="text"
-                                    id="member-user-id"
-                                    placeholder="User ID (예: user_123)"
-                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm"
+                                    id="member-group-id"
+                                    placeholder="groupId"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono"
                                 />
-                                <div class="flex space-x-2">
-                                    <button
-                                        onclick="handleAddMember()"
-                                        class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold py-2 rounded-lg transition"
-                                    >
-                                        추가
-                                    </button>
-                                    <button
-                                        onclick="handleRemoveMember()"
-                                        class="flex-1 bg-rose-600/80 hover:bg-rose-600 text-xs font-semibold py-2 rounded-lg transition"
-                                    >
-                                        삭제
-                                    </button>
-                                </div>
                             </div>
 
-                            <!-- 멤버별 색상 수정 -->
-                            <div
-                                class="space-y-3 border-l border-slate-700/50 pl-4"
-                            >
-                                <h3 class="text-xs font-bold text-slate-400">
-                                    멤버 개인 지정 색상
-                                </h3>
-                                <div class="flex items-center space-x-2">
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <div class="space-y-2">
+                                    <label
+                                        class="block text-xs font-medium text-slate-400"
+                                        >멤버 추가 / 삭제</label
+                                    >
                                     <input
                                         type="text"
-                                        id="member-color-user-id"
-                                        placeholder="User ID"
-                                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs"
+                                        id="member-target-uid"
+                                        placeholder="대상 User UID"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs"
                                     />
+                                    <div class="flex space-x-2">
+                                        <button
+                                            onclick="handleAddMember()"
+                                            class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-xs py-1.5 rounded"
+                                        >
+                                            추가
+                                        </button>
+                                        <button
+                                            onclick="handleRemoveMember()"
+                                            class="flex-1 bg-rose-600 hover:bg-rose-500 text-xs py-1.5 rounded"
+                                        >
+                                            삭제
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="space-y-2 border-l border-slate-700/60 pl-3"
+                                >
+                                    <label
+                                        class="block text-xs font-medium text-slate-400"
+                                        >개인 색상 수정</label
+                                    >
                                     <input
                                         type="color"
                                         id="member-custom-color"
                                         value="#8b5cf6"
-                                        class="w-8 h-8 rounded border-0 cursor-pointer bg-transparent"
+                                        class="w-full h-8 rounded border-0 bg-transparent cursor-pointer"
                                     />
+                                    <button
+                                        onclick="handleChangeMemberColor()"
+                                        class="w-full bg-purple-600 hover:bg-purple-500 text-xs py-1.5 rounded"
+                                    >
+                                        색상 변경
+                                    </button>
                                 </div>
-                                <button
-                                    onclick="handleUpdateMemberColor()"
-                                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold py-2 rounded-lg transition"
-                                >
-                                    멤버 색상 업데이트
-                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 실행 로그 콘솔 -->
+                    <!-- 실행 결과 JSON 패널 -->
                     <div
-                        class="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-xs space-y-2"
+                        class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2"
                     >
                         <div
-                            class="flex justify-between items-center text-slate-500 border-b border-slate-800 pb-2"
+                            class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-2"
                         >
-                            <span
-                                ><i class="fa-solid fa-terminal mr-2"></i
-                                >Execution Logs</span
+                            <span class="font-mono"
+                                ><i
+                                    class="fa-solid fa-code text-teal-400 mr-2"
+                                ></i
+                                >Return Result (Response Object)</span
                             >
                             <button
                                 onclick="clearLogs()"
-                                class="hover:text-slate-300"
+                                class="hover:text-slate-200"
                             >
-                                <i class="fa-solid fa-trash-can"></i>
+                                <i class="fa-solid fa-rotate-left"></i> 초기화
                             </button>
                         </div>
-                        <div
-                            id="log-output"
-                            class="h-32 overflow-y-auto space-y-1 text-slate-400 scrollbar-thin"
+                        <pre
+                            id="json-output"
+                            class="text-xs font-mono text-emerald-400 bg-slate-900/50 p-3 rounded-lg overflow-x-auto min-h-[120px]"
                         >
-                            <p class="text-slate-600">
-                                // 테스트 실행 로그가 이곳에 표시됩니다.
-                            </p>
-                        </div>
+{
+  "info": "함수 실행 결과가 이곳에 표시됩니다."
+}</pre
+                        >
                     </div>
                 </div>
 
-                <!-- 오른쪽 패널: 그룹 목록 실시간 뷰어 -->
+                <!-- 우측 패널: 호출 로그 및 힌트 -->
                 <div
-                    class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col"
+                    class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col justify-between"
                 >
-                    <div
-                        class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700"
-                    >
-                        <h2 class="text-lg font-bold text-slate-200">
-                            생성된 그룹 목록
-                        </h2>
-                        <button
-                            onclick="fetchAllGroups()"
-                            class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-slate-300 transition flex items-center space-x-1"
+                    <div class="space-y-4">
+                        <h2
+                            class="text-base font-bold text-slate-200 border-b border-slate-700 pb-3"
                         >
-                            <i class="fa-solid fa-rotate-right"></i>
-                            <span>새로고침</span>
-                        </button>
+                            서비스 처리 응답 구조 참고
+                        </h2>
+
+                        <div class="space-y-2 text-xs">
+                            <p class="text-slate-400">
+                                서비스 함수는 항상 아래와 같은 규격 데이터를
+                                반환하도록 설계되었습니다:
+                            </p>
+
+                            <div
+                                class="bg-slate-900 p-3 rounded-lg font-mono text-[11px] space-y-2 border border-slate-700"
+                            >
+                                <div class="text-emerald-400">
+                                    // 성공 시 반환 형태
+                                </div>
+                                <div>
+                                    {
+                                    <span class="text-slate-300">success:</span>
+                                    <span class="text-amber-300">true</span>,
+                                    <span class="text-slate-300">data:</span> {
+                                    ... } }
+                                </div>
+                                <div class="text-rose-400 pt-2">
+                                    // 실패 시 반환 형태
+                                </div>
+                                <div>
+                                    {
+                                    <span class="text-slate-300">success:</span>
+                                    <span class="text-amber-300">false</span>,
+                                    <span class="text-slate-300">error:</span> {
+                                    <span class="text-slate-300">code:</span>
+                                    ...,
+                                    <span class="text-slate-300">message:</span>
+                                    ... } }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="border-t border-slate-700/60 pt-3 space-y-2"
+                        >
+                            <h3 class="text-xs font-bold text-slate-300">
+                                코드 수정 제안 (<code class="text-teal-400"
+                                    >createGroup</code
+                                >
+                                버그 수정 예시)
+                            </h3>
+                            <div
+                                class="bg-slate-900/80 p-3 rounded-lg font-mono text-[11px] text-slate-400 space-y-1"
+                            >
+                                <div class="text-rose-400/80">
+                                    // 수정 전 (현재)
+                                </div>
+                                <div>
+                                    if (name && description && color) { return
+                                    fail(...) }
+                                </div>
+                                <div class="text-emerald-400/80 pt-1">
+                                    // 수정 후 (정상 검증)
+                                </div>
+                                <div>
+                                    if (!name || !description || !color) {
+                                </div>
+                                <div class="pl-3">
+                                    return fail({ code: 400, message: "..." });
+                                </div>
+                                <div>}</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- 그룹 목록 리스트 -->
                     <div
-                        id="group-list"
-                        class="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[520px]"
+                        class="mt-6 pt-4 border-t border-slate-700 text-center text-xs text-slate-500"
                     >
-                        <div class="text-center text-slate-500 py-12 text-sm">
-                            그룹 목록을 불러오는 중이거나 데이터가 없습니다.
-                        </div>
+                        Firebase Auth 모의 환경 연동 중
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 인라인 테스트 스크립트 모듈 -->
         <script type="module">
-            // 타겟 모듈 import 테스트 (실제 서버 환경/절대 경로에 맞춰 수정 가능)
-            import { db } from "../app.js";
-            import {
-                setDoc,
-                updateDoc,
-                deleteDoc,
-                getDoc,
-                getDocs,
-                collection,
-                doc,
-                arrayUnion,
-                arrayRemove,
-                serverTimestamp,
-            } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+            // 실제 작성하신 모듈 연동 (경로는 환경에 맞춰 조절 가능)
+            import { createGroup } from "../src/services/group.js"; // 파일 경로에 맞춰 수정
+            import { auth } from "../app.js";
 
-            // 색상 Picker 텍스트 싱크
+            // 색상 인풋 처리
             document
                 .getElementById("create-color")
                 .addEventListener("input", (e) => {
-                    document.getElementById("create-color-hex").innerText =
+                    document.getElementById("create-color-hex").value =
                         e.target.value;
                 });
 
-            // 로그 출력 용 함수
-            window.log = function (msg, type = "info") {
-                const output = document.getElementById("log-output");
-                const time = new Date().toLocaleTimeString();
-                const colorMap = {
-                    info: "text-blue-400",
-                    success: "text-emerald-400",
-                    error: "text-rose-400",
-                    warn: "text-amber-400",
-                };
-
-                const entry = document.createElement("div");
-                entry.className = `${colorMap[type] || "text-slate-300"}`;
-                entry.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
-                output.appendChild(entry);
-                output.scrollTop = output.scrollHeight;
+            // Mock Auth 로그인 상태 스위치
+            window.toggleAuth = function (isLoggedIn) {
+                const label = document.getElementById("auth-status-label");
+                if (isLoggedIn) {
+                    label.innerText = "로그인됨 (uid: user_test_01)";
+                    label.className = "text-xs font-semibold text-teal-400";
+                } else {
+                    label.innerText = "비로그인 상태";
+                    label.className = "text-xs font-semibold text-rose-400";
+                }
             };
+
+            // JSON 출력 함수
+            function displayOutput(data) {
+                document.getElementById("json-output").innerText =
+                    JSON.stringify(data, null, 2);
+            }
 
             window.clearLogs = function () {
-                document.getElementById("log-output").innerHTML =
-                    '<p class="text-slate-600">// 로그 초기화됨</p>';
+                displayOutput({ info: "초기화되었습니다." });
             };
 
-            // Tab 전환 UI
+            // 탭 전환
             window.switchTab = function (tabName) {
                 document
                     .querySelectorAll(".tab-panel")
                     .forEach((el) => el.classList.add("hidden"));
                 document.querySelectorAll(".tab-btn").forEach((el) => {
-                    el.classList.remove("bg-blue-600", "text-white");
+                    el.classList.remove("bg-teal-600", "text-white");
                     el.classList.add("text-slate-400");
                 });
 
@@ -435,235 +483,73 @@
                     .getElementById(`panel-${tabName}`)
                     .classList.remove("hidden");
                 const activeTab = document.getElementById(`tab-${tabName}`);
-                activeTab.classList.add("bg-blue-600", "text-white");
+                activeTab.classList.add("bg-teal-600", "text-white");
                 activeTab.classList.remove("text-slate-400");
             };
 
-            // 1. 그룹 생성 테스트
+            // 1. createGroup 테스트 함수 호출
             window.handleCreateGroup = async function () {
                 const name = document.getElementById("create-name").value;
                 const description =
                     document.getElementById("create-desc").value;
-                const ownerId = document.getElementById("create-owner").value;
-                const color = document.getElementById("create-color").value;
+                const color = document.getElementById("create-color-hex").value;
 
                 try {
-                    log(`그룹 생성 시도: ${name}...`);
-                    const newRef = doc(collection(db, "groups"));
-
-                    await setDoc(newRef, {
-                        groupId: newRef.id,
-                        name,
-                        description,
-                        ownerId,
-                        memberIds: [ownerId], // 생성자 기본 포함
-                        color,
-                        memberColors: { [ownerId]: color },
-                        updatedAt: serverTimestamp(),
+                    const res = await createGroup({ name, description, color });
+                    displayOutput(res);
+                } catch (e) {
+                    displayOutput({
+                        success: false,
+                        unhandledException: e.message,
                     });
-
-                    log(`그룹 생성 성공! ID: ${newRef.id}`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`그룹 생성 실패: ${err.message}`, "error");
                 }
             };
 
-            // 전체 그룹 조회 (우측 실시간 대시보드 표시용)
-            window.fetchAllGroups = async function () {
-                const container = document.getElementById("group-list");
-                try {
-                    const querySnapshot = await getDocs(
-                        collection(db, "groups"),
-                    );
-                    if (querySnapshot.empty) {
-                        container.innerHTML = `<div class="text-center text-slate-500 py-8 text-sm">등록된 그룹 문서가 없습니다.</div>`;
-                        return;
-                    }
-
-                    container.innerHTML = "";
-                    querySnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        const card = document.createElement("div");
-                        card.className =
-                            "bg-slate-900 border border-slate-700/70 hover:border-slate-500 rounded-xl p-4 space-y-3 transition cursor-pointer";
-                        card.onclick = () => selectGroup(data.groupId);
-
-                        card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <span class="w-3 h-3 rounded-full" style="background-color: ${data.color || "#3b82f6"}"></span>
-                <h3 class="font-bold text-slate-200 text-sm">${data.name || "무제 그룹"}</h3>
-              </div>
-              <span class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">${data.groupId}</span>
-            </div>
-            <p class="text-xs text-slate-400 line-clamp-1">${data.description || "설명 없음"}</p>
-            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800">
-              <span>Owner: <strong class="text-slate-400">${data.ownerId}</strong></span>
-              <span>Members: <strong class="text-slate-300">${data.memberIds ? data.memberIds.length : 0}명</strong></span>
-            </div>
-          `;
-                        container.appendChild(card);
-                    });
-                } catch (err) {
-                    log(`목록 불러오기 실패: ${err.message}`, "error");
-                }
+            // 2. 미구현 함수들 스텁(Stub) 핸들러
+            window.handleGetGroups = async function () {
+                displayOutput({
+                    success: false,
+                    error: {
+                        code: 501,
+                        message: "getGroups() 함수가 아직 구현되지 않았습니다.",
+                    },
+                });
             };
 
-            // 선택된 ID 폼 자동 채우기
-            window.selectGroup = function (id) {
-                document.getElementById("target-group-id").value = id;
-                document.getElementById("member-target-group-id").value = id;
-                log(`그룹 ID 선택됨: ${id}`, "info");
-            };
-
-            // 2. 단일 그룹 조회
             window.handleGetGroup = async function () {
-                const groupId =
-                    document.getElementById("target-group-id").value;
-                if (!groupId) return log("그룹 ID를 입력하세요", "warn");
-
-                try {
-                    const docRef = doc(db, "groups", groupId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById("update-name").value =
-                            data.name || "";
-                        document.getElementById("update-desc").value =
-                            data.description || "";
-                        document.getElementById("update-color").value =
-                            data.color || "#3b82f6";
-                        log(
-                            `그룹 조회 완료: ${JSON.stringify(data)}`,
-                            "success",
-                        );
-                    } else {
-                        log("해당 ID의 문서가 존재하지 않습니다.", "warn");
-                    }
-                } catch (err) {
-                    log(`조회 실패: ${err.message}`, "error");
-                }
+                const id = document.getElementById("target-group-id").value;
+                displayOutput({
+                    success: false,
+                    error: {
+                        code: 501,
+                        message: `getGroup("${id}") 함수가 아직 구현되지 않았습니다.`,
+                    },
+                });
             };
 
-            // 3. 그룹 정보 수정
-            window.handleUpdateGroup = async function () {
-                const groupId =
-                    document.getElementById("target-group-id").value;
-                if (!groupId) return log("그룹 ID를 입력하세요", "warn");
-
-                try {
-                    const docRef = doc(db, "groups", groupId);
-                    await updateDoc(docRef, {
-                        name: document.getElementById("update-name").value,
-                        description:
-                            document.getElementById("update-desc").value,
-                        color: document.getElementById("update-color").value,
-                        updatedAt: serverTimestamp(),
-                    });
-                    log(`그룹 정보 수정 완료 (${groupId})`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`수정 실패: ${err.message}`, "error");
-                }
+            window.handleAddMember = function () {
+                displayOutput({
+                    success: false,
+                    error: { code: 501, message: "addMember() 구현 전" },
+                });
             };
 
-            // 4. 그룹 삭제
-            window.handleDeleteGroup = async function () {
-                const groupId =
-                    document.getElementById("target-group-id").value;
-                if (!groupId) return log("그룹 ID를 입력하세요", "warn");
-
-                if (!confirm("정말 이 그룹을 삭제하시겠습니까?")) return;
-
-                try {
-                    await deleteDoc(doc(db, "groups", groupId));
-                    log(`그룹 삭제 완료 (${groupId})`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`삭제 실패: ${err.message}`, "error");
-                }
+            window.handleRemoveMember = function () {
+                displayOutput({
+                    success: false,
+                    error: { code: 501, message: "removeMember() 구현 전" },
+                });
             };
 
-            // 5. 그룹 멤버 추가 (arrayUnion)
-            window.handleAddMember = async function () {
-                const groupId = document.getElementById(
-                    "member-target-group-id",
-                ).value;
-                const userId = document.getElementById("member-user-id").value;
-
-                if (!groupId || !userId)
-                    return log(
-                        "그룹 ID와 User ID를 모두 입력해주세요.",
-                        "warn",
-                    );
-
-                try {
-                    const docRef = doc(db, "groups", groupId);
-                    await updateDoc(docRef, {
-                        memberIds: arrayUnion(userId),
-                        updatedAt: serverTimestamp(),
-                    });
-                    log(`멤버 추가 완료: ${userId} -> ${groupId}`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`멤버 추가 실패: ${err.message}`, "error");
-                }
+            window.handleChangeMemberColor = function () {
+                displayOutput({
+                    success: false,
+                    error: {
+                        code: 501,
+                        message: "updateMemberColor() 구현 전",
+                    },
+                });
             };
-
-            // 6. 그룹 멤버 삭제 (arrayRemove)
-            window.handleRemoveMember = async function () {
-                const groupId = document.getElementById(
-                    "member-target-group-id",
-                ).value;
-                const userId = document.getElementById("member-user-id").value;
-
-                if (!groupId || !userId)
-                    return log("그룹 ID와 User ID를 입력해주세요.", "warn");
-
-                try {
-                    const docRef = doc(db, "groups", groupId);
-                    await updateDoc(docRef, {
-                        memberIds: arrayRemove(userId),
-                        updatedAt: serverTimestamp(),
-                    });
-                    log(`멤버 제거 완료: ${userId} <- ${groupId}`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`멤버 제거 실패: ${err.message}`, "error");
-                }
-            };
-
-            // 7. 멤버별 그룹 색상 수정 (Nested Object update)
-            window.handleUpdateMemberColor = async function () {
-                const groupId = document.getElementById(
-                    "member-target-group-id",
-                ).value;
-                const userId = document.getElementById(
-                    "member-color-user-id",
-                ).value;
-                const color = document.getElementById(
-                    "member-custom-color",
-                ).value;
-
-                if (!groupId || !userId)
-                    return log("그룹 ID와 User ID를 입력해주세요.", "warn");
-
-                try {
-                    const docRef = doc(db, "groups", groupId);
-                    await updateDoc(docRef, {
-                        [`memberColors.${userId}`]: color,
-                        updatedAt: serverTimestamp(),
-                    });
-                    log(`멤버 색상 수정 완료 (${userId}: ${color})`, "success");
-                    fetchAllGroups();
-                } catch (err) {
-                    log(`멤버 색상 수정 실패: ${err.message}`, "error");
-                }
-            };
-
-            // 페이지 진입 시 초기 목록 불러오기
-            fetchAllGroups();
         </script>
     </body>
 </html>
