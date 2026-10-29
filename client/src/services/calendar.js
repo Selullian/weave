@@ -66,9 +66,9 @@ export async function createEvent(
 ) {
     try {
         if (title === "" || startAt === null || endAt === null) {
-            throw new Error("필수 항목을 입력해주세요.");
+            return fail({ code: 400, message: "필수 항목을 입력해주세요." });
         } else if (source != "manual" && source != "ics") {
-            throw new Error("잘못된 출처 입력");
+            return fail({ code: 400, message: "잘못된 출처 입력입니다." });
         }
 
         const uid = requiredUid();
