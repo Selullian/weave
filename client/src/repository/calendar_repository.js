@@ -1,4 +1,5 @@
 import { db } from "../../app.js";
+import { toEntity } from "../services/common.js";
 import {
     setDoc,
     updateDoc,
@@ -26,6 +27,7 @@ import {
   - getUserEventDoc(uid, [groupId]) - 기초 구현 완료
   - getUserPublicEventDoc() - 기초 구현 완료
   - getGroupEventDoc()
+  - getEventDocById()
 3. 일정 문서 수정
   - updateEventDoc(eventId, contents) - 기초 구현 완료
 4. 일정 문서 검색
@@ -34,10 +36,6 @@ import {
   - deleteEventDoc(eventId) - 기초 구현 완료
 =====================
 */
-
-const toEntity = (doc) => ({
-    ...doc.data(),
-});
 
 export async function isExistEvent(eventId) {
     // 문서 존재 검증
@@ -84,7 +82,7 @@ export async function createEventDoc(
 }
 
 // 특정 일정 조회하기
-export async function getDocById(eventId) {
+export async function getEventDocById(eventId) {
     try {
         let docRef = await getDoc(doc(db, "events", eventId));
         if (docRef.exists()) {

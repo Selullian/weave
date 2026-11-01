@@ -35,6 +35,7 @@ import {
     deleteEventDoc,
     getDocById,
     isExistEvent,
+    getEventDocById,
 } from "../repository/calendar_repository.js";
 
 const ok = (data) => {
@@ -88,6 +89,20 @@ export async function createEvent(
         return ok(docs);
     } catch (e) {
         console.error("일정 생성 실패 : ", e);
+        return fail(e);
+    }
+}
+
+export async function getEventById(eventId) {
+    try {
+        console.log("단일 일정 조회 실행");
+
+        let result = await getEventDocById(eventId);
+        if (!result) return null;
+
+        return ok(result);
+    } catch (e) {
+        console.error("단일 일정 조회 실패 : ", e);
         return fail(e);
     }
 }
