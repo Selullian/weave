@@ -12,3 +12,7 @@ export function requiredUid() {
     if (!user) throw new Error("로그인이 필요합니다.");
     return user.uid;
 }
+
+export const toEntity = (doc) => ({
+    ...doc.data(),
+});

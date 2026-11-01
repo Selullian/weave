@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>그룹 테스트</title>
+        <title>그룹 서비스 레이어 통합 API 테스트</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link
             rel="stylesheet"
@@ -23,7 +23,7 @@
                         Group Service Layer Tester
                     </h1>
                     <p class="text-xs text-slate-400 mt-1">
-                        인증 및 그룹 비즈니스 로직 연동 테스트 환경
+                        인증 및 그룹 비즈니스 로직 연동 통합 테스트 환경
                     </p>
                 </div>
 
@@ -75,7 +75,7 @@
                             id="tab-read"
                             class="tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200"
                         >
-                            2. 그룹 조회 (getGroups/getGroup)
+                            2. 그룹 조회 (getGroupInfo)
                         </button>
                         <button
                             onclick="switchTab('members')"
@@ -101,25 +101,6 @@
                                 class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono"
                                 >구현 완료</span
                             >
-                        </div>
-
-                        <!-- 코드 내 조건문 검증용 가이드 -->
-                        <div
-                            class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-300/90 flex items-start space-x-2"
-                        >
-                            <i
-                                class="fa-solid fa-triangle-exclamation mt-0.5"
-                            ></i>
-                            <div>
-                                <strong>코드 유의사항:</strong> 작성하신
-                                <code class="text-amber-200"
-                                    >if (name && description && color)</code
-                                >
-                                조건문은 3개의 값이 모두 들어왔을 때
-                                <code class="text-amber-200">fail()</code>을
-                                반환하도록 작성되어 있습니다. 하단 테스트 시 이
-                                예외 동작을 바로 확인할 수 있습니다.
-                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -180,7 +161,7 @@ Firebase & React 공부 모임</textarea
                         </button>
                     </div>
 
-                    <!-- 2. 그룹 조회 패널 -->
+                    <!-- 2. 그룹 정보 조회 패널 (getUserGroupDocs 연동 반영) -->
                     <div
                         id="panel-read"
                         class="tab-panel hidden bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4"
@@ -189,43 +170,69 @@ Firebase & React 공부 모임</textarea
                             class="flex items-center justify-between border-b border-slate-700 pb-3"
                         >
                             <h2 class="text-base font-bold text-slate-200">
-                                2. getGroups() & getGroup(groupId)
+                                2. getGroupInfo(groupId)
                             </h2>
                             <span
-                                class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono"
-                                >구현 예정</span
+                                class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono"
+                                >getUserGroupDocs 연동</span
                             >
                         </div>
 
-                        <div class="space-y-3">
-                            <div class="flex space-x-2">
-                                <button
-                                    onclick="handleGetGroups()"
-                                    class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-lg text-xs transition"
-                                >
-                                    내 그룹 목록 전체 조회 (getGroups)
-                                </button>
-                            </div>
-
-                            <div
-                                class="border-t border-slate-700/60 pt-3 space-y-2"
-                            >
+                        <div class="space-y-4">
+                            <div>
                                 <label
-                                    class="block text-xs font-medium text-slate-400"
-                                    >단일 그룹 상세 조회 (getGroup)</label
+                                    class="block text-xs font-medium text-slate-400 mb-1"
+                                    >그룹 ID (groupId)</label
                                 >
                                 <div class="flex space-x-2">
                                     <input
                                         type="text"
                                         id="target-group-id"
-                                        placeholder="groupId 입력"
-                                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono"
+                                        placeholder="그룹 ID를 입력하세요"
+                                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-teal-500"
                                     />
                                     <button
-                                        onclick="handleGetGroup()"
-                                        class="bg-slate-700 hover:bg-slate-600 text-xs px-4 rounded-lg transition"
+                                        onclick="handleGetGroupInfo()"
+                                        class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-5 py-2 rounded-lg font-semibold transition flex items-center space-x-1.5"
                                     >
-                                        조회
+                                        <i
+                                            class="fa-solid fa-magnifying-glass"
+                                        ></i>
+                                        <span>조회 실행</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 예외 및 파라미터 테스트용 프리셋 -->
+                            <div
+                                class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60 space-y-2"
+                            >
+                                <span
+                                    class="text-[11px] font-semibold text-slate-400"
+                                    >빠른 테스트 프리셋</span
+                                >
+                                <div class="flex space-x-2">
+                                    <button
+                                        onclick="
+                                            setGroupIdPreset(
+                                                'sample_group_id_01',
+                                            )
+                                        "
+                                        class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 px-3 rounded-lg border border-slate-700 transition"
+                                    >
+                                        <i
+                                            class="fa-solid fa-check text-emerald-400 mr-1"
+                                        ></i>
+                                        샘플 ID 입력
+                                    </button>
+                                    <button
+                                        onclick="setGroupIdPreset('')"
+                                        class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 px-3 rounded-lg border border-slate-700 transition"
+                                    >
+                                        <i
+                                            class="fa-solid fa-xmark text-rose-400 mr-1"
+                                        ></i>
+                                        빈 값 입력 (400 에러 검증)
                                     </button>
                                 </div>
                             </div>
@@ -317,7 +324,7 @@ Firebase & React 공부 모임</textarea
 
                     <!-- 실행 결과 JSON 패널 -->
                     <div
-                        class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2"
+                        class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-xl"
                     >
                         <div
                             class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-2"
@@ -330,14 +337,14 @@ Firebase & React 공부 모임</textarea
                             >
                             <button
                                 onclick="clearLogs()"
-                                class="hover:text-slate-200"
+                                class="hover:text-slate-200 transition"
                             >
                                 <i class="fa-solid fa-rotate-left"></i> 초기화
                             </button>
                         </div>
                         <pre
                             id="json-output"
-                            class="text-xs font-mono text-emerald-400 bg-slate-900/50 p-3 rounded-lg overflow-x-auto min-h-[120px]"
+                            class="text-xs font-mono text-emerald-400 bg-slate-900/50 p-3 rounded-lg overflow-x-auto min-h-[140px] border border-slate-800/80"
                         >
 {
   "info": "함수 실행 결과가 이곳에 표시됩니다."
@@ -346,7 +353,7 @@ Firebase & React 공부 모임</textarea
                     </div>
                 </div>
 
-                <!-- 우측 패널: 호출 로그 및 힌트 -->
+                <!-- 우측 패널: 서비스 정보 및 실행 가이드 -->
                 <div
                     class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col justify-between"
                 >
@@ -358,16 +365,13 @@ Firebase & React 공부 모임</textarea
                         </h2>
 
                         <div class="space-y-2 text-xs">
-                            <p class="text-slate-400">
-                                서비스 함수는 항상 아래와 같은 규격 데이터를
-                                반환하도록 설계되었습니다:
-                            </p>
+                            <p class="text-slate-400">서비스 함수 응답 규격:</p>
 
                             <div
                                 class="bg-slate-900 p-3 rounded-lg font-mono text-[11px] space-y-2 border border-slate-700"
                             >
                                 <div class="text-emerald-400">
-                                    // 성공 시 반환 형태
+                                    // 성공 시: ok(groupInfo)
                                 </div>
                                 <div>
                                     {
@@ -377,7 +381,7 @@ Firebase & React 공부 모임</textarea
                                     ... } }
                                 </div>
                                 <div class="text-rose-400 pt-2">
-                                    // 실패 시 반환 형태
+                                    // 실패 시: fail(e)
                                 </div>
                                 <div>
                                     {
@@ -396,50 +400,52 @@ Firebase & React 공부 모임</textarea
                             class="border-t border-slate-700/60 pt-3 space-y-2"
                         >
                             <h3 class="text-xs font-bold text-slate-300">
-                                코드 수정 제안 (<code class="text-teal-400"
-                                    >createGroup</code
-                                >
-                                버그 수정 예시)
+                                getGroupInfo 메커니즘
                             </h3>
-                            <div
-                                class="bg-slate-900/80 p-3 rounded-lg font-mono text-[11px] text-slate-400 space-y-1"
+                            <ul
+                                class="text-xs text-slate-400 space-y-1.5 list-disc list-inside"
                             >
-                                <div class="text-rose-400/80">
-                                    // 수정 전 (현재)
-                                </div>
-                                <div>
-                                    if (name && description && color) { return
-                                    fail(...) }
-                                </div>
-                                <div class="text-emerald-400/80 pt-1">
-                                    // 수정 후 (정상 검증)
-                                </div>
-                                <div>
-                                    if (!name || !description || !color) {
-                                </div>
-                                <div class="pl-3">
-                                    return fail({ code: 400, message: "..." });
-                                </div>
-                                <div>}</div>
-                            </div>
+                                <li>
+                                    <code class="text-teal-400">groupId</code>
+                                    유효성 검사: 누락 시
+                                    <code class="text-rose-400"
+                                        >400 Bad Request</code
+                                    >
+                                    객체 반환
+                                </li>
+                                <li>
+                                    내부적으로 Repository의
+                                    <code class="text-indigo-300"
+                                        >getUserGroupDocs(groupId)</code
+                                    >
+                                    함수를 비동기 호출
+                                </li>
+                                <li>
+                                    정상 반환된 문서 데이터 객체를
+                                    <code class="text-emerald-400"
+                                        >ok(groupInfo)</code
+                                    >로 감싸 전달
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
                     <div
                         class="mt-6 pt-4 border-t border-slate-700 text-center text-xs text-slate-500"
                     >
-                        Firebase Auth 모의 환경 연동 중
+                        Firebase Group Service UI Integration
                     </div>
                 </div>
             </div>
         </div>
 
         <script type="module">
-            // 실제 작성하신 모듈 연동 (경로는 환경에 맞춰 조절 가능)
-            import { createGroup } from "../src/services/group.js"; // 파일 경로에 맞춰 수정
-            import { auth } from "../app.js";
+            import {
+                createGroup,
+                getGroupInfo,
+            } from "../src/services/group.js"; // 경로 확인 필요
 
-            // 색상 인풋 처리
+            // 색상 Picker 텍스트 반영
             document
                 .getElementById("create-color")
                 .addEventListener("input", (e) => {
@@ -447,7 +453,7 @@ Firebase & React 공부 모임</textarea
                         e.target.value;
                 });
 
-            // Mock Auth 로그인 상태 스위치
+            // Auth 토글 UI
             window.toggleAuth = function (isLoggedIn) {
                 const label = document.getElementById("auth-status-label");
                 if (isLoggedIn) {
@@ -469,7 +475,12 @@ Firebase & React 공부 모임</textarea
                 displayOutput({ info: "초기화되었습니다." });
             };
 
-            // 탭 전환
+            // 프리셋 설정 함수
+            window.setGroupIdPreset = function (val) {
+                document.getElementById("target-group-id").value = val;
+            };
+
+            // 탭 전환 함수
             window.switchTab = function (tabName) {
                 document
                     .querySelectorAll(".tab-panel")
@@ -487,7 +498,7 @@ Firebase & React 공부 모임</textarea
                 activeTab.classList.remove("text-slate-400");
             };
 
-            // 1. createGroup 테스트 함수 호출
+            // 1. createGroup 실행
             window.handleCreateGroup = async function () {
                 const name = document.getElementById("create-name").value;
                 const description =
@@ -505,28 +516,23 @@ Firebase & React 공부 모임</textarea
                 }
             };
 
-            // 2. 미구현 함수들 스텁(Stub) 핸들러
-            window.handleGetGroups = async function () {
-                displayOutput({
-                    success: false,
-                    error: {
-                        code: 501,
-                        message: "getGroups() 함수가 아직 구현되지 않았습니다.",
-                    },
-                });
+            // 2. getGroupInfo 실행 (getUserGroupDocs 호출 결과 수신)
+            window.handleGetGroupInfo = async function () {
+                const groupId =
+                    document.getElementById("target-group-id").value;
+
+                try {
+                    const res = await getGroupInfo(groupId);
+                    displayOutput(res);
+                } catch (e) {
+                    displayOutput({
+                        success: false,
+                        unhandledException: e.message,
+                    });
+                }
             };
 
-            window.handleGetGroup = async function () {
-                const id = document.getElementById("target-group-id").value;
-                displayOutput({
-                    success: false,
-                    error: {
-                        code: 501,
-                        message: `getGroup("${id}") 함수가 아직 구현되지 않았습니다.`,
-                    },
-                });
-            };
-
+            // 기타 미구현 스텁 함수
             window.handleAddMember = function () {
                 displayOutput({
                     success: false,
