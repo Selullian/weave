@@ -79,7 +79,7 @@ export async function createGroupDoc({ name, description, color, ownerId }) {
 }
 
 // 단일 그룹 문서 조회
-export async function getGroupDoc(groupId) {
+export async function getGroupDocById(groupId) {
     try {
         console.log("단일 그룹 문서 조회");
         let docRef = await getDoc(doc(db, "groups", groupId));

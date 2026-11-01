@@ -77,6 +77,22 @@ export async function getGroupInfo(groupId) {
     }
 }
 
+// 사용자의 특정 그룹 조회
+export async function getGroupById(groupId) {
+    try {
+        console.log("특정 그룹 조회 실행");
+
+        let result = await getGroupById(groupId);
+        if (result === null)
+            return fail({ code: 400, message: "존재하지 않는 그룹입니다." });
+
+        return ok(result);
+    } catch (e) {
+        console.error("특정 그룹 조회 실패 : ", e);
+        return fail(e);
+    }
+}
+
 // 시용자의 모든 그룹 조회
 export async function getUserGroups() {
     try {
