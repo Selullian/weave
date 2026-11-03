@@ -34,7 +34,7 @@ import {
     updateEventDoc,
     findEventDoc,
     deleteEventDoc,
-    getDocById,
+    getEventDocById,
     isExistEvent,
     getEventDocById,
 } from "../repository/calendar_repository.js";
@@ -81,6 +81,7 @@ export async function createEvent(
     }
 }
 
+// 단일 일정 조회
 export async function getEventById(eventId) {
     try {
         console.log("단일 일정 조회 실행");
