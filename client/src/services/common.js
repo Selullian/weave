@@ -16,3 +16,22 @@ export function requiredUid() {
 export const toEntity = (doc) => ({
     ...doc.data(),
 });
+
+// 변경된 필드만 추출하는 함수
+export async function getToUpdateContent(contentId, contents) {
+    let originalData = await getDocById(contentId);
+    if (originalData) {
+        const newData = {
+            ...contents,
+        };
+        const updates = {};
+        Object.keys(newData).forEach((key) => {
+            if (originalData[key] !== newData[key]) {
+                updates[key] = newData[key];
+            }
+        });
+
+        return updates;
+    }
+    return null;
+}

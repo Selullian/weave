@@ -25,6 +25,7 @@
 
 import { auth } from "../../app.js";
 import { getUserGroupIds } from "../services/auth.js";
+import { ok, fail, requiredUid, getToUpdateContent } from "./common.js";
 import {
     createEventDoc,
     getUserEventDocs,
@@ -36,19 +37,6 @@ import {
     getDocById,
     isExistEvent,
 } from "../repository/calendar_repository.js";
-
-const ok = (data) => {
-    return { success: true, data: data };
-};
-const fail = (e) => {
-    return { success: false, error: { code: e.code, message: e.message } };
-};
-
-function requiredUid() {
-    const user = auth.currentUser;
-    if (!user) throw new Error("로그인이 필요합니다.");
-    return user.uid;
-}
 
 function toDate(date) {
     if (date.seconds) return new Date(date.seconds * 1000);
@@ -149,25 +137,6 @@ export async function getGroupEvents(groupId) {
         console.error("유저 일정 조회 실패 :", e);
         fail(e);
     }
-}
-
-// 변경된 필드만 추출하는 함수
-async function getToUpdateContent(eventId, contents) {
-    let originalData = await getDocById(eventId);
-    if (originalData) {
-        const newData = {
-            ...contents,
-        };
-        const updates = {};
-        Object.keys(newData).forEach((key) => {
-            if (originalData[key] !== newData[key]) {
-                updates[key] = newData[key];
-            }
-        });
-
-        return updates;
-    }
-    return null;
 }
 
 //4. 일정 수정

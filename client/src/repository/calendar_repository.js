@@ -1,4 +1,5 @@
 import { db } from "../../app.js";
+import { toEntity } from "../services/common.js";
 import {
     setDoc,
     updateDoc,
@@ -34,10 +35,6 @@ import {
   - deleteEventDoc(eventId) - 기초 구현 완료
 =====================
 */
-
-const toEntity = (doc) => ({
-    ...doc.data(),
-});
 
 export async function isExistEvent(eventId) {
     // 문서 존재 검증
