@@ -34,8 +34,8 @@ updatedAt
 1. 그룹 생성
     - createGroupDoc({name, description, color, ownerId}) -> 기초 구현 완료
 2. 그룹 조회
-    - getUserGroupDocs() -> 구현 중
-    - getGroupDoc(groupId) -> 구현 전
+    - getUserGroupDocs() -> 기초 구현 완료
+    - getGroupDocById(groupId) -> 기초 구현 완료
 3. 그룹 수정
 4. 그룹 삭제
 5. 그룹 멤버 추가
@@ -107,6 +107,28 @@ export async function getUserGroupDocs(uid) {
         return result ? result : null;
     } catch (e) {
         console.error("모든 그룹 문서 조회 실패 : ", e);
+        throw e;
+    }
+}
+
+// 그룹 정보 수정
+export async function updateGroupDoc(groupId, contents) {
+    try {
+        console.log("그룹 문서 수정 실행");
+
+        if (!isExistGroup()) {
+            // 존재하지 않는 문서
+            return null;
+        }
+
+        await updateDoc(doc(db, "groups", groupId), {
+            ...contents,
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
+    } catch (e) {
+        console.error("그룹 문서 수정 실패 : ", e);
         throw e;
     }
 }
