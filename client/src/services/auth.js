@@ -27,6 +27,7 @@ import {
 
 import { auth } from "../../app.js";
 import { createUserDoc, getUserDoc } from "../repository/auth_repository.js";
+import { requiredUid } from "./common.js";
 
 // 회원가입
 export async function signUp(name, email, password) {
@@ -137,5 +138,24 @@ export async function getUserGroupIds() {
         }
     } catch (e) {
         console.error("사용자의 그룹 목록 조회 실패", e);
+    }
+}
+
+// 회원 문서 수정 name, groupIds 수정 가능
+export async function updateUserInfo(contents) {
+    try {
+        console.log("회원 문서 수정 실행");
+
+        let uid = requiredUid();
+
+        await updateDoc(doc(db, "users", uid), {
+            ...contents,
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
+    } catch (e) {
+        console.error("회원 문서 수정 실패 : ", e);
+        throw e;
     }
 }
