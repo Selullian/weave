@@ -39,7 +39,9 @@ updatedAt
 3. 그룹 수정
 - updateGroupDoc() -> 기초 구현 완료
 4. 그룹 삭제
+- deleteGroupDoc() -> 기초 구현 완료
 5. 그룹 멤버 추가
+- addMemberDoc() -> 기초 구현 중 
 6. 그룹 멤버 삭제
 7. 멤버별 그룹 색상 수정
 
@@ -144,6 +146,39 @@ export async function deleteGroupDoc(groupId) {
         return true;
     } catch (e) {
         console.error("그룹 삭제 실패", e);
+        throw e;
+    }
+}
+
+//랜덤 헥사 코드 생성기
+const getRandomHexColor = () => {
+    return (
+        "#" +
+        Math.floor(Math.random() * 16777215)
+            .toString(16)
+            .padStart(6, "0")
+    );
+};
+
+// 그룹에 멤버 관련 정보 추가
+export async function addMemberDoc(groupId, uid) {
+    try {
+        console.log("멤버 추가 실행");
+
+        let groupInfo = await getGroupDocById(groupId);
+
+        groupInfo = groupInfo[memberIds].push(uid);
+        groupInfo = groupInfo[memberColors].uid = getRandomHexColor();
+
+        await updateDoc(doc(db, "groups", groupId), {
+            memberIds: groupInfo[memberIds],
+            memberColors: groupInfo[memberColors],
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
+    } catch (e) {
+        console.error("멤버 추가 실패 : ", e);
         throw e;
     }
 }
