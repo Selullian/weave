@@ -37,6 +37,7 @@ updatedAt
     - getUserGroupDocs() -> 기초 구현 완료
     - getGroupDocById(groupId) -> 기초 구현 완료
 3. 그룹 수정
+- updateGroupDoc() -> 기초 구현 완료
 4. 그룹 삭제
 5. 그룹 멤버 추가
 6. 그룹 멤버 삭제
@@ -129,6 +130,20 @@ export async function updateGroupDoc(groupId, contents) {
         return true;
     } catch (e) {
         console.error("그룹 문서 수정 실패 : ", e);
+        throw e;
+    }
+}
+
+// 그룹 삭제
+export async function deleteGroupDoc(groupId) {
+    try {
+        console.log("그룹 삭제 DB 실행");
+
+        await deleteDoc(doc(db, "groups", groupId));
+
+        return true;
+    } catch (e) {
+        console.error("그룹 삭제 실패", e);
         throw e;
     }
 }

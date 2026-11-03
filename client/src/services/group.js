@@ -10,6 +10,7 @@ import {
     getGroupDocById,
     getUserGroupDocs,
     updateGroupDoc,
+    deleteGroupDoc,
 } from "../repository/group_repository.js";
 
 /*
@@ -74,10 +75,8 @@ export async function getGroupInfo(groupId) {
             });
         }
         let groupInfo = await getGroupDocById(groupId);
-        if (groupInfo === null) {
-            return fail({ code: 400, message: "존재하지 않는 그룹입니다." });
-        }
 
+        // 없으면 null
         return ok(groupInfo);
     } catch (e) {
         console.error("그룹 정보 조회 실패 : ", e);
@@ -127,6 +126,29 @@ export async function updateGroup(groupId, contents = {}) {
         return ok(true);
     } catch (e) {
         console.error("그룹 수정 실패", e);
+        return fail(e);
+    }
+}
+
+// 그룹 삭제
+export async function deleteGroup(groupId) {
+    try {
+        console.log("그룹 삭제 실행");
+
+        if (!groupId) {
+            return fail({ code: 400, message: "필수 항목을 입력해주세요" });
+        } else if (!(await isExistGroup(groupId))) {
+            return fail({
+                code: 400,
+                message: "삭제할 그룹이 존재하지 않습니다.",
+            });
+        }
+        let result = await deleteGroupDoc(groupId);
+
+        if (result) return ok(result);
+        else return fail({ code: 400, message: "존재하지 않는 그룹입니다." });
+    } catch (e) {
+        console.error("그룹 삭제 실패: ", e);
         return fail(e);
     }
 }
