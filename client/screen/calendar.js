@@ -151,12 +151,14 @@ function render_sidebar_schedule(arr, dateKey) {
         if (!render_schedule[info_time.time]) {
           render_schedule[info_time.time] = [];
         }
-        render_schedule[info_time.time].push(info_time.info);
+        render_schedule[info_time.time].push(
+          `${info_time.info}, ${data.color}`,
+        );
       }
     }
   }
 
-  console.log(render_schedule);
+  console.log("render_schedule", render_schedule);
 
   const container = document.getElementById("sidebar_schedule");
   if (!container) return;
@@ -171,25 +173,32 @@ function render_sidebar_schedule(arr, dateKey) {
 
   // 3. 시간대별로 순회하며 이미지 형태의 HTML 생성[cite: 3]
   for (let [time, infoList] of Object.entries(render_schedule)) {
-    // 시간대 그룹 컨테이너
-    const groupEl = document.createElement("div");
-    groupEl.className = "schedule_group";
+    let temp_info = infoList.toString().split(",");
+    console.log("infoList : ", infoList);
 
-    // 시간 제목 (예: 12:00~13:00)
-    const timeEl = document.createElement("div");
-    timeEl.className = "time_title";
-    timeEl.textContent = time;
-    groupEl.appendChild(timeEl);
+    // 1. 시간대 안의 일정 카드(card)들을 먼저 백틱으로 조립
+    let card_temp = "";
 
-    // 해당 시간대의 일정 카드 목록 생성 (배열 요소마다 둥근 박스 1개씩)
     infoList.forEach((infoText) => {
-      const cardEl = document.createElement("div");
-      cardEl.className = "schedule_card";
-      cardEl.textContent = infoText; // "배포일", "회식" 등
-      groupEl.appendChild(cardEl);
+      // class로 변경하여 중복 id 문제 해결
+      card_temp += `
+      <div class="schedule_card" style="background-color: ${temp_info[1]};">
+        ${temp_info[0]}
+      </div>
+    `;
     });
 
-    container.appendChild(groupEl);
+    // 2. 그룹 전체(시간 + 카드들)를 하나의 HTML 문자열로 만듦
+    // class="schedule_group"으로 변경
+    let group_str = `
+    <div class="schedule_group">
+      <div class="time_title">${time}</div>
+      ${card_temp}
+    </div>
+  `;
+
+    // 3. 덮어씌우기(=)가 아니라 누적(+=)으로 container에 추가!
+    container.innerHTML += group_str;
   }
 }
 // 초기 실행

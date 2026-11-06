@@ -492,7 +492,7 @@ body {
 }
 
 /*시간 표시되는 자리*/
-.time_title {
+#time_title {
   font-size: 15px;
   color: #5a5a5a;
   margin-bottom: 8px;
