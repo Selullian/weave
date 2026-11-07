@@ -140,7 +140,11 @@ export async function getUserInfo() {
             return null;
         }
 
-        return { name: userData.name, email: userData.email };
+        return {
+            name: userData.name,
+            email: userData.email,
+            groupIds: userData.groupIds,
+        };
     } catch (e) {
         console.error("사용자 정보 조회 실패:", e.message);
         throw e;
@@ -165,17 +169,26 @@ export async function getUserGroupIds() {
 }
 
 // 회원 정보 수정
-export async function updateUserInfo({ name = null, groupInfo = null } = {}) {
+export async function updateUserInfo({
+    name = null,
+    groupInfo = null,
+    removeGroupId = null,
+} = {}) {
     try {
         console.log("회원 정보 수정 실행");
-        if (!name && !groupInfo) {
+        if (!name && !groupInfo && !removeGroupId) {
             console.warn("수정할 정보가 없습니다.");
             return null;
         }
 
         const uid = requiredUid();
 
-        const isSuccess = await updateUserInfoDoc({ uid, name, groupInfo });
+        const isSuccess = await updateUserInfoDoc({
+            uid,
+            name,
+            groupInfo,
+            removeGroupId,
+        });
         return isSuccess;
     } catch (e) {
         console.error("회원 정보 수정 실패 : ", e);

@@ -5,6 +5,7 @@ import {
     doc,
     updateDoc,
     serverTimestamp,
+    deleteField,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 /*
@@ -90,18 +91,26 @@ export async function updateUserInfoDoc({
     uid,
     name = null,
     groupInfo = null,
+    removeGroupId = null,
 }) {
     try {
         console.log("회원 문서 수정 실행");
 
         let updateContents = {};
+        // 이름 수정
         if (name) updateContents.name = name;
+        // 그룹 추가 또는 색상 수정
         if (groupInfo) {
             for (const [groupId, color] of Object.entries(groupInfo)) {
                 if (groupId) {
                     updateContents[`groupIds.${groupId}`] = color;
                 }
             }
+        }
+
+        // 특정 그룹 하나 삭제
+        if (removeGroupId) {
+            updateContents[`groupIds.${removeGroupId}`] = deleteField();
         }
 
         if (Object.keys(updateContents).length === 0)
