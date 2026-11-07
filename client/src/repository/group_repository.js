@@ -65,9 +65,8 @@ export async function createGroupDoc({ name, description, color, ownerId }) {
             name: name,
             description: description,
             ownerId: ownerId,
-            memberIds: [],
+            members: {},
             color: color,
-            memberColors: {},
             updateAt: serverTimestamp(),
         });
 
@@ -100,7 +99,12 @@ export async function getUserGroupDocs(uid) {
     try {
         console.log("사용자 그룹 문서 조회");
 
-        const q = query(collection(db, "groups"), where("uid", "==", uid));
+        // 사용자의 그룹 목록 가져오기
+        const userRef = await getDoc(doc(db, "users", uid));
+        const userObj = toEntity(userRef);
+        const groupIds = userObj.groupIds;
+
+        const q = query(collection(db, "groups"), where("id", "in", groupIds));
         let docsRef = await getDocs(q);
 
         const result = docsRef.docs.map(toEntity);
@@ -162,15 +166,13 @@ export async function addMemberDoc(groupId, uid) {
         if (!groupInfo) throw new Error("존재하지 않는 그룹입니다.");
 
         // 이미 멤버인 경우
-        if (groupInfo.memberIds.includes(uid)) return null;
+        if (Object.keys(groupInfo.members).includes(uid)) return null;
 
         const memberColor = getRandomHexColor();
-        const memberIds = [...groupInfo.memberIds, uid];
-        const memberColors = { ...groupInfo.memberColors, [uid]: memberColor };
+        const members = { ...groupInfo.members, [uid]: memberColor };
 
         await updateDoc(doc(db, "groups", groupId), {
-            memberIds,
-            memberColors,
+            members,
             updateAt: serverTimestamp(),
         });
 
