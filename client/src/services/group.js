@@ -4,7 +4,7 @@ import {
     requiredUid,
     getToUpdateContent,
 } from "../services/common.js";
-import { getUserGroupIds, updateUserInfo } from "../services/auth.js";
+import { getUserInfo, updateUserInfo } from "../services/auth.js";
 import {
     createGroupDoc,
     getGroupDocById,
@@ -12,6 +12,7 @@ import {
     updateGroupDoc,
     deleteGroupDoc,
     addMemberDoc,
+    deleteMemberDoc,
     isExistGroup,
 } from "../repository/group_repository.js";
 
@@ -172,7 +173,7 @@ export async function addMember(groupId) {
         if (!groupId)
             return fail({ code: 400, message: "그룹 아이디를 입력해주세요." });
 
-        let uid = requiredUid();
+        const uid = requiredUid();
 
         // 그룹 문서에 멤버 추가 (이미 멤버면 null, 성공하면 배정된 색상 반환)
         let memberColor = await addMemberDoc(groupId, uid);
@@ -189,6 +190,36 @@ export async function addMember(groupId) {
         return ok(true);
     } catch (e) {
         console.error("멤버 추가 실패 : ", e);
+        return fail(e);
+    }
+}
+
+/**
+ * 그룹에서 멤버 삭제
+ * @param {String} groupId
+ * @returns 성공 여부 boolean
+ */
+export async function deleteMember(groupId) {
+    try {
+        console.log("멤버 삭제 실행");
+
+        if (!groupId)
+            return fail({ code: 400, message: "필수 항목을 확인해주세요." });
+
+        const uid = requiredUid();
+
+        const deletedAtGroup = await deleteMemberDoc(groupId, uid);
+        if (!deletedAtGroup) {
+            return fail({ code: 400, message: "멤버 삭제 실패" });
+        }
+
+        const deletedAtUser = await updateUserInfo({ removeGroupId: groupId });
+        if (!deletedAtUser)
+            return fail({ code: 400, message: "멤버 삭제 실패" });
+
+        return ok(true);
+    } catch (e) {
+        console.error("멤버 삭제 실패 : ", e);
         return fail(e);
     }
 }

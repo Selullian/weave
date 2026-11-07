@@ -11,6 +11,7 @@ import {
     query,
     where,
     serverTimestamp,
+    deleteField,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 /*
@@ -103,7 +104,6 @@ export async function getUserGroupDocs(uid) {
         const userRef = await getDoc(doc(db, "users", uid));
         const userObj = toEntity(userRef);
         const groupIds = Object.keys(userObj.groupIds);
-        console.log(groupIds);
 
         const q = query(
             collection(db, "groups"),
@@ -112,7 +112,6 @@ export async function getUserGroupDocs(uid) {
         let docsRef = await getDocs(q);
 
         const result = docsRef.docs.map(toEntity);
-        console.log(result);
 
         return result ? result : null;
     } catch (e) {
@@ -162,7 +161,12 @@ const getRandomHexColor = () => {
     );
 };
 
-// 그룹에 멤버 관련 정보 추가
+/**
+ * 그룹에 멤버 관련 정보 추가
+ * @param {String} groupId
+ * @param {String} uid
+ * @returns 멤버의 색상
+ */
 export async function addMemberDoc(groupId, uid) {
     try {
         console.log("멤버 추가 실행");
@@ -184,6 +188,35 @@ export async function addMemberDoc(groupId, uid) {
         return memberColor;
     } catch (e) {
         console.error("그룹 문서 멤버 추가 실패 : ", e);
+        throw e;
+    }
+}
+
+/**
+ * 그룹 문서에서 멤버 삭제
+ * @param {String} groupId
+ * @param {String} uid
+ * @returns 성공 여부 boolean
+ */
+export async function deleteMemberDoc(groupId, uid) {
+    try {
+        console.log("그룹 문서 멤버 삭제 실행");
+
+        let groupInfo = await getGroupDocById(groupId);
+        if (!groupInfo) throw new Error("존재하지 않는 그룹입니다.");
+
+        // 그룹의 멤버가 아닌 경우
+        if (!Object.keys(groupInfo.members).includes(uid))
+            throw new Error("그룹의 멤버가 아닙니다.");
+
+        await updateDoc(doc(db, "groups", groupId), {
+            [`members.${uid}`]: deleteField(),
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
+    } catch (e) {
+        console.error("그룹 문서 멤버 삭제 실패 : ", e);
         throw e;
     }
 }

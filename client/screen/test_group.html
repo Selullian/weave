@@ -127,14 +127,6 @@
                 color: #cbd5e1;
             }
 
-            .success {
-                color: #4ade80;
-            }
-
-            .failure {
-                color: #f87171;
-            }
-
             .hint {
                 color: #777;
                 font-size: 13px;
@@ -236,7 +228,7 @@
 
                 <div class="checkbox">
                     <input id="changeColor" type="checkbox" />
-                    <label for="changeColor">그룹 색상도 변경하기</label>
+                    <label for="changeColor"> 그룹 색상도 변경하기 </label>
                 </div>
 
                 <div class="field">
@@ -283,6 +275,28 @@
                 </p>
             </section>
 
+            <!-- 7. 멤버 삭제 -->
+            <section class="section">
+                <h2>7. 멤버 삭제</h2>
+
+                <div class="field">
+                    <label for="deleteMemberGroupId">그룹 ID</label>
+                    <input
+                        id="deleteMemberGroupId"
+                        type="text"
+                        placeholder="멤버를 삭제할 그룹 ID"
+                    />
+                </div>
+
+                <button id="deleteMemberBtn" class="danger">
+                    현재 로그인한 사용자 삭제
+                </button>
+
+                <p class="hint">
+                    현재 로그인한 Firebase 사용자를 해당 그룹에서 삭제합니다.
+                </p>
+            </section>
+
             <!-- 테스트 결과 -->
             <section class="result-section">
                 <h2>테스트 결과</h2>
@@ -296,6 +310,12 @@
         </div>
 
         <script type="module">
+            /*
+    ===================================
+    서비스 함수 import
+    ===================================
+    */
+
             import {
                 createGroup,
                 getUserGroups,
@@ -303,9 +323,8 @@
                 updateGroup,
                 deleteGroup,
                 addMember,
+                deleteMember,
             } from "../src/services/group.js";
-
-            const resultElement = document.getElementById("result");
 
             /*
     ===================================
@@ -313,16 +332,19 @@
     ===================================
     */
 
+            const resultElement = document.getElementById("result");
+
             function printResult(title, result) {
                 const time = new Date().toLocaleTimeString();
 
                 const output = `
-                    [${time}] ${title}
+[${time}] ${title}
 
-                    ${JSON.stringify(result, null, 2)}
+${JSON.stringify(result, null, 2)}
 
-                    ----------------------------------------
-                    `;
+----------------------------------------
+
+`;
 
                 resultElement.textContent = output + resultElement.textContent;
             }
@@ -367,9 +389,11 @@
                     const name = document
                         .getElementById("createName")
                         .value.trim();
+
                     const description = document
                         .getElementById("createDescription")
                         .value.trim();
+
                     const color = document.getElementById("createColor").value;
 
                     await runTest("그룹 생성", () =>
@@ -440,9 +464,17 @@
                     // 입력한 항목만 수정 내용에 포함
                     const contents = {};
 
-                    if (name) contents.name = name;
-                    if (description) contents.description = description;
-                    if (changeColor) contents.color = color;
+                    if (name) {
+                        contents.name = name;
+                    }
+
+                    if (description) {
+                        contents.description = description;
+                    }
+
+                    if (changeColor) {
+                        contents.color = color;
+                    }
 
                     await runTest("그룹 정보 수정", () =>
                         updateGroup(groupId, contents),
@@ -484,6 +516,28 @@
 
                     await runTest("현재 로그인한 사용자 멤버 추가", () =>
                         addMember(groupId),
+                    );
+                });
+
+            /*
+    ===================================
+    7. 멤버 삭제
+    ===================================
+    */
+
+            document
+                .getElementById("deleteMemberBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("deleteMemberGroupId")
+                        .value.trim();
+
+                    if (!confirm("정말 해당 그룹에서 나가시겠습니까?")) {
+                        return;
+                    }
+
+                    await runTest("현재 로그인한 사용자 멤버 삭제", () =>
+                        deleteMember(groupId),
                     );
                 });
 
