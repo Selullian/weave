@@ -3,6 +3,8 @@ import {
     setDoc,
     getDoc,
     doc,
+    updateDoc,
+    serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 /*
@@ -78,6 +80,41 @@ export async function getUserDoc(uid) {
         }
     } catch (e) {
         console.error("DB 사용자 조회 실패 : ", e);
+        throw e;
+    }
+}
+
+// 원 문서 수정 name, groupIds 수정 가능
+// groupInfo 형식 : { 그룹아이디: 그룹색상 }
+export async function updateUserInfoDoc({
+    uid,
+    name = null,
+    groupInfo = null,
+}) {
+    try {
+        console.log("회원 문서 수정 실행");
+
+        let updateContents = {};
+        if (name) updateContents.name = name;
+        if (groupInfo) {
+            for (const [groupId, color] of Object.entries(groupInfo)) {
+                if (groupId) {
+                    updateContents[`groupIds.${groupId}`] = color;
+                }
+            }
+        }
+
+        if (Object.keys(updateContents).length === 0)
+            throw new Error("수정할 항목을 필수로 입력해주세요.");
+
+        await updateDoc(doc(db, "users", uid), {
+            ...updateContents,
+            updateAt: serverTimestamp(),
+        });
+
+        return true;
+    } catch (e) {
+        console.error("회원 문서 수정 실패 : ", e);
         throw e;
     }
 }

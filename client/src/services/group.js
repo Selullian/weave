@@ -4,13 +4,15 @@ import {
     requiredUid,
     getToUpdateContent,
 } from "../services/common.js";
-import { getUserGroupIds } from "../services/auth.js";
+import { getUserGroupIds, updateUserInfo } from "../services/auth.js";
 import {
     createGroupDoc,
     getGroupDocById,
     getUserGroupDocs,
     updateGroupDoc,
     deleteGroupDoc,
+    addMemberDoc,
+    isExistGroup,
 } from "../repository/group_repository.js";
 
 /*
@@ -22,10 +24,11 @@ import {
 그룹 조회
 - getUserGroups(uid) - 구현 완료
 그룹 정보 조회
-- getGroupInfo(groupId) - 구현 전
+- getGroupInfo(groupId) - 구현 완료
 그룹 정보 수정
-- updateGroup() - 구현 중
+- updateGroup() - 구현 완료
 그룹 삭제
+- deleteGroup() - 구현 완료
 멤버 추가
 멤버 조회
 멤버 삭제
@@ -40,6 +43,8 @@ import {
 // 1. 그룹 생성
 export async function createGroup({ name, description, color }) {
     try {
+        console.log("그룹 생성 실행");
+
         if (!name || !description || !color) {
             return fail({
                 code: 400,
@@ -98,8 +103,8 @@ export async function getUserGroups() {
     }
 }
 
-// 그룹 정보 수정
-export async function updateGroup(groupId, contents = {}) {
+// 그룹 정보 수정 { name, description, color, membersColor }
+export async function updateGroup(groupId, contents) {
     try {
         console.log("그룹 수정 실행");
         if (!groupId || !contents)
@@ -109,18 +114,25 @@ export async function updateGroup(groupId, contents = {}) {
             });
 
         requiredUid();
-        if (!(await isExistEvent(groupId))) {
+        if (!(await isExistGroup(groupId))) {
             return fail({
                 code: 400,
                 message: "수정할 그룹이 존재하지 않습니다.",
             });
         }
 
-        const updateField = await getToUpdateContent(groupId, contents);
+        const updateField = await getToUpdateContent(
+            "groups",
+            groupId,
+            contents,
+        );
+
         if (!updateField) {
+            console.warn("변경된 항목이 없습니다.");
             return fail({ code: 400, message: "변경된 항목이 없습니다." });
         }
-        let result = await updateGroupDoc(groupId, updateField);
+
+        await updateGroupDoc(groupId, updateField);
 
         // 성공 시 true
         return ok(true);
@@ -149,6 +161,34 @@ export async function deleteGroup(groupId) {
         else return fail({ code: 400, message: "존재하지 않는 그룹입니다." });
     } catch (e) {
         console.error("그룹 삭제 실패: ", e);
+        return fail(e);
+    }
+}
+
+// 멤버 추가
+export async function addMember(groupId) {
+    try {
+        console.log("멤버 추가 실행");
+        if (!groupId)
+            return fail({ code: 400, message: "그룹 아이디를 입력해주세요." });
+
+        let uid = requiredUid();
+
+        // 그룹 문서에 멤버 추가 (이미 멤버면 null, 성공하면 배정된 색상 반환)
+        let memberColor = await addMemberDoc(groupId, uid);
+        if (!memberColor) {
+            return fail({ code: 409, message: "이미 그룹의 멤버입니다." });
+        }
+
+        // 회원 문서의 groupIds에 {groupId: color} 추가
+        let groupInfo = {};
+        groupInfo[groupId] = memberColor;
+
+        await updateUserInfo({ groupInfo: groupInfo });
+
+        return ok(true);
+    } catch (e) {
+        console.error("멤버 추가 실패 : ", e);
         return fail(e);
     }
 }

@@ -23,7 +23,6 @@
 ========================
 */
 
-import { auth } from "../../app.js";
 import { getUserGroupIds } from "../services/auth.js";
 import { ok, fail, requiredUid, getToUpdateContent } from "./common.js";
 import {
@@ -173,7 +172,11 @@ export async function updateEvent(eventId, contents = {}) {
             });
         }
 
-        const updateField = await getToUpdateContent(eventId, contents);
+        const updateField = await getToUpdateContent(
+            "events",
+            eventId,
+            contents,
+        );
         if (!updateField) {
             return fail({ code: 400, message: "변경된 항목이 없습니다." });
         }

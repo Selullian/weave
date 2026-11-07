@@ -1,4 +1,8 @@
-import { auth } from "../../app.js";
+import { auth, db } from "../../app.js";
+import {
+    getDoc,
+    doc,
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 export function ok(data) {
     return { success: true, data: data };
@@ -18,8 +22,8 @@ export const toEntity = (doc) => ({
 });
 
 // 변경된 필드만 추출하는 함수
-export async function getToUpdateContent(contentId, contents) {
-    let originalData = await getDocById(contentId);
+export async function getToUpdateContent(col, contentId, contents) {
+    let originalData = await getDoc(doc(db, col, contentId));
     if (originalData) {
         const newData = {
             ...contents,
@@ -31,6 +35,7 @@ export async function getToUpdateContent(contentId, contents) {
             }
         });
 
+        if (Object.keys(updates).length === 0) return null;
         return updates;
     }
     return null;

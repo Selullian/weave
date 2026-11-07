@@ -10,10 +10,6 @@ import {
     doc,
     query,
     where,
-    or,
-    startAt,
-    endAt,
-    orderBy,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -45,13 +41,15 @@ updatedAt
 6. 그룹 멤버 삭제
 7. 멤버별 그룹 색상 수정
 
-
+=============================
 */
 
-async function isExistGroup(groupId) {
+export async function isExistGroup(groupId) {
     // 문서 존재 검증
     const docRef = doc(db, "groups", groupId);
     let docSnap = await getDoc(docRef);
+
+    console.log(docSnap.exists());
 
     return docSnap.exists();
 }
@@ -119,11 +117,6 @@ export async function updateGroupDoc(groupId, contents) {
     try {
         console.log("그룹 문서 수정 실행");
 
-        if (!isExistGroup()) {
-            // 존재하지 않는 문서
-            return null;
-        }
-
         await updateDoc(doc(db, "groups", groupId), {
             ...contents,
             updateAt: serverTimestamp(),
@@ -166,19 +159,24 @@ export async function addMemberDoc(groupId, uid) {
         console.log("멤버 추가 실행");
 
         let groupInfo = await getGroupDocById(groupId);
+        if (!groupInfo) throw new Error("존재하지 않는 그룹입니다.");
 
-        groupInfo = groupInfo[memberIds].push(uid);
-        groupInfo = groupInfo[memberColors].uid = getRandomHexColor();
+        // 이미 멤버인 경우
+        if (groupInfo.memberIds.includes(uid)) return null;
+
+        const memberColor = getRandomHexColor();
+        const memberIds = [...groupInfo.memberIds, uid];
+        const memberColors = { ...groupInfo.memberColors, [uid]: memberColor };
 
         await updateDoc(doc(db, "groups", groupId), {
-            memberIds: groupInfo[memberIds],
-            memberColors: groupInfo[memberColors],
+            memberIds,
+            memberColors,
             updateAt: serverTimestamp(),
         });
 
-        return true;
+        return memberColor;
     } catch (e) {
-        console.error("멤버 추가 실패 : ", e);
+        console.error("그룹 문서 멤버 추가 실패 : ", e);
         throw e;
     }
 }
