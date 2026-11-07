@@ -102,12 +102,17 @@ export async function getUserGroupDocs(uid) {
         // 사용자의 그룹 목록 가져오기
         const userRef = await getDoc(doc(db, "users", uid));
         const userObj = toEntity(userRef);
-        const groupIds = userObj.groupIds;
+        const groupIds = Object.keys(userObj.groupIds);
+        console.log(groupIds);
 
-        const q = query(collection(db, "groups"), where("id", "in", groupIds));
+        const q = query(
+            collection(db, "groups"),
+            where("groupId", "in", groupIds),
+        );
         let docsRef = await getDocs(q);
 
         const result = docsRef.docs.map(toEntity);
+        console.log(result);
 
         return result ? result : null;
     } catch (e) {
