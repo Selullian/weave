@@ -226,6 +226,10 @@ body {
   cursor: pointer;
 }
 
+.title_more_img img {
+  pointer-events: none; /* 이미지가 마우스 클릭을 차단하지 않고 통과시킴! */
+}
+
 /*그룹 없음 안내*/
 #no_group {
   text-align: center;
@@ -322,13 +326,20 @@ body {
 }
 
 /*일정 추가하기 버튼*/
-#profile_btn button {
-  border: none;
+#upload_button {
   outline: none;
   box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
-  background-color: white;
   border-radius: 10px;
   height: 33%;
+}
+
+#upload_button button {
+  background-color: white;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+
+  height: 100%;
 }
 
 /*캘린더+사이드바*/
