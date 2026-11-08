@@ -47,7 +47,13 @@ todo |
  └────────────┴───────────┴──────────────────────────────────────────────
 */
 
-// 회원 문서 생성
+/**
+ * 회원 문서 생성
+ * @param {*} uid
+ * @param {*} email
+ * @param {*} name
+ * @returns 성공 시 true
+ */
 export async function createUserDoc(uid, email, name) {
     try {
         console.log("문서 생성 실행");
@@ -65,7 +71,11 @@ export async function createUserDoc(uid, email, name) {
     }
 }
 
-// 회원 정보 조회
+/**
+ * 회원 정보 조회
+ * @param {*} uid
+ * @returns 데이터 유무 (data/null)
+ */
 export async function getUserDoc(uid) {
     try {
         console.log("uid로 회원 정보 조회 실행");
@@ -76,17 +86,22 @@ export async function getUserDoc(uid) {
         if (docSnap.exists()) {
             const userData = docSnap.data();
             return userData;
-        } else {
-            return null;
         }
+        return null;
     } catch (e) {
         console.error("DB 사용자 조회 실패 : ", e);
         throw e;
     }
 }
 
-// 원 문서 수정 name, groupIds 수정 가능
-// groupInfo 형식 : { 그룹아이디: 그룹색상 }
+/**
+ * 원 문서 수정 name, groupIds 수정 가능
+ * @param {*} uid
+ * @param {*} name
+ * @param {*} groupInfo { 그룹아이디: 그룹색상 }
+ * @param {*} removeGroupId
+ * @returns
+ */
 export async function updateUserInfoDoc({
     uid,
     name = null,
