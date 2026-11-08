@@ -29,16 +29,7 @@ import {
     getUserDoc,
     updateUserInfoDoc,
 } from "../repository/auth_repository.js";
-import { requiredUid } from "./common.js";
-
-// 현재 로그인된 사용자 획득 및 뷰 검증 헬퍼 함수
-function getAuthenticatedUser() {
-    const user = auth.currentUser;
-    if (!user) {
-        throw new Error("로그인이 필요한 서비스입니다.");
-    }
-    return user;
-}
+import { ok, fail, requiredUid } from "./common.js";
 
 // 회원가입
 export async function signUp(name, email, password) {
@@ -52,7 +43,7 @@ export async function signUp(name, email, password) {
             !name ||
             name.trim() === ""
         ) {
-            throw new Error("모든 항목을 입력해주세요.");
+            return fail({ code: 400, message: "모든 항목을 입력해주세요." });
         }
 
         // Firebase 회원가입 요청
@@ -69,7 +60,7 @@ export async function signUp(name, email, password) {
         // DB 유저 문서 생성 비동기 처리
         await createUserDoc(user.uid, user.email, name);
 
-        return user;
+        return ok(user);
     } catch (e) {
         if (e.code === "auth/email-already-in-use") {
             console.error("이미 등록된 사용자입니다.", e);
@@ -77,7 +68,7 @@ export async function signUp(name, email, password) {
             console.error("회원가입 실패!", e);
         }
 
-        throw e;
+        return fail(e);
     }
 }
 
@@ -85,7 +76,7 @@ export async function signUp(name, email, password) {
 export async function signIn(email, password) {
     const currentUser = auth.currentUser;
     if (currentUser) {
-        throw new Error("이미 로그인 되어 있습니다.");
+        return fail({ code: 400, message: "이미 로그인 되어있습니다." });
     }
 
     try {
@@ -98,7 +89,7 @@ export async function signIn(email, password) {
         const user = userCredential.user;
         console.log("로그인 성공!");
 
-        return user;
+        return ok(user);
     } catch (e) {
         if (e.code === "auth/missing-password") {
             console.error("로그인 실패 : 비밀번호 미입력");
@@ -107,8 +98,7 @@ export async function signIn(email, password) {
         } else {
             console.error("로그인 실패", e);
         }
-
-        throw e;
+        return fail(e);
     }
 }
 
@@ -117,16 +107,15 @@ export async function logOut() {
     try {
         const user = auth.currentUser;
         if (!user) {
-            console.warn("로그인 상태가 아닙니다.");
-            return;
+            return fail({ code: 400, message: "로그인 상태가 아닙니다." });
         }
 
         await signOut(auth);
         console.log(`로그아웃 성공!`);
-        // todo : 로그아웃 후 로그인 페이지로 이동
+        return ok(true);
     } catch (e) {
         console.error("로그아웃 실패", e);
-        throw e;
+        return fail(e);
     }
 }
 
@@ -137,17 +126,17 @@ export async function getUserInfo() {
 
         const userData = await getUserDoc(user.uid);
         if (!userData) {
-            return null;
+            return ok(null);
         }
 
-        return {
+        return ok({
             name: userData.name,
             email: userData.email,
             groupIds: userData.groupIds,
-        };
+        });
     } catch (e) {
         console.error("사용자 정보 조회 실패:", e.message);
-        throw e;
+        return fail(e);
     }
 }
 
@@ -158,10 +147,11 @@ export async function getUserGroupIds() {
 
         const userData = await getUserDoc(user.uid);
         if (!userData) {
-            return null;
+            return ok(null);
         }
 
-        return userData.groupIds || [];
+        // data / []
+        return ok(userData.groupIds);
     } catch (e) {
         console.error("사용자의 그룹 목록 조회 실패:", e.message);
         throw e;
@@ -178,7 +168,7 @@ export async function updateUserInfo({
         console.log("회원 정보 수정 실행");
         if (!name && !groupInfo && !removeGroupId) {
             console.warn("수정할 정보가 없습니다.");
-            return null;
+            return ok(null);
         }
 
         const uid = requiredUid();
@@ -189,9 +179,9 @@ export async function updateUserInfo({
             groupInfo,
             removeGroupId,
         });
-        return isSuccess;
+        return ok(isSuccess);
     } catch (e) {
         console.error("회원 정보 수정 실패 : ", e);
-        throw e;
+        return fail(e);
     }
 }

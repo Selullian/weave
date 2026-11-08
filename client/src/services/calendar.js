@@ -33,7 +33,6 @@ import {
     updateEventDoc,
     findEventDoc,
     deleteEventDoc,
-    getEventDocById,
     isExistEvent,
     getEventDocById,
 } from "../repository/calendar_repository.js";
@@ -136,7 +135,10 @@ export async function getGroupEvents(groupId) {
     try {
         console.log("그룹 일정 조회 실행");
         let uid = requiredUid();
+
         let groupIds = await getUserGroupIds(uid);
+
+        // 사용자가 속한 그룹이 아닌 경우
         if (!Object.keys(groupIds).includes(groupId)) {
             return fail({
                 code: 400,
