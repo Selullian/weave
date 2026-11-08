@@ -23,14 +23,6 @@ import {
  */
 
 /**
- * @typedef {Object} User
- * @property {string} uid - 사용자 고유 식별자이며, firebase auth의 uid와 동일한 값
- * @property {string} name - 그룹원 목록 및 그룹 초대 검색 결과에 표시할 사용자 이름
- * @property {string} email - 회원가입 및 로그인에 사용하는 이메일
- * @property {Object.<string, string>} groupIds - 그룹 아이디를 키로, 사용자가 지정한 캘린더 색상을 값으로 저장하는 객체
- */
-
-/**
  * 회원 문서 생성
  *
  * auth에서 발급받은 uid를 문서 id로 사용하여
@@ -60,11 +52,16 @@ export async function createUserDoc(uid, email, name) {
 
 /**
  * 회원 정보 조회
+<<<<<<< HEAD
  *
  * uid를 기준으로 users 컬렉션에서 회원 문서를 조회한다.
  *
  * @param {string} uid - 조회할 사용자의 고유 식별자
  * @returns {Promise<User|null>} 조회한 회원 정보 또는 문서가 존재하지 않을 경우 null
+=======
+ * @param {*} uid
+ * @returns 데이터 유무 (data/null)
+>>>>>>> main
  */
 export async function getUserDoc(uid) {
     try {
@@ -76,9 +73,8 @@ export async function getUserDoc(uid) {
         if (docSnap.exists()) {
             const userData = docSnap.data();
             return userData;
-        } else {
-            return null;
         }
+        return null;
     } catch (e) {
         console.error("DB 사용자 조회 실패 : ", e);
         throw e;
@@ -86,6 +82,7 @@ export async function getUserDoc(uid) {
 }
 
 /**
+<<<<<<< HEAD
  * 회원 정보 수정
  *
  * 사용자의 이름 및 그룹 정보를 수정한다.
@@ -98,6 +95,14 @@ export async function getUserDoc(uid) {
  * @param {Object.<string, string>|null} [params.groupInfo=null] - 추가하거나 색상을 변경할 그룹 정보 (그룹id: #hex)
  * @param {string|null} [params.removeGroupId=null] - 삭제할 그룹 아이디
  * @returns {Promise<boolean>} 문서 수정 성공 여부
+=======
+ * 원 문서 수정 name, groupIds 수정 가능
+ * @param {*} uid
+ * @param {*} name
+ * @param {*} groupInfo { 그룹아이디: 그룹색상 }
+ * @param {*} removeGroupId
+ * @returns
+>>>>>>> main
  */
 export async function updateUserInfoDoc({
     uid,
