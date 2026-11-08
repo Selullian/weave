@@ -8,46 +8,39 @@ import {
     deleteField,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-/*
-=================================
-회원 문서 관리 (이름/이메일/비밀번호)
+/**
+ * =================================
+ * 회원 문서 관리
+ *
+ * 1. 회원 문서 생성
+ *    - createUserDoc(uid, email, name)
+ * 2. 회원 정보 조회
+ *    - getUserDoc(uid)
+ * 3. 회원 정보 수정
+ *    - updateUserInfoDoc({ uid, name, groupInfo, removeGroupId })
+ *
+ * =================================
+ */
 
-1. 회원 문서 생성
-  - createUserDoc(uid, email, name) - 기초 기능 완료
-2. 회원 정보 조회
-  - getUserDoc(uid) - 기초 기능 완료
-3. 회원명 수정 - 구현 전
+/**
+ * @typedef {Object} User
+ * @property {string} uid - 사용자 고유 식별자이며, firebase auth의 uid와 동일한 값
+ * @property {string} name - 그룹원 목록 및 그룹 초대 검색 결과에 표시할 사용자 이름
+ * @property {string} email - 회원가입 및 로그인에 사용하는 이메일
+ * @property {Object.<string, string>} groupIds - 그룹 아이디를 키로, 사용자가 지정한 캘린더 색상을 값으로 저장하는 객체
+ */
 
-todo |
-
-=================================
-*/
-
-/* Users
- ┌────────────┬───────────┬──────────────────────────────────────────────
- │ 필드         타입         용도
- ├────────────┼───────────┼──────────────────────────────────────────────
- │ uid        │ string    │ doc ID로 사용. Firebase Auth의 UID와 동일하며,
- │            │           │ 사용자를 특정할 때 기준이 되는 값
- ├────────────┼───────────┼──────────────────────────────────────────────
- │ name       │ string    │ 그룹원 목록 조회 시 이름 표시
- │            │           │ 그룹 초대 시 사용자 검색 결과에 표시
- ├────────────┼───────────┼──────────────────────────────────────────────
- │ email      │ string    │ 회원가입·로그인 수단
- │            │           │ 그룹 초대 시 ID로 사용자를 검색
- ├────────────┼───────────┼──────────────────────────────────────────────
- │ groupIds   │ map       │ 내가 속한 그룹 목록을 한 번에 가져오기 위한 필드
- │            │           │ 좌측 그룹 목록 렌더링 및 통합 캘린더의
- │            │           │ 표시 그룹 선택 체크박스 목록 구성에 사용, keys()
- |            |           | 
- │            │           │ 내가 각 그룹에 지정한 캘린더 표시 색상
- │            │           │ { groupId: "#hex" } 형태로 저장
- │            │           │ 통합 캘린더에서 그룹별 색상으로 일정을
- │            │           │ 렌더링할 때 참조
- └────────────┴───────────┴──────────────────────────────────────────────
-*/
-
-// 회원 문서 생성
+/**
+ * 회원 문서 생성
+ *
+ * auth에서 발급받은 uid를 문서 id로 사용하여
+ * users에 회원 기본 정보를 생성한다.
+ *
+ * @param {string} uid - auth에서 발급받은 사용자 id
+ * @param {string} email - 회원 이메일
+ * @param {string} name - 회원 이름
+ * @returns {Promise<boolean>} 문서 생성 성공 여부
+ */
 export async function createUserDoc(uid, email, name) {
     try {
         console.log("문서 생성 실행");
@@ -65,14 +58,21 @@ export async function createUserDoc(uid, email, name) {
     }
 }
 
-// 회원 정보 조회
+/**
+ * 회원 정보 조회
+ *
+ * uid를 기준으로 users 컬렉션에서 회원 문서를 조회한다.
+ *
+ * @param {string} uid - 조회할 사용자의 고유 식별자
+ * @returns {Promise<User|null>} 조회한 회원 정보 또는 문서가 존재하지 않을 경우 null
+ */
 export async function getUserDoc(uid) {
     try {
         console.log("uid로 회원 정보 조회 실행");
         const docRef = doc(db, "users", uid);
         const docSnap = await getDoc(docRef);
 
-        // 문서 존재 분기
+        // 문서 존재 여부 확인
         if (docSnap.exists()) {
             const userData = docSnap.data();
             return userData;
@@ -85,8 +85,20 @@ export async function getUserDoc(uid) {
     }
 }
 
-// 원 문서 수정 name, groupIds 수정 가능
-// groupInfo 형식 : { 그룹아이디: 그룹색상 }
+/**
+ * 회원 정보 수정
+ *
+ * 사용자의 이름 및 그룹 정보를 수정한다.
+ * 그룹 정보는 기존 데이터를 유지하면서 추가하거나 색상을 변경할 수 있으며,
+ * 특정 그룹 id를 지정하여 그룹 정보를 삭제할 수 있다.
+ *
+ * @param {Object} params - 회원 정보 수정에 필요한 매개변수
+ * @param {string} params.uid - 수정할 사용자의 고유 식별자
+ * @param {string|null} [params.name=null] - 변경할 사용자 이름
+ * @param {Object.<string, string>|null} [params.groupInfo=null] - 추가하거나 색상을 변경할 그룹 정보 (그룹id: #hex)
+ * @param {string|null} [params.removeGroupId=null] - 삭제할 그룹 아이디
+ * @returns {Promise<boolean>} 문서 수정 성공 여부
+ */
 export async function updateUserInfoDoc({
     uid,
     name = null,
@@ -97,8 +109,10 @@ export async function updateUserInfoDoc({
         console.log("회원 문서 수정 실행");
 
         let updateContents = {};
+
         // 이름 수정
         if (name) updateContents.name = name;
+
         // 그룹 추가 또는 색상 수정
         if (groupInfo) {
             for (const [groupId, color] of Object.entries(groupInfo)) {
@@ -108,7 +122,7 @@ export async function updateUserInfoDoc({
             }
         }
 
-        // 특정 그룹 하나 삭제
+        // 특정 그룹 삭제
         if (removeGroupId) {
             updateContents[`groupIds.${removeGroupId}`] = deleteField();
         }
