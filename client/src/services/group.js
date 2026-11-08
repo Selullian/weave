@@ -4,7 +4,11 @@ import {
     requiredUid,
     getToUpdateContent,
 } from "../services/common.js";
-import { getUserInfo, updateUserInfo } from "../services/auth.js";
+import {
+    getUserGroupIds,
+    getUserInfo,
+    updateUserInfo,
+} from "../services/auth.js";
 import {
     createGroupDoc,
     getGroupDocById,
@@ -14,6 +18,7 @@ import {
     addMemberDoc,
     deleteMemberDoc,
     isExistGroup,
+    getMemberDocs,
 } from "../repository/group_repository.js";
 
 /*
@@ -220,6 +225,43 @@ export async function deleteMember(groupId) {
         return ok(true);
     } catch (e) {
         console.error("멤버 삭제 실패 : ", e);
+        return fail(e);
+    }
+}
+
+/**
+ * 그룹 소속 멤버 목록 조회
+ * @param {*} groupId
+ * @returns 데이터 유무(data/null)
+ */
+export async function getMembers(groupId) {
+    try {
+        console.log("멤버 목록 조회 실행");
+        if (!groupId)
+            return fail({
+                code: 400,
+                message: "필수 입력 사항을 확인해주세요.",
+            });
+
+        const uid = requiredUid();
+
+        // 그룹이 존재하지 않을 경우
+        let isExist = await isExistGroup(groupId);
+        if (!isExist)
+            return fail({ code: 400, message: "존재하지 않는 그룹입니다." });
+
+        // 그룹의 멤버가 아닌 경우
+        const userGroups = await getUserGroupIds(uid);
+        if (!Object.keys(userGroups).includes(groupId))
+            throw new Error("그룹의 멤버가 아닙니다.");
+
+        // 그룹의 멤버 목록 조회
+        const memberList = await getMemberDocs(groupId, uid);
+
+        // 데이터가 없음 null
+        return ok(memberList);
+    } catch (e) {
+        console.error("멤버 목록 조회 실패 : ", e);
         return fail(e);
     }
 }

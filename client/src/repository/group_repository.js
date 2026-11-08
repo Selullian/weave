@@ -220,3 +220,25 @@ export async function deleteMemberDoc(groupId, uid) {
         throw e;
     }
 }
+
+/**
+ * 그룹 멤버 목록 조회
+ * @param {String} groupId
+ * @param {String} uid
+ * @returns 데이터 유무(data/null)
+ */
+export async function getMemberDocs(groupId, uid) {
+    try {
+        console.log("그룹 문서 멤버 조회 실행");
+
+        const groupDoc = await getGroupDocById(groupId);
+        const members = Object.keys(groupDoc.members);
+        console.log(members);
+
+        if (!members) return null;
+        return members;
+    } catch (e) {
+        console.error("그룹 문서 멤버 조회 실패 : ", e);
+        throw e;
+    }
+}

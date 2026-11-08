@@ -151,7 +151,7 @@ export async function getUserInfo() {
     }
 }
 
-// 사용자 그룹 목록 조회
+// 사용자 그룹 목록 조회 (groupId:#hex)
 export async function getUserGroupIds() {
     try {
         const user = getAuthenticatedUser();
