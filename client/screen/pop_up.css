@@ -1,0 +1,175 @@
+/* 버튼 박스 스타일 */
+.title_more_img {
+  position: relative; /* 팝업의 기준점 설정 */
+  cursor: pointer;
+}
+
+/* 팝업 창 스타일 */
+.group_color_popup {
+  display: none; /* 기본 상태는 숨김 */
+  position: absolute;
+  top: 100%; /* 버튼 바로 아래 위치 */
+  right: 0;
+  width: 181px;
+  height: 82px;
+  background-color: #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 9px;
+  border-radius: 10px;
+}
+
+.popup_title {
+  display: flex;
+  align-items: flex-end;
+}
+
+.popup_title p {
+  font-size: 10px;
+  height: auto;
+  bottom: 0;
+  padding-left: 0;
+}
+
+.group_color_popup.active {
+  display: block;
+}
+
+.color_input {
+  width: 97%;
+  border-radius: 5px;
+  border: 1px solid #e3e3e3;
+  outline: none;
+  margin-bottom: 5px;
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
+.small_btn {
+  width: 50px;
+  height: 15px;
+  margin-left: 5px;
+  cursor: pointer;
+  font-size: 10px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+#user_more_img {
+  position: relative;
+}
+
+#cancel_btn {
+  color: #5a5a5a;
+}
+
+#save_btn {
+  color: #7940ff;
+}
+
+.group_buttons {
+  display: none; /* 기본 상태는 숨김 */
+  position: absolute;
+  top: 100%; /* 버튼 바로 아래 위치 */
+  right: 0;
+  width: 80px;
+  height: 50px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+}
+
+.popup_btn {
+  display: flex;
+  width: 100%;
+  height: 50%;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  position: relative;
+  color: #5a5a5a;
+}
+
+#upload_button {
+  width: 100%;
+}
+
+#logout_btn {
+  border-bottom: 1px solid #b3b3b3;
+}
+
+.group_buttons.active {
+  display: block;
+}
+
+#import_popup {
+  position: fixed;
+  display: none;
+  width: 594px;
+  height: 251px;
+  top: 50%;
+  left: 50%;
+  border-radius: 10px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  padding: 25px 25px;
+  z-index: 100;
+}
+
+#title_btn {
+  display: flex;
+  width: 100%;
+  margin-top: 0;
+  align-items: center; /* 세로 중앙 정렬 유지 */
+  justify-content: center;
+  position: relative; /* 이미지를 오른쪽 끝에 완전히 고정하기 위해 추가 */
+}
+
+#title_btn p {
+  display: block;
+  font-size: 36px;
+  margin: 0;
+  margin-left: 30%; /* 기존 여백 유지 */
+  margin-bottom: 5%;
+  line-height: 1; /*  글자 박스의 불필요한 높이 여백 제거 */
+}
+
+#title_btn img {
+  display: block;
+  margin-left: auto;
+  margin-bottom: 5%;
+  height: 30px;
+  width: 30px;
+  /* flex 상에서 찌그러짐 방지 */
+  flex-shrink: 0;
+}
+
+#upload_btn {
+  display: flex;
+  height: 160px;
+  border: 3px solid #7940ff;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+#upload_btn img {
+  height: 80px;
+  width: 85px;
+}
+
+#import_popup.active {
+  display: block;
+}
