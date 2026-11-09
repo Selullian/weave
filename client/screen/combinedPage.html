@@ -127,15 +127,18 @@
     <!--메인보드-->
 
     <script type="module">
-      import { getUserInfo } from "../src/servicies/auth.js";
+      import { getAuthUser } from "../src/services/auth.js";
+      let email = "",
+        name = "";
 
       try {
-        const userInfo = await getUserInfo();
+        const userInfo = await getAuthUser();
 
         if (userInfo === null) {
           alert("사용자 정보가 조회되지 않습니다.");
         } else {
           console.log(userInfo);
+          console.log(userInfo.email);
         }
       } catch (e) {
         console.error("사용자 정보 조회 실패", e);
@@ -167,10 +170,9 @@
       renderGroup(temp_group1);
 
       /*유저 렌더링 함수*/
-      let renderUser = (arr) => {
-        let { name, email } = arr;
+      let renderUser = () => {
         let str = `<div id="name_btn">
-                      <p>${name}</p>
+                      <p>더미데이터</p>
                       <div id="user_more_img">
                         <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%" />
                       </div>
@@ -182,7 +184,7 @@
 
       async function getUsersInfo() {
         try {
-          const userInfo = await getUserInfo();
+          const userInfo = await getAuthUser();
 
           if (userInfo === null) {
             console.log("사용자 정보가 조회되지 않음");

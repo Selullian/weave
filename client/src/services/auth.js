@@ -21,6 +21,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import { auth } from "../../app.js";
@@ -28,14 +29,13 @@ import {
   createUserDoc,
   getUserDoc,
   updateUserInfoDoc,
-  getAuthenticatedUser,
 } from "../repository/auth_repository.js";
 import { ok, fail, requiredUid } from "./common.js";
 
 /**
  * 현재 로그인한 사용자를 가져오는 간단한 함수
  */
-async function getAuthUser() {
+export async function getAuthUser() {
   // 1. 이미 로그인 정보가 로딩됐으면 바로 반환
   if (auth.currentUser) {
     return auth.currentUser;
