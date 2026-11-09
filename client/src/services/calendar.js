@@ -10,6 +10,7 @@ import {
     deleteEventDoc,
     isExistEvent,
     getEventDocById,
+    getMonthEventDocs,
 } from "../repository/calendar_repository.js";
 
 /*
@@ -313,6 +314,38 @@ export async function deleteEvent(eventId) {
         else return fail({ code: 400, message: "존재하지 않는 일정입니다." });
     } catch (e) {
         console.error("일정 삭제 실패: ", e);
+        return fail(e);
+    }
+}
+
+/**
+ * 월별 일정 조회
+ *
+ * 사용자의 모든 일정과 그룹의 모든 공개 일정을 받아와
+ * 해당 연월의 일정을 걸러 조회
+ *
+ * @param {Date} year
+ * @param {Date} month
+ * @returns
+ */
+export async function getMonthEvents(year, month) {
+    try {
+        console.log("월별 일정 조회 실행");
+        if (!year || !month) {
+            return fail({
+                code: 400,
+                message: "필수 입력 항목을 입력해주세요",
+            });
+        }
+
+        const uid = requiredUid();
+
+        const result = await getMonthEventDocs(uid, year, month);
+        if (result === null) console.warn("조회된 일정이 없습니다.");
+
+        return ok(result);
+    } catch (e) {
+        console.error("월별 일정 조회 실패 : ", e);
         return fail(e);
     }
 }
