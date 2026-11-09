@@ -1,4 +1,5 @@
 import { logOut } from "../src/services/auth.js";
+import { createGroup } from "../src/services/group.js";
 
 let color_popup = `
 <div class="group_color_popup">
@@ -33,6 +34,29 @@ let import_popup = `
 </div>
 `;
 
+let create_group_popup = `
+<div id="create_group_popup" class="group_color_popup">
+    <div class="input_group">
+      <label for="createName">그룹 이름</label>
+      <input type="text" id="createName" placeholder="그룹 이름을 입력하세요" />
+    </div>
+
+    <div class="input_group">
+      <label for="createDescription">그룹 설명</label>
+      <input id="createDescription" placeholder="그룹 설명을 입력하세요" />
+    </div>
+
+    <div class="input_group">
+      <label for="createColor">배경색</label>
+      <input type="text" id="createColor" placeholder="Hex로 입력하세요 예) #FFFFFF"/>
+    </div>
+
+    <div class="popup_buttons">
+      <button type="button" id="cancel_create_btn" class="cancel_btn">취소</button>
+      <button type="submit" id="submit_btn">생성</button>
+    </div>
+</div>`;
+
 window.addEventListener("DOMContentLoaded", () => {
   let inputs = document.getElementsByClassName("color_input");
   for (let i = 0; i < inputs.length; i++) {
@@ -54,6 +78,43 @@ document.addEventListener("click", async (e) => {
     }
   }
 
+  const createGroups = e.target.closest("#submit_btn");
+  if (createGroups) {
+    console.log(createGroups);
+    e.preventDefault();
+
+    const name = document.getElementById("createName").value.trim();
+
+    const description = document
+      .getElementById("createDescription")
+      .value.trim();
+
+    const color = document.getElementById("createColor").value;
+
+    const res = await runTest("그룹 생성", () =>
+      createGroup({
+        name,
+        description,
+        color,
+      }),
+    );
+
+    // 💡 생성 성공 검증 후 렌더링 실행
+    if (res && res.success !== false) {
+      alert("그룹이 생성되었습니다!");
+
+      // 1. 팝업 닫기
+      const popup = document.querySelector("#create_group_popup");
+      if (popup) popup.classList.remove("active");
+
+      // 2. 💡 window.renderGroup이 함수인지 확인 후 await로 호출!
+      if (typeof window.renderGroup === "function") {
+        await window.renderGroup();
+      } else {
+        console.error("❌ window.renderGroup 함수를 찾을 수 없습니다.");
+      }
+    }
+  }
   // 1. [취소 버튼 클릭 처리]
   const cancelBtn = e.target.closest("#cancel_btn");
   if (cancelBtn) {
@@ -69,6 +130,14 @@ document.addEventListener("click", async (e) => {
     const importPopup = x_btn.closest("#import_popup");
     if (importPopup) {
       importPopup.classList.remove("active");
+    }
+  }
+
+  const cancel_btn = e.target.closest("#cancel_create_btn");
+  if (cancel_btn) {
+    const createPopup = cancelBtn.closest("#create_group_popup");
+    if (createPopup) {
+      createPopup.classList.remove("active");
     }
   }
 
@@ -135,5 +204,19 @@ document.addEventListener("click", async (e) => {
       importBtn.classList.toggle("active");
     }
     return;
+  }
+
+  const createGroupBtn = e.target.closest("#add_btn");
+  if (createGroupBtn) {
+    let create_group = createGroupBtn.querySelector("#create_group_popup");
+
+    if (!create_group) {
+      createGroupBtn.insertAdjacentHTML("beforeend", create_group_popup);
+      create_group = createGroupBtn.querySelector("#create_group_popup");
+    }
+
+    if (create_group) {
+      create_group.classList.toggle("active");
+    }
   }
 });
