@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>auth 기능 테스트</title>
+    </head>
+
+    <body>
+        <h1>회원가입 테스트</h1>
+
+        <input type="email" id="signUpEmail" placeholder="이메일" />
+        <input type="password" id="signUpPassword" placeholder="비밀번호" />
+        <input type="name" id="signUpName" placeholder="이름" />
+        <button id="signUpButton">회원가입</button><br />
+        <span id="signUpMessage">결과 메시지가 표시됨.</span>
+
+        <h1>로그인 테스트</h1>
+
+        <input type="email" id="signInEmail" placeholder="이메일" />
+        <input type="password" id="signInPassword" placeholder="비밀번호" />
+        <button id="signInButton">로그인</button><br />
+        <span id="signInMessage">결과 메시지가 표시됨.</span>
+        <br />
+        <br />
+        <button id="logOutButton">로그아웃</button>
+
+        <h1>사용자 정보 조회 테스트</h1>
+        <span id="getUserInfoMessage">결과 메시지가 표시됨.</span><br /><br />
+        <button id="getUserInfoButton">사용자 정보 조회</button>
+
+        <h1>사용자 그룹 조회 테스트</h1>
+        <span id="getUserGroupMessage">결과 메시지가 표시됨.</span><br /><br />
+        <button id="getUserGroupButton">사용자 정보 조회</button>
+
+        <script type="module">
+            import {
+                signUp,
+                signIn,
+                logOut,
+                getUserInfo,
+                getUserGroupIds,
+            } from "../src/services/auth.js";
+
+            // signUp 요소들
+            const signUpEmailInput = document.getElementById("signUpEmail");
+            const signUpPasswordInput =
+                document.getElementById("signUpPassword");
+            const signUpNameInput = document.getElementById("signUpName");
+            const signUpButton = document.getElementById("signUpButton");
+
+            // signIn 요소들
+            const signInEmailInput = document.getElementById("signInEmail");
+            const signInPasswordInput =
+                document.getElementById("signInPassword");
+            const signInButton = document.getElementById("signInButton");
+
+            // logOut 버튼
+            const logOutButton = document.getElementById("logOutButton");
+
+            // getUserInfo 버튼
+            const getUserInfoButton =
+                document.getElementById("getUserInfoButton");
+            // getUserGroup 버튼
+            const getUserGroupButton =
+                document.getElementById("getUserGroupButton");
+
+            // signUp 실행
+            signUpButton.addEventListener("click", async () => {
+                const email = signUpEmailInput.value;
+                const password = signUpPasswordInput.value;
+                const name = signUpNameInput.value;
+
+                console.log("회원가입 실행됨.", email);
+
+                // 사용자 출력 칸
+                let message = document.getElementById("signUpMessage");
+
+                try {
+                    const user = await signUp(name, email, password);
+                    message.innerHTML = `${user.email} 회원가입 성공`;
+                } catch (e) {
+                    if (e.code === "auth/email-already-in-use") {
+                        // 이미 있는 회원
+                        message.innerHTML = "이미 등록된 회원입니다.";
+                        console.log("이미 등록된 회원입니다.");
+                    } else {
+                        console.error("회원가입 실패:", e.code);
+                    }
+                }
+            });
+
+            // signIn 실행
+            signInButton.addEventListener("click", async () => {
+                const email = signInEmailInput.value;
+                const password = signInPasswordInput.value;
+
+                console.log("로그인 실행 : " + email);
+                // 사용자 출력 칸
+                let message = document.getElementById("signInMessage");
+                try {
+                    const user = await signIn(email, password);
+
+                    console.log("로그인 성공:", user.email);
+                    message.innerHTML = `${user.email} 로그인 성공`;
+                } catch (e) {
+                    if (e.code === "auth/missing-password") {
+                        // 비밀번호 입력X
+                        console.error("비밀번호 미입력");
+                        message.innerHTML = "비밀번호가 입력되지 않았습니다.";
+                    } else if (e.code === "auth/weak-password") {
+                        // 너무 약한 비번(6자리, 특수문자, 소문자, 숫자)
+                        console.error("너무 약한 비밀번호");
+                        message.innerHTML = "너무 약한 비밀번호 입니다.";
+                    } else {
+                        message.innerHTML = `로그인 실패`;
+                        console.log("로그인 실패 : ", e);
+                    }
+                }
+            });
+
+            // 로그아웃 실행
+            logOutButton.addEventListener("click", async () => {
+                try {
+                    logOut();
+                } catch (e) {
+                    alert("로그아웃 실패");
+                }
+            });
+
+            // 사용자 정보 조회 실행
+            getUserInfoButton.addEventListener("click", async () => {
+                let message = document.getElementById("getUserInfoMessage");
+                try {
+                    const userInfo = await getUserInfo();
+
+                    if (userInfo === null) {
+                        console.log("사용자 정보가 조회되지 않음");
+                        message.innerHTML = "사용자 정보가 조회되지 않음";
+                    } else {
+                        console.log("프론트에 전달된 정보 : ", userInfo);
+                        message.innerHTML = `name : ${userInfo.name} | email : ${userInfo.email}`;
+                    }
+                } catch (e) {
+                    console.error("사용자 정보 조회 실패", e);
+                }
+            });
+
+            // 사용자 그룹 목록 조회
+            getUserGroupButton.addEventListener("click", async () => {
+                let message = document.getElementById("getUserGroupMessage");
+                try {
+                    const groupIds = await getUserGroupIds();
+                    if (groupIds === null) {
+                        console.log("사용자 그룹 조회 실패");
+                        message.innerHTML = "사용자 그룹 조회 실패";
+                    } else {
+                        console.log(groupIds);
+                        if (Object.keys(groupIds).length === 0) {
+                            message.innerHTML = "소속된 그룹 없음";
+                        } else {
+                            message.innerHTML = groupIds;
+                        }
+                    }
+                } catch (e) {
+                    message.innerHTML = "사용자 그룹 조회 실패";
+                    console.error("사용자 그룹 조회 실패", e);
+                }
+            });
+        </script>
+    </body>
+</html>
