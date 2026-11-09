@@ -32,19 +32,19 @@ import {
 import { ok, fail, requiredUid } from "./common.js";
 
 /**
- * 현재 로그인한 사용자(Auth)를 가져오는 간단한 함수
+ * 현재 로그인한 사용자를 가져오는 간단한 함수
  */
 async function getAuthUser() {
-    // 1. 이미 로그인 정보가 온전히 로드되어 있다면 바로 반환
+    // 1. 이미 로그인 정보가 로딩됐으면 바로 반환
     if (auth.currentUser) {
         return auth.currentUser;
     }
 
-    // 2. 새로고침 직후라 로딩 중이라면 준비될 때까지 기다렸다가 반환
+    // 2. 새로고침 직후 로딩 중이라면 준비될 때까지 기다렸다가 반환
     return new Promise((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe(); // 한 번 확인했으니 리스너 종료
-            resolve(user); // 유저 정보 넘겨주기 (비로그인이면 null)
+            unsubscribe(); // 리스너 종료
+            resolve(user); // 유저 정보 (비로그인이면 null)
         });
     });
 }
