@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./sign_in.css" />
+    <title>로그인 화면</title>
+  </head>
+  <body>
+    <div id="screen_box">
+      <div id="signin_element">
+        <div id="logo">
+          <img
+            src="../assets/logo.png"
+            alt="로고 이미지"
+            id="logo_img"
+            width="100%"
+            height="100%"
+          />
+        </div>
+        <!--logo(로고 이미지)-->
+
+        <h2 id="start_text">시작하기</h2>
+        <p id="information_text">
+          Weave에 로그인하고 <br />
+          지인들과 함께 일정을 관리해보세요!
+        </p>
+        <!--start_text(안내 텍스트 모음)-->
+
+        <div class="signin_input_box">
+          <p>이메일</p>
+          <input
+            type="text"
+            id="signInEmail"
+            placeholder="이메일을 입력하세요"
+          />
+        </div>
+        <div class="signin_input_box">
+          <p>비밀번호</p>
+          <input
+            type="text"
+            id="signInPassword"
+            placeholder="비밀번호를 입력하세요"
+          />
+        </div>
+
+        <!--login_input (로그인 입력)-->
+
+        <button id="signInButton">로그인</button>
+        <!--로그인 버튼-->
+
+        <div id="signup_text">
+          회원이 아니신가요? <a href="./sign_up.html">회원가입</a>
+        </div>
+      </div>
+      <!--login_element(로고+텍스트+로그인 페이지)-->
+    </div>
+    <!--screen_box)-->
+    <script type="module">
+      import { signIn } from "../src/services/auth.js";
+      const signInEmailInput = document.getElementById("signInEmail");
+      const signInPasswordInput = document.getElementById("signInPassword");
+      const signInButton = document.getElementById("signInButton");
+
+      signInButton.addEventListener("click", async () => {
+        const email = signInEmailInput.value;
+        const password = signInPasswordInput.value;
+
+        console.log("로그인 실행 : " + email);
+        // 사용자 출력 칸
+        try {
+          const user = await signIn(email, password);
+
+          console.log("로그인 성공:", user.email);
+          location.href = "./combinedPage.html";
+        } catch (e) {
+          if (e.code === "auth/missing-password") {
+            // 비밀번호 입력X
+            alert("비밀번호를 입력해주세요");
+          } else {
+            alert("로그인이 실패하였습니다 (아이디와 비밀번호를 확인해주세요)");
+            console.log("로그인 실패 : ", e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
