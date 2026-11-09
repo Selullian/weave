@@ -27,18 +27,18 @@
         </p>
         <!--start_text(안내 텍스트 모음)-->
 
-        <div id="signin_input_box">
+        <div class="signin_input_box" id="signInEmail">
           <p>이메일</p>
           <input type="text" placeholder="이메일을 입력하세요" />
         </div>
-        <div id="signin_input_box">
+        <div class="signin_input_box" id="signInPassword">
           <p>비밀번호</p>
           <input type="text" placeholder="비밀번호를 입력하세요" />
         </div>
 
         <!--login_input (로그인 입력)-->
 
-        <button id="signin_button">로그인</button>
+        <button id="signInButton">로그인</button>
         <!--로그인 버튼-->
 
         <div id="signup_text">
@@ -48,5 +48,32 @@
       <!--login_element(로고+텍스트+로그인 페이지)-->
     </div>
     <!--screen_box)-->
+    <script type="module">
+      const signInEmailInput = document.getElementById("signInEmail");
+      const signInPasswordInput = document.getElementById("signInPassword");
+      const signInButton = document.getElementById("signInButton");
+
+      signInButton.addEventListener("click", async () => {
+        const email = signInEmailInput.value;
+        const password = signInPasswordInput.value;
+
+        console.log("로그인 실행 : " + email);
+        // 사용자 출력 칸
+        try {
+          const user = await signIn(email, password);
+
+          console.log("로그인 성공:", user.email);
+          location.href("./combindePage.html");
+        } catch (e) {
+          if (e.code === "auth/missing-password") {
+            // 비밀번호 입력X
+            alert("비밀번호를 입력해주세요");
+          } else {
+            alert("로그인이 실패하였습니다 (아이디와 비밀번호를 확인해주세요)");
+            console.log("로그인 실패 : ", e);
+          }
+        }
+      });
+    </script>
   </body>
 </html>

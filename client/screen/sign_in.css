@@ -64,7 +64,7 @@ body {
 }
 
 /*로그인 입력 요소 텍스트+상자*/
-#signin_input_box {
+.signin_input_box {
   width: 100%;
   height: auto;
   margin: 0;
@@ -72,13 +72,13 @@ body {
 }
 
 /*입력창 위에 올라가는 텍스트*/
-#signin_input_box p {
+.signin_input_box p {
   margin-bottom: 3%;
   font-size: 15px;
 }
 
 /*입력창*/
-#signin_input_box input {
+.signin_input_box input {
   width: 97%;
   height: 40%;
   outline: none;
@@ -89,7 +89,7 @@ body {
 }
 
 /*로그인 버튼*/
-#signin_button {
+#signInButton {
   display: inline-block;
   width: 100%;
   border: none;
