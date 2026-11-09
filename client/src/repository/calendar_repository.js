@@ -316,3 +316,62 @@ export async function deleteEventDoc(eventId) {
         throw e;
     }
 }
+
+/**
+ * 월별 일정 조회 (내 개인 일정 + 소속 그룹 일정)
+ *
+ * @param {string} uid 일정을 조회할 사용자의 uid
+ * @param {number} year 조회할 연도
+ * @param {number} month 조회할 월
+ * @returns {Promise<Object[]|null>} 해당 월의 일정 객체 배열
+ */
+export async function getMonthEventDocs(uid, year, month) {
+    try {
+        console.log("월별 일정 조회 실행");
+
+        // 해당 월의 시작일과 종료일 날짜 생성
+        const startDate = new Date(year, month - 1, 1, 0, 0, 0);
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+        // 유저가 가입된 그룹 id 목록 추출
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (!userDoc.exists()) {
+            throw new Error("존재하지 않는 사용자입니다.");
+        }
+
+        const userData = userDoc.data();
+        const groupIds = userData.groupIds
+            ? Object.keys(userData.groupIds)
+            : [];
+
+        const eventRef = collection(db, "events");
+        const condition =
+            groupIds.length === 0
+                ? where("uid", "==", uid)
+                : or(where("uid", "==", uid), where("groupId", "in", groupIds));
+
+        // 이번 달에 '하루라도' 걸쳐 있는 일정을 모두 가져오는 쿼리
+        const q = query(
+            collection(db, "users", uid, "events"),
+            where("startDate", "<", endDate), // 일정 시작이 다음 달 1일 전이면서
+            where("endDate", ">=", startDate), // 일정 종료가 이번 달 1일 이후인 것
+        );
+
+        const result = await getDocs(q);
+        const dataList = result.docs.map(toEntity);
+
+        // 비공개 일정 중 타인의 일정 필터링
+        const resultList = dataList.filter((event) => {
+            // 본인 일정이면 모두 포함
+            if (event.uid === uid) return true;
+            // 타인의 일정인 경우 공개일정인 것만 포함
+            return event.isPublic === true;
+        });
+
+        // 일정이 없으면 null
+        return resultList.length === 0 ? null : resultList;
+    } catch (e) {
+        console.error("월별 일정 조회 실패 : ", e);
+        throw e;
+    }
+}
