@@ -29,7 +29,7 @@ import {
   createUserDoc,
   getUserDoc,
   updateUserInfoDoc,
-  //getAuthenticatedUser,
+  getAuthenticatedUser,
 } from "../repository/auth_repository.js";
 import { ok, fail, requiredUid } from "./common.js";
 

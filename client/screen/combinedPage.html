@@ -180,22 +180,20 @@
       };
       renderUser(user1);
 
-      getUserInfoButton.addEventListener("click", async () => {
-        let message = document.getElementById("getUserInfoMessage");
+      async function getUsersInfo() {
         try {
           const userInfo = await getUserInfo();
 
           if (userInfo === null) {
             console.log("사용자 정보가 조회되지 않음");
-            message.innerHTML = "사용자 정보가 조회되지 않음";
           } else {
             console.log("프론트에 전달된 정보 : ", userInfo);
-            message.innerHTML = `name : ${userInfo.name} | email : ${userInfo.email}`;
           }
         } catch (e) {
           console.error("사용자 정보 조회 실패", e);
         }
-      });
+      }
+      getUsersInfo();
     </script>
   </body>
 </html>
