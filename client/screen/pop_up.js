@@ -1,3 +1,5 @@
+import { logOut } from "../src/services/auth.js";
+
 let color_popup = `
 <div class="group_color_popup">
     <div class="popup_title">
@@ -23,7 +25,7 @@ let import_popup = `
 <div id="import_popup">
     <div id="title_btn">
         <p>.ics 파일 불러오기</p>
-        <img src="../assets/X_btn.png"/>
+        <img src="../assets/X_btn.png" id="X_btn"/>
     </div>
     <div id="upload_btn">
         <img src="../assets/Upload.png"/>
@@ -38,7 +40,20 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
+  const logout_btn = e.target.closest("#logout_btn");
+  if (logout_btn) {
+    console.log(logout_btn);
+    try {
+      await logOut(); // await 추가!
+      alert("로그아웃이 성공하였습니다.");
+      location.href = "./sign_in.html";
+    } catch (e) {
+      console.error(e);
+      alert("로그아웃 실패");
+    }
+  }
+
   // 1. [취소 버튼 클릭 처리]
   const cancelBtn = e.target.closest("#cancel_btn");
   if (cancelBtn) {
@@ -47,6 +62,14 @@ document.addEventListener("click", (e) => {
       activePopup.classList.remove("active");
     }
     return;
+  }
+
+  const x_btn = e.target.closest("#X_btn");
+  if (x_btn) {
+    const importPopup = x_btn.closest("#import_popup");
+    if (importPopup) {
+      importPopup.classList.remove("active");
+    }
   }
 
   // 2. [팝업 내부 클릭 시 아무 동작 안 함] (input 입력 등 클릭 시 닫힘 방지)

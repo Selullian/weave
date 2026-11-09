@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./combinedPage.css" />
     <link rel="stylesheet" href="./pop_up.css" />
     <script src="./calendar.js" defer></script>
-    <script src="./pop_up.js"></script>
+    <script type="module" src="./pop_up.js"></script>
   </head>
   <body>
     <div id="top_menu">
@@ -166,7 +166,6 @@
             email = userInfo.email || "";
             name = userInfo.displayName || userInfo.name || "";
 
-            // 2. 데이터를 성공적으로 받아온 '직후'에 렌더링 실행
             renderUser();
           }
         } catch (e) {
@@ -174,15 +173,12 @@
         }
       }
 
-      // 실행
-      getUsersInfo();
-
       /* 그룹 렌더링 함수 */
       function renderGroup(arr = []) {
         const resultGroupEl = document.getElementById("result_group");
         if (!resultGroupEl) return;
 
-        if (arr.length === 0) {
+        if (arr === null) {
           resultGroupEl.innerHTML = `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
         } else {
           let render_group = arr.map(
@@ -224,11 +220,31 @@
       /* 내 그룹 전체 조회 후 화면에 그리기 */
       async function selectGroup() {
         const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
-        // 조회한 그룹 데이터를 화면에 렌더링
-        if (res && Array.isArray(res)) {
+        console.log(res);
+
+        if (!res || res.success === false) {
+          document.getElementById("result_group").innerHTML =
+            `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
+          return;
+        }
+
+        if (res && res.success && Array.isArray(res.data)) {
+          renderGroup(res.data);
+        } else if (Array.isArray(res)) {
           renderGroup(res);
+        } else {
+          console.log("실패!");
         }
       }
+
+      // 1. 초기 실행을 감싸는 초기화 함수 정의
+      async function initApp() {
+        await getUsersInfo();
+        await selectGroup();
+      }
+
+      // 2. 앱 시작 (페이지 로드 시 호출)
+      initApp();
     </script>
   </body>
 </html>
