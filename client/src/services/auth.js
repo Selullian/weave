@@ -1,22 +1,21 @@
-/**
- * =================================
- * 회원 인증 관리
- *
- * 1. 회원가입
- *    - signUp(name, email, password)
- * 2. 로그인
- *    - signIn(email, password)
- * 3. 로그아웃
- *    - logOut()
- * 4. 사용자 정보 조회
- *    - getUserInfo()
- * 5. 사용자 그룹 목록 조회
- *    - getUserGroupIds()
- * 6. 회원 정보 수정
- *    - updateUserInfo({ name, groupInfo, removeGroupId })
- *
- * =================================
- */
+/*
+=================================
+회원 인증 관리 (이름/이메일/비밀번호)
+
+1. 회원가입
+  - signUp(name, email, password) - DB 연동 완료
+2. 로그인
+  - signIn(email, password) - 기초 기능 완료
+3. 로그아웃
+  - logOut() - 기초 기능 완료
+4. 사용자 정보 조회
+  - getUserInfo() - 로그인 검증 및 오류 처리 완료
+5. 사용자 그룹 목록 조회
+  - getUserGroupIds() - 로그인 검증 및 오류 처리 완료
+6. 회원 정보 수정
+  - updateUserInfo({ name, groupInfo }) - 오류 처리 완료
+=================================
+*/
 
 import {
     createUserWithEmailAndPassword,
@@ -29,21 +28,28 @@ import {
     createUserDoc,
     getUserDoc,
     updateUserInfoDoc,
-    getAuthenticatedUser,
 } from "../repository/auth_repository.js";
 import { ok, fail, requiredUid } from "./common.js";
 
 /**
- * 회원가입
- *
- * 이메일과 비밀번호를 사용하여 firebase auth에 회원을 등록하고,
- * 생성된 uid를 기준으로 firestore에 회원 문서를 생성한다.
- *
- * @param {string} name - 회원 이름
- * @param {string} email - 회원 이메일
- * @param {string} password - 회원 비밀번호
- * @returns {Promise<Object>} 회원가입 결과
+ * 현재 로그인한 사용자(Auth)를 가져오는 간단한 함수
  */
+async function getAuthUser() {
+    // 1. 이미 로그인 정보가 온전히 로드되어 있다면 바로 반환
+    if (auth.currentUser) {
+        return auth.currentUser;
+    }
+
+    // 2. 새로고침 직후라 로딩 중이라면 준비될 때까지 기다렸다가 반환
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe(); // 한 번 확인했으니 리스너 종료
+            resolve(user); // 유저 정보 넘겨주기 (비로그인이면 null)
+        });
+    });
+}
+
+// 회원가입
 export async function signUp(name, email, password) {
     try {
         // 입력값 유효성 검사
@@ -58,7 +64,7 @@ export async function signUp(name, email, password) {
             return fail({ code: 400, message: "모든 항목을 입력해주세요." });
         }
 
-        // firebase 회원가입 요청
+        // Firebase 회원가입 요청
         const userCredential = await createUserWithEmailAndPassword(
             auth,
             email,
@@ -69,7 +75,7 @@ export async function signUp(name, email, password) {
         const user = userCredential.user;
         console.log("회원가입 auth 성공!");
 
-        // firestore 회원 문서 생성
+        // DB 유저 문서 생성 비동기 처리
         await createUserDoc(user.uid, user.email, name);
 
         return ok(user);
@@ -84,16 +90,7 @@ export async function signUp(name, email, password) {
     }
 }
 
-/**
- * 로그인
- *
- * 이메일과 비밀번호를 사용하여 firebase authentication 로그인을 진행한다.
- * 이미 로그인된 사용자가 있는 경우 로그인을 중단한다.
- *
- * @param {string} email - 회원 이메일
- * @param {string} password - 회원 비밀번호
- * @returns {Promise<Object>} 로그인 결과
- */
+// 로그인
 export async function signIn(email, password) {
     const currentUser = auth.currentUser;
     if (currentUser) {
@@ -123,14 +120,7 @@ export async function signIn(email, password) {
     }
 }
 
-/**
- * 로그아웃
- *
- * 현재 로그인된 사용자를 로그아웃한다.
- * 로그인 상태가 아닌 경우 로그아웃을 중단한다.
- *
- * @returns {Promise<Object>} 로그아웃 결과
- */
+// 로그아웃
 export async function logOut() {
     try {
         const user = auth.currentUser;
@@ -147,17 +137,10 @@ export async function logOut() {
     }
 }
 
-/**
- * 사용자 정보 조회
- *
- * 현재 로그인된 사용자의 uid를 확인하고,
- * 해당 uid를 기준으로 회원 정보를 조회한다.
- *
- * @returns {Promise<Object>} 사용자 이름, 이메일, 그룹 목록을 포함한 조회 결과
- */
+// 사용자 정보 조회
 export async function getUserInfo() {
     try {
-        const user = getAuthenticatedUser();
+        const user = getAuthUser();
 
         const userData = await getUserDoc(user.uid);
         if (!userData) {
@@ -175,44 +158,25 @@ export async function getUserInfo() {
     }
 }
 
-/**
- * 사용자 그룹 목록 조회
- *
- * 현재 로그인된 사용자의 uid를 확인하고,
- * 문서에 저장된 그룹 아이디와 캘린더 색상 정보를 조회한다.
- *
- * @returns {Promise<Object>} 그룹 아이디와 색상 정보를 포함한 조회 결과
- */
+// 사용자 그룹 목록 조회 (groupId:#hex)
 export async function getUserGroupIds() {
     try {
-        const user = getAuthenticatedUser();
+        const user = getAuthUser();
 
         const userData = await getUserDoc(user.uid);
         if (!userData) {
             return ok(null);
         }
 
-        // 그룹 정보 반환
+        // data / []
         return ok(userData.groupIds);
     } catch (e) {
         console.error("사용자의 그룹 목록 조회 실패:", e.message);
-        return fail(e);
+        throw e;
     }
 }
 
-/**
- * 회원 정보 수정
- *
- * 현재 로그인된 사용자의 uid를 확인하고,
- * 사용자 이름 및 그룹 정보를 수정한다.
- * 그룹 정보는 추가, 색상 변경 또는 삭제할 수 있다.
- *
- * @param {Object} params - 회원 정보 수정에 필요한 매개변수
- * @param {string|null} [params.name=null] - 변경할 사용자 이름
- * @param {Object.<string, string>|null} [params.groupInfo=null] - 추가 혹은 변경할 그룹 정보 (그룹 아이디: 색상)
- * @param {string|null} [params.removeGroupId=null] - 삭제할 그룹 아이디
- * @returns {Promise<Object>} 회원 정보 수정 결과
- */
+// 회원 정보 수정
 export async function updateUserInfo({
     name = null,
     groupInfo = null,

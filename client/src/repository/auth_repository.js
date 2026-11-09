@@ -52,16 +52,11 @@ export async function createUserDoc(uid, email, name) {
 
 /**
  * 회원 정보 조회
-<<<<<<< HEAD
  *
  * uid를 기준으로 users 컬렉션에서 회원 문서를 조회한다.
  *
  * @param {string} uid - 조회할 사용자의 고유 식별자
  * @returns {Promise<User|null>} 조회한 회원 정보 또는 문서가 존재하지 않을 경우 null
-=======
- * @param {*} uid
- * @returns 데이터 유무 (data/null)
->>>>>>> main
  */
 export async function getUserDoc(uid) {
     try {
@@ -82,7 +77,6 @@ export async function getUserDoc(uid) {
 }
 
 /**
-<<<<<<< HEAD
  * 회원 정보 수정
  *
  * 사용자의 이름 및 그룹 정보를 수정한다.
@@ -95,14 +89,6 @@ export async function getUserDoc(uid) {
  * @param {Object.<string, string>|null} [params.groupInfo=null] - 추가하거나 색상을 변경할 그룹 정보 (그룹id: #hex)
  * @param {string|null} [params.removeGroupId=null] - 삭제할 그룹 아이디
  * @returns {Promise<boolean>} 문서 수정 성공 여부
-=======
- * 원 문서 수정 name, groupIds 수정 가능
- * @param {*} uid
- * @param {*} name
- * @param {*} groupInfo { 그룹아이디: 그룹색상 }
- * @param {*} removeGroupId
- * @returns
->>>>>>> main
  */
 export async function updateUserInfoDoc({
     uid,
