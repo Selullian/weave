@@ -134,6 +134,7 @@
     <script type="module">
       import { getAuthUser } from "../src/services/auth.js";
       import { getUserGroups } from "../src/services/group.js";
+      import { getUserEvents } from "../src/services/calendar/js";
 
       let email = "";
       let name = "";
@@ -141,7 +142,7 @@
       /* 유저 DOM 렌더링 함수 */
       let renderUser = () => {
         let str = `<div id="name_btn">
-                <p>${name || "이름 없음"}</p>
+                <p>${name || "김연서"}</p>
                 <div id="user_more_img">
                   <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%" />
                 </div>
@@ -249,6 +250,12 @@
           console.error("🚨 renderGroup 실행 중 오류:", error);
         }
       };
+
+      window.getUserSchedules = async function () {
+        await runTest("내 일정 조회", () => getUserEvents());
+      };
+
+      window.getUserSchedules();
     </script>
   </body>
 </html>

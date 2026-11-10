@@ -1,6 +1,6 @@
 import { logOut } from "../src/services/auth.js";
 import { createGroup, getUserGroups } from "../src/services/group.js";
-//import { createEvent } from "../src/services/calendar.js";
+import { createEvent } from "../src/services/calendar.js";
 
 let color_popup = `
 <div class="group_color_popup">
