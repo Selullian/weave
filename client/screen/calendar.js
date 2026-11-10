@@ -47,7 +47,7 @@ function toggle_click() {
 }
 toggle_click();
 
-async function getMyEvent() {
+export async function getMyEvent() {
   await waitForAuth();
   const result = await getUserEvents();
 

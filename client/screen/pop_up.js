@@ -1,6 +1,7 @@
 import { logOut } from "../src/services/auth.js";
 import { createGroup, getUserGroups } from "../src/services/group.js";
 import { createEvent } from "../src/services/calendar.js";
+import { getMyEvent } from "./calendar.js";
 
 let color_popup = `
 <div class="group_color_popup">
@@ -195,6 +196,7 @@ document.addEventListener("click", async (e) => {
       ),
     );
     console.log("일정 생성 완료");
+    getMyEvent();
   }
 
   // 1. [취소 버튼 클릭 처리]
