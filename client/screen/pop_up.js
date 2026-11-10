@@ -1,5 +1,6 @@
 import { logOut } from "../src/services/auth.js";
-import { createGroup } from "../src/services/group.js";
+import { createGroup, getUserGroups } from "../src/services/group.js";
+//import { createEvent } from "../src/services/calendar.js";
 
 let color_popup = `
 <div class="group_color_popup">
@@ -63,13 +64,20 @@ let add_schedule_popup = `
         <span class="back_btn" id="schedule_back_btn">&lt;</span>
         <h2>일정 추가</h2>
     </div>
+    <select id="scheduleGroup">
+      <option value="groupId1">첫 번째 그룹</option>
+    </select>
     <div class="input_schedule">
         <label for="scheduleTitle">일정명</label>
         <input type="text" id="scheduleTitle" class="popup_input" />
     </div>
     <div class="input_schedule">
         <label for="scheduleDate">날짜</label>
-        <input type="text" id="scheduleDate" class="popup_input" />
+        <div id="input_date">
+        <input type="datetime-local" id="startDate" class="schedule_input" />
+        ~
+        <input type="datetime-local" id="endDate" class="schedule_input" />
+        </div>
     </div>
     <div class="input_schedule">
         <label for="scheduleMemo">메모</label>
@@ -90,7 +98,6 @@ let add_schedule_popup = `
 `;
 
 document.addEventListener("click", async (e) => {
-  console.log(e.target);
   const logout_btn = e.target.closest("#logout_btn");
   if (logout_btn) {
     console.log(logout_btn);
@@ -125,15 +132,12 @@ document.addEventListener("click", async (e) => {
       }),
     );
 
-    // 💡 생성 성공 검증 후 렌더링 실행
     if (res && res.success !== false) {
       alert("그룹이 생성되었습니다!");
 
-      // 1. 팝업 닫기
       const popup = document.querySelector("#create_group_popup");
       if (popup) popup.classList.remove("active");
 
-      // 2. 💡 window.renderGroup이 함수인지 확인 후 await로 호출!
       if (typeof window.renderGroup === "function") {
         await window.renderGroup();
       } else {
@@ -145,17 +149,54 @@ document.addEventListener("click", async (e) => {
   const submitScheduleBtn = e.target.closest("#submit_schedule_btn");
   if (submitScheduleBtn) {
     e.preventDefault();
-    const title = document.getElementById("scheduleTitle")?.value.trim();
-    const date = document.getElementById("scheduleDate")?.value;
-    const memo = document.getElementById("scheduleMemo")?.value.trim();
-    const isPublic = document.getElementById("scheduleIsPublic")?.checked;
+    const groupId = document.getElementById("scheduleGroup").value;
+    const title = document.getElementById("scheduleTitle").value.trim();
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const memo = document.getElementById("scheduleMemo").value.trim();
+    const isPublic = document.getElementById("scheduleIsPublic").checked;
 
     if (!title) return alert("일정명을 입력해 주세요.");
-    if (!date) return alert("날짜를 선택해 주세요.");
+    if (!startDate || !endDate) return alert("날짜들을 입력해주세요");
 
-    console.log("입력 데이터:", { title, date, memo, isPublic });
-    // 백엔드/Firestore 데이터 저장 함수를 여기서 호출하시면 됩니다!
+    console.log("입력 데이터:", { title, memo, isPublic });
+    const startAt = new Date(startDate);
+    const endAt = new Date(endDate);
+
+    if (
+      Number.isNaN(startAt.getTime()) ||
+      Number.isNaN(endAt.getTime()) ||
+      endAt <= startAt
+    ) {
+      showResult("일정 생성", {
+        message: "종료 일시는 시작 일시보다 늦어야 합니다.",
+      });
+      return;
+    }
+
+    const contents = {
+      title,
+      startAt,
+      endAt,
+      memo,
+      isPublic,
+      source: "manual",
+      ...(groupId ? { groupId } : {}),
+    };
+    await runTest("일정 생성", () =>
+      createEvent(
+        contents.title,
+        contents.startAt,
+        contents.endAt,
+        contents.memo,
+        contents.isPublic,
+        contents.source,
+        contents.groupId,
+      ),
+    );
+    console.log("일정 생성 완료");
   }
+
   // 1. [취소 버튼 클릭 처리]
   const cancelBtn = e.target.closest("#cancel_btn");
   if (cancelBtn) {
@@ -271,25 +312,76 @@ document.addEventListener("click", async (e) => {
 
   const scheduleAddBtn = e.target.closest("#plusBtn");
   if (scheduleAddBtn) {
-    console.log("일정 추가 버튼 클릭 감지!");
-
-    const sidebar = document.getElementById("right_sidebar");
-
-    console.log("사이드바 요소:", sidebar);
-
-    if (!sidebar) {
-      console.error("#right_sidebar를 찾을 수 없습니다.");
-      return;
-    }
-
     let popup = document.querySelector("#add_schedule_popup");
-
     if (!popup) {
+      const sidebar = document.getElementById("right_sidebar");
+
+      if (!sidebar) {
+        console.error("right_sidebar를 찾을 수 없습니다.");
+        return;
+      }
+
       sidebar.insertAdjacentHTML("beforeend", add_schedule_popup);
+
       popup = document.querySelector("#add_schedule_popup");
     }
 
-    popup?.classList.add("active");
+    if (popup) {
+      popup.classList.add("active");
+
+      await renderOptionGroups();
+    }
+
     return;
   }
 });
+
+import { waitForAuth } from "../src/services/auth.js";
+
+async function renderOptionGroups() {
+  try {
+    console.log("1. 그룹 옵션 렌더링 시작");
+
+    await waitForAuth();
+    console.log("2. 로그인 확인 완료");
+
+    const res = await getUserGroups();
+    console.log("3. 그룹 조회 결과:", res);
+
+    if (!res || res.success === false) {
+      console.error("그룹 데이터 조회 실패");
+      return;
+    }
+
+    const optionContainer = document.getElementById("scheduleGroup");
+
+    console.log("4. select 요소:", optionContainer);
+
+    if (!optionContainer) {
+      console.error("scheduleGroup 요소가 없습니다.");
+      return;
+    }
+
+    optionContainer.innerHTML = `<option value="">그룹을 선택하세요</option>`;
+
+    if (!res.data || res.data.length === 0) {
+      console.log("등록된 그룹이 없습니다.");
+      return;
+    }
+
+    res.data.forEach((group) => {
+      console.log("추가할 그룹:", group);
+
+      const option = document.createElement("option");
+      option.value = group.groupId;
+      option.textContent = group.name;
+
+      optionContainer.appendChild(option);
+    });
+
+    console.log("5. 최종 select HTML:", optionContainer.innerHTML);
+  } catch (e) {
+    console.error("그룹 옵션 렌더링 오류:", e);
+  }
+}
+renderOptionGroups();

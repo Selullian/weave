@@ -213,7 +213,6 @@
         }
       }
 
-      // 1. 초기 실행을 감싸는 초기화 함수 정의
       async function initApp() {
         await getUsersInfo();
         await selectGroup();
@@ -225,50 +224,15 @@
       // 💡 window 객체에 등록하여 외부 파일(popup.js 등)에서도 호출할 수 있게 만듭니다.
       window.renderGroup = async function () {
         try {
-          console.log("🔄 그룹 목록 갱신 시작...");
-
-          // 1. 그룹 데이터 요청
-          console.log("1. getUserGroups 실행 직전");
-
           const res = await getUserGroups();
-
-          console.log("2. getUserGroups 반환값:", res);
-          console.log("3. success:", res?.success);
-          console.log("4. data:", res?.data);
-
-          // 2. 응답 확인
-          if (!res) {
-            console.error("❌ getUserGroups가 아무것도 반환하지 않았습니다.");
-            return;
-          }
-
-          if (!res.success) {
-            console.error("❌ 그룹 조회 실패:", res);
-            return;
-          }
-
-          if (!Array.isArray(res.data)) {
-            console.error("❌ 그룹 데이터가 배열이 아닙니다:", res.data);
-            return;
-          }
-
-          // 3. HTML 요소 확인
           const groupListContainer = document.getElementById("result_group");
-
-          console.log("5. group_list 요소:", groupListContainer);
-
           if (!groupListContainer) {
             console.error("group_list 요소를 찾을 수 없습니다.");
             return;
           }
-
-          // 4. 기존 목록 제거
           groupListContainer.innerHTML = "";
-
           // 5. 그룹 렌더링
           res.data.forEach((group) => {
-            console.log("렌더링할 그룹:", group);
-
             const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupid}">
           <div class="title_more">
             <h3>${group.name}</h3>
@@ -281,8 +245,6 @@
 
             groupListContainer.insertAdjacentHTML("beforeend", groupItem);
           });
-
-          console.log("✅ 그룹 목록 UI 렌더링 완료!");
         } catch (error) {
           console.error("🚨 renderGroup 실행 중 오류:", error);
         }

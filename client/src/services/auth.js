@@ -206,3 +206,18 @@ export async function updateUserInfo({
     return fail(e);
   }
 }
+
+export function waitForAuth() {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+
+      if (!user) {
+        reject(new Error("로그인이 필요합니다."));
+        return;
+      }
+
+      resolve(user);
+    });
+  });
+}
