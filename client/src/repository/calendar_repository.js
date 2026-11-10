@@ -1,3 +1,4 @@
+// calendar_repository.js
 import { db } from "../../app.js";
 import { toEntity } from "../services/common.js";
 import {
@@ -15,6 +16,7 @@ import {
     endAt,
     orderBy,
     serverTimestamp,
+    writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 /*
@@ -30,6 +32,7 @@ import {
    - getUserPublicEventDocs(uid) - 기초 구현 완료
    - getGroupEventDocs(groupId)
    - getEventDocById(eventId)
+   - getMonthEventDocs(uid, year, month)
 
 3. 일정 문서 수정
    - updateEventDoc(eventId, contents) - 기초 구현 완료
@@ -39,6 +42,9 @@ import {
 
 5. 일정 문서 삭제
    - deleteEventDoc(eventId) - 기초 구현 완료
+
+6. ics 일정 저장
+   - replaceIcsEventDocs(uid, events)
 =====================
 */
 
@@ -320,6 +326,9 @@ export async function deleteEventDoc(eventId) {
 /**
  * 월별 일정 조회 (내 개인 일정 + 소속 그룹 일정)
  *
+ * 개인 일정과 소속 그룹 일정을 각각 조회한 후 합쳐서
+ * 해당 월에 하루라도 걸쳐 있는 일정만 반환한다.
+ *
  * @param {string} uid 일정을 조회할 사용자의 uid
  * @param {number} year 조회할 연도
  * @param {number} month 조회할 월
@@ -329,9 +338,9 @@ export async function getMonthEventDocs(uid, year, month) {
     try {
         console.log("월별 일정 조회 실행");
 
-        // 해당 월의 시작일과 종료일 날짜 생성
-        const startDate = new Date(year, month - 1, 1, 0, 0, 0);
-        const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+        // 해당 월의 첫 시각과 마지막 시각
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0, 23, 59, 59, 999);
 
         // 유저가 가입된 그룹 id 목록 추출
         const userDoc = await getDoc(doc(db, "users", uid));
@@ -345,33 +354,125 @@ export async function getMonthEventDocs(uid, year, month) {
             : [];
 
         const eventRef = collection(db, "events");
-        const condition =
-            groupIds.length === 0
-                ? where("uid", "==", uid)
-                : or(where("uid", "==", uid), where("groupId", "in", groupIds));
+        const results = [];
 
-        // 이번 달에 '하루라도' 걸쳐 있는 일정을 모두 가져오는 쿼리
-        const q = query(
-            collection(db, "users", uid, "events"),
-            where("startDate", "<", endDate), // 일정 시작이 다음 달 1일 전이면서
-            where("endDate", ">=", startDate), // 일정 종료가 이번 달 1일 이후인 것
+        // 1. 내 개인 일정 중 이번 달 말 이전에 시작하는 일정
+        results.push(
+            await getDocs(
+                query(
+                    eventRef,
+                    where("uid", "==", uid),
+                    where("startAt", "<=", monthEnd),
+                ),
+            ),
         );
 
-        const result = await getDocs(q);
-        const dataList = result.docs.map(toEntity);
+        // 2. 소속 그룹 일정 중 이번 달 말 이전에 시작하는 일정
+        if (groupIds.length > 0) {
+            results.push(
+                await getDocs(
+                    query(
+                        eventRef,
+                        where("groupId", "in", groupIds),
+                        where("startAt", "<=", monthEnd),
+                    ),
+                ),
+            );
+        }
 
-        // 비공개 일정 중 타인의 일정 필터링
-        const resultList = dataList.filter((event) => {
-            // 본인 일정이면 모두 포함
-            if (event.uid === uid) return true;
-            // 타인의 일정인 경우 공개일정인 것만 포함
-            return event.isPublic === true;
+        // 두 결과 합치기 (내가 만든 그룹 일정은 양쪽에 모두 나오므로 id로 중복 제거)
+        const eventMap = new Map();
+        results.forEach((result) => {
+            result.docs.forEach((d) => eventMap.set(d.id, toEntity(d)));
         });
+
+        // 이번 달 1일 이후에 끝나는 일정만 남기기
+        const resultList = [...eventMap.values()].filter(
+            (event) => event.endAt.seconds * 1000 >= monthStart.getTime(),
+        );
 
         // 일정이 없으면 null
         return resultList.length === 0 ? null : resultList;
     } catch (e) {
         console.error("월별 일정 조회 실패 : ", e);
+        throw e;
+    }
+}
+
+//---------------- ics
+
+/**
+ * ics 일정 문서 일괄 저장
+ *
+ * 사용자의 기존 ics 출처 일정을 모두 삭제한 뒤
+ * 새로 읽은 ics 일정들을 저장한다. (수동 입력 일정은 유지)
+ *
+ * @param {string} uid - 일정을 저장할 사용자의 uid
+ * @param {Object[]} events - 저장할 일정 배열 ({ title, startAt, endAt, memo })
+ * @returns {Promise<number>} 저장된 일정 개수
+ */
+export async function replaceIcsEventDocs(uid, events) {
+    try {
+        console.log("ics 일정 일괄 저장 실행");
+
+        // 기존 ics 일정 조회
+        const oldDocs = await getDocs(
+            query(
+                collection(db, "events"),
+                where("uid", "==", uid),
+                where("source", "==", "ics"),
+            ),
+        );
+
+        // 배치 준비 (한 배치에 최대 500개 작업까지 가능)
+        let batch = writeBatch(db);
+        let count = 0; // 현재 배치에 들어간 작업 수
+
+        // 기존 ics 일정 삭제
+        for (const oldDoc of oldDocs.docs) {
+            batch.delete(oldDoc.ref);
+            count++;
+
+            // 500개가 차면 저장하고 새 배치 시작
+            if (count === 500) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
+
+        // 새 일정 생성
+        for (const event of events) {
+            const newRef = doc(collection(db, "events"));
+
+            batch.set(newRef, {
+                id: newRef.id,
+                uid: uid,
+                title: event.title,
+                startAt: event.startAt,
+                endAt: event.endAt,
+                memo: event.memo,
+                isPublic: false,
+                source: "ics",
+                groupId: "",
+                updateAt: serverTimestamp(),
+            });
+            count++;
+
+            if (count === 500) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
+
+        // 남은 작업 저장
+        if (count > 0) await batch.commit();
+
+        console.log("ics 일정 저장 완료 : ", events.length);
+        return events.length;
+    } catch (e) {
+        console.error("ics 일정 저장 실패 : ", e);
         throw e;
     }
 }
