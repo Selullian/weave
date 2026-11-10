@@ -1,6 +1,6 @@
 import { waitForAuth } from "../src/services/auth.js";
-import { getUserEvents, getGroupEvents } from "../src/services/calendar.js";
-import { getUserGroups } from "../src/services/group.js";
+import { getUserEvents } from "../src/services/calendar.js";
+import { getGroupInfo } from "../src/services/group.js";
 
 let currentDate = new Date();
 
@@ -49,29 +49,66 @@ toggle_click();
 
 async function getMyEvent() {
   await waitForAuth();
-  await runTest("내 일정 조회", () => getUserEvents());
-  const events = await getUserEventDocs(requiredUid());
+  const result = await getUserEvents();
 
-  console.log("가져온 일정:", events);
-  console.log("시작 시간:", events?.[0]?.startAt);
-  console.log("시작 시간 타입:", events?.[0]?.startAt?.constructor?.name);
+  if (result.success) {
+    const events = result.data.map((event) => ({
+      ...event,
+      startAt: new Date(event.startAt.seconds * 1000),
+      endAt: new Date(event.endAt.seconds * 1000),
+    }));
+
+    const eventsByDate = {};
+
+    for (const event of events) {
+      const date = event.startAt;
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      const dateKey = `${year}-${month}-${day}`;
+      const get_group_info = await getGroupInfo(event.groupId);
+      console.log("가져온 것 : ", get_group_info);
+      const group_color = get_group_info.data.color;
+      const startTime = event.startAt;
+      const endTime = event.endAt;
+
+      const formatTime = (date) => {
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${hours}:${minutes}`;
+      };
+
+      const formattedStart = formatTime(startTime);
+      const formattedEnd = formatTime(endTime);
+
+      // 해당 날짜가 아직 없다면 새로 생성
+      if (!eventsByDate[dateKey]) {
+        eventsByDate[dateKey] = {
+          date: dateKey,
+          color: group_color,
+          schedule: [],
+        };
+      }
+
+      // 해당 날짜에 일정 추가
+      eventsByDate[dateKey].schedule.push({
+        startTime: formattedStart,
+        endTime: formattedEnd,
+        info: event.title,
+      });
+    }
+
+    const calendarData = Object.values(eventsByDate);
+
+    console.log("날짜별로 묶인 일정:", calendarData);
+    renderSchedule(calendarData);
+    console.log(JSON.stringify(calendarData, null, 2));
+  }
 }
 getMyEvent();
-let eventsData = [
-  {
-    date: "2026-11-15",
-    schedule: [{ info: "팀 회의", time: "10:00~12:00" }],
-    color: "white",
-  },
-  {
-    date: "2026-11-27",
-    schedule: [
-      { info: "배포일", time: "12:00~13:00" },
-      { info: "회식", time: "17:00~18:30" },
-    ],
-    color: "#D5FFCE",
-  },
-];
 
 let temp_selected = document.getElementById("select_date");
 console.log(temp_selected.innerHTML);
@@ -163,7 +200,7 @@ let renderSchedule = (arr) => {
     cell.onclick = () => {
       render_date(dateKey);
       console.log("클릭 확인!");
-      render_sidebar_schedule(eventsData, dateKey);
+      render_sidebar_schedule(arr, dateKey);
     };
     grid.appendChild(cell);
   }
@@ -201,16 +238,15 @@ function Choose_color(hexColor) {
 //사이드바에 일정 업로드
 function render_sidebar_schedule(arr, dateKey) {
   let render_schedule = {};
-
+  console.log("arr : ", arr);
   for (let data of arr) {
     if (data.date === dateKey) {
       for (let info_time of data.schedule) {
-        if (!render_schedule[info_time.time]) {
-          render_schedule[info_time.time] = [];
+        let render_time = `${info_time.startTime}~${info_time.endTime}`;
+        if (!render_schedule[render_time]) {
+          render_schedule[render_time] = [];
         }
-        render_schedule[info_time.time].push(
-          `${info_time.info}, ${data.color}`,
-        );
+        render_schedule[render_time].push(`${info_time.info}, ${data.color}`);
       }
     }
   }
@@ -257,8 +293,6 @@ function render_sidebar_schedule(arr, dateKey) {
     container.innerHTML += group_str;
   }
 }
-// 초기 실행
-renderSchedule(eventsData);
 
 //선택한 날짜부터 전하는 함수
 function render_date(date) {

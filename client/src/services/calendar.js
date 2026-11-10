@@ -133,22 +133,37 @@ export async function getEventById(eventId) {
 export async function getUserEvents() {
   try {
     console.log("유저 일정 조회 실행");
-    let uid = requiredUid();
 
-    let groupIds = await getUserGroupIds(uid);
+    const uid = requiredUid();
 
-    let userEvents = await getUserEventDocs(uid);
-    let groupEvents = await getGroupEventDocs(groupIds);
+    // 1. 사용자의 그룹 ID 목록 가져오기
+    const groupResult = await getUserGroupIds();
 
-    const result = [...userEvents, ...groupEvents];
+    if (!groupResult.success) {
+      return groupResult;
+    }
+
+    const groupIds = groupResult.data ?? [];
+
+    // 2. 개인 일정 가져오기
+    const userEvents = (await getUserEventDocs(uid)) ?? [];
+
+    // 3. 그룹별 일정 가져오기
+    const groupResults = await Promise.all(
+      groupIds.map((groupId) => getGroupEventDocs(groupId)),
+    );
+
+    const groupEvents = groupResults.flatMap((events) => events ?? []);
+
+    // 4. 개인 일정과 그룹 일정 합치기
+    const result = [...userEvents /* ...groupEvents */];
 
     return ok(result);
   } catch (e) {
-    console.error("유저 일정 조회 실패 :", e);
+    console.error("유저 일정 조회 실패:", e);
     return fail(e);
   }
 }
-
 /**
  * 사용자 공개 일정 조회
  *

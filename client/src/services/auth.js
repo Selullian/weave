@@ -143,7 +143,7 @@ export async function logOut() {
 // 사용자 정보 조회
 export async function getUserInfo() {
   try {
-    const user = getAuthenticatedUser();
+    const user = await getAuthUser();
 
     const userData = await getUserDoc(user.uid);
     if (!userData) {
@@ -164,7 +164,7 @@ export async function getUserInfo() {
 // 사용자 그룹 목록 조회 (groupId:#hex)
 export async function getUserGroupIds() {
   try {
-    const user = getAuthenticatedUser();
+    const user = await getAuthUser();
 
     const userData = await getUserDoc(user.uid);
     if (!userData) {
