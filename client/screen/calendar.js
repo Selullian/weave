@@ -1,5 +1,62 @@
+import { waitForAuth } from "../src/services/auth.js";
+import { getUserEvents, getGroupEvents } from "../src/services/calendar.js";
+import { getUserGroups } from "../src/services/group.js";
+
 let currentDate = new Date();
 
+let selected_groupId = null;
+
+export async function runTest(title, callback) {
+  try {
+    const result = await callback();
+    if (typeof printResult === "function") {
+      printResult(title, result);
+    }
+    return result;
+  } catch (error) {
+    const errorResult = {
+      success: false,
+      message: error.message,
+      stack: error.stack,
+    };
+    if (typeof printResult === "function") {
+      printResult(title + " - 예외 발생", errorResult);
+    }
+    return errorResult;
+  }
+}
+
+//클릭 시 보라색 배경 나타나는 로직
+function toggle_click() {
+  document.addEventListener("click", async (e) => {
+    const targetGroup = e.target.closest(".render_group");
+
+    if (!targetGroup) return;
+
+    console.log("그룹 클릭 확인!", targetGroup);
+
+    targetGroup.classList.toggle("active");
+
+    const selectedGroups = document.querySelectorAll(".render_group.active");
+
+    const groupIds = Array.from(selectedGroups).map(
+      (group) => group.dataset.groupId,
+    );
+    console.log("선택된 그룹 목록:", groupIds);
+  });
+}
+toggle_click();
+
+async function getMyEvent() {
+  await waitForAuth();
+  await runTest("내 일정 조회", () => getUserEvents());
+  const events = await getUserEventDocs(requiredUid());
+
+  console.log("가져온 일정:", events);
+  console.log("시작 시간:", events?.[0]?.startAt);
+  console.log("시작 시간 타입:", events?.[0]?.startAt?.constructor?.name);
+}
+getMyEvent();
 let eventsData = [
   {
     date: "2026-11-15",
@@ -189,7 +246,6 @@ function render_sidebar_schedule(arr, dateKey) {
     });
 
     // 2. 그룹 전체(시간 + 카드들)를 하나의 HTML 문자열로 만듦
-    // class="schedule_group"으로 변경
     let group_str = `
     <div class="schedule_group">
       <div class="time_title">${time}</div>

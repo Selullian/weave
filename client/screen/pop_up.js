@@ -340,8 +340,6 @@ import { waitForAuth } from "../src/services/auth.js";
 
 async function renderOptionGroups() {
   try {
-    console.log("1. 그룹 옵션 렌더링 시작");
-
     await waitForAuth();
     console.log("2. 로그인 확인 완료");
 

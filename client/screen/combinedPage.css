@@ -189,6 +189,10 @@ body {
   border: 1px solid #b3b3b3;
 }
 
+.render_group.active {
+  border: 3px solid #7940ff;
+}
+
 /*박스 내부 그룹명+그룹 설명*/
 .render_group p,
 .title_more h3 {

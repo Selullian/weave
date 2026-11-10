@@ -6,7 +6,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="./combinedPage.css" />
     <link rel="stylesheet" href="./pop_up.css" />
-    <script src="./calendar.js" defer></script>
+    <script type="module" src="./calendar.js" defer></script>
     <script type="module" src="./pop_up.js"></script>
   </head>
   <body>
@@ -134,7 +134,7 @@
     <script type="module">
       import { getAuthUser } from "../src/services/auth.js";
       import { getUserGroups } from "../src/services/group.js";
-      import { getUserEvents } from "../src/services/calendar/js";
+      import { getUserEvents } from "../src/services/calendar.js";
 
       let email = "";
       let name = "";
@@ -219,10 +219,9 @@
         await selectGroup();
       }
 
-      // 2. 앱 시작 (페이지 로드 시 호출)
       initApp();
       window.runTest = runTest;
-      // 💡 window 객체에 등록하여 외부 파일(popup.js 등)에서도 호출할 수 있게 만듭니다.
+
       window.renderGroup = async function () {
         try {
           const res = await getUserGroups();
@@ -232,9 +231,10 @@
             return;
           }
           groupListContainer.innerHTML = "";
+          console.log("res : ", res.data);
           // 5. 그룹 렌더링
           res.data.forEach((group) => {
-            const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupid}">
+            const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupId}">
           <div class="title_more">
             <h3>${group.name}</h3>
             <div class="title_more_img">
@@ -250,12 +250,6 @@
           console.error("🚨 renderGroup 실행 중 오류:", error);
         }
       };
-
-      window.getUserSchedules = async function () {
-        await runTest("내 일정 조회", () => getUserEvents());
-      };
-
-      window.getUserSchedules();
     </script>
   </body>
 </html>
