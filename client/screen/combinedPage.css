@@ -1,0 +1,530 @@
+body {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/*탑메뉴 부모 div*/
+#top_menu {
+  display: flex;
+  height: 6%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 25%);
+}
+
+/*로고 이미지*/
+#logo {
+  width: 12%;
+  height: 80%;
+  align-content: center;
+  padding-left: 6%;
+}
+
+/*오른쪽에 있는 텍스트들*/
+#texts {
+  display: flex;
+  width: 14%;
+  height: 100%;
+  margin-right: 10%;
+  margin-left: auto;
+  align-content: center;
+  flex-direction: row;
+  gap: 30%;
+  flex-wrap: wrap;
+}
+
+/*내 캘린더 버튼*/
+#my_calendar {
+  text-decoration: underline;
+}
+
+/*버튼에 마우스 올릴 시 커서 모양 바꾸기*/
+#my_calendar,
+#group:hover {
+  cursor: pointer;
+}
+
+/*사이드바*/
+#side_bar {
+  position: absolute;
+  display: flex;
+  width: 21%;
+  height: 94%;
+  margin-left: 0;
+  bottom: 0;
+  border-right: 1px solid black;
+  justify-content: center;
+}
+
+/*사이드바 요소*/
+#sidebar_elements {
+  display: flex;
+  top: 0;
+  bottom: auto;
+  width: 90%;
+  height: 100%;
+  margin-top: 6%;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 5%;
+}
+
+/*제목+알람+검색 기록*/
+#title_side {
+  width: 100%;
+  height: 15%;
+}
+
+/*제목+알람*/
+#title_alarm {
+  display: flex;
+  width: 100%;
+  height: 54%;
+  align-items: center;
+}
+
+/*제목 텍스트*/
+#title_alarm h1 {
+  font-size: 28px;
+}
+
+/*알람 이미지*/
+#title_alarm_img {
+  height: 100%;
+  width: 19%;
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/*그룹 검색 박스*/
+#group_search_box {
+  position: relative;
+  width: 100%;
+  height: 36%;
+  margin-top: 5%;
+}
+
+/*그룹 검색창*/
+#group_search_box input {
+  width: 83%;
+  height: 100%;
+  padding-right: 10%;
+  padding-left: 12px;
+  border-radius: 8px;
+  outline: none;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+}
+
+/*그룹 검색 이미지*/
+#group_search_box button {
+  border: none;
+  background: none;
+  outline: none;
+  position: absolute;
+  width: 10%;
+  height: 50%;
+  top: 30%;
+  transform: translateX(-125%);
+  cursor: pointer;
+}
+
+/*그룹 박스 전체 div*/
+#group_box {
+  margin-top: 10%;
+  width: 100%;
+  height: auto;
+}
+
+/*그룹 선택*/
+#title_button {
+  display: flex;
+  width: 100%;
+  height: 25px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/*그룹 선택 글자*/
+#title_button p {
+  font-size: 20px;
+  font-weight: 450;
+}
+
+/*그룹 추가 버튼*/
+#add_btn {
+  width: 34%;
+  height: 100%;
+  font-size: 13px;
+  margin-right: 0;
+  margin-left: auto;
+  color: #7940ff;
+  background-color: white;
+  outline: none;
+  border: 1px solid #e3e3e3;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/*그룹 결과*/
+#result_group {
+  display: flex;
+  width: 100%;
+  height: auto;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/*렌더링된 그룹박스*/
+.render_group {
+  height: 60px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #b3b3b3;
+}
+
+/*박스 내부 그룹명+그룹 설명*/
+.render_group p,
+.title_more h3 {
+  padding-left: 14px;
+  margin: 0;
+}
+
+/*그룹명*/
+.title_more h3 {
+  padding-top: 3%;
+  font-size: 18px;
+}
+
+/*그룹 설명*/
+.render_group p {
+  font-size: 14px;
+  padding-top: 0;
+  align-items: center;
+  color: #b3b3b3;
+}
+
+/*그룹설명+아이콘*/
+.title_more {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+}
+
+/*점 세개 이미지*/
+.title_more_img {
+  margin-right: 16px;
+  margin-left: auto;
+  width: 11%;
+  height: 11%;
+  cursor: pointer;
+}
+
+.title_more_img img {
+  pointer-events: none; /* 이미지가 마우스 클릭을 차단하지 않고 통과시킴! */
+}
+
+/*그룹 없음 안내*/
+#no_group {
+  text-align: center;
+  align-items: center;
+  color: #b3b3b3;
+}
+
+/*나머지 영역들을 담을 전체 div*/
+#main_board {
+  position: absolute;
+  width: 79%;
+  height: 94%;
+  bottom: 0;
+  right: 0;
+  top: auto;
+  left: auto;
+}
+
+/*헤더+버튼 2개 div*/
+#header_profile_btn {
+  display: flex;
+  margin-left: 1%;
+  margin-top: 3%;
+  height: 15%;
+  flex-direction: row;
+  gap: 2%;
+}
+
+/*헤더*/
+#header {
+  display: flex;
+  width: 65%;
+  background-color: #838383;
+  border-radius: 10px;
+  align-items: center;
+}
+
+/*헤더 안에 들어가는 통합캘린더 글자*/
+#header p {
+  color: white;
+  margin-left: 3%;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+/*프로필+업로드 버튼*/
+#profile_btn {
+  display: flex;
+  width: 24%;
+  height: 100%;
+  flex-direction: column;
+  gap: 10%;
+}
+
+/*프로필 만들기*/
+#profile {
+  width: 100%;
+  height: 57%;
+  border-radius: 10px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+}
+
+/*이름+더보기 버튼*/
+#name_btn {
+  display: flex;
+  width: 100%;
+  height: 50%;
+  margin-bottom: 0;
+}
+
+/*이름 텍스트*/
+#name_btn p {
+  font-size: 12px;
+  margin-top: 8px;
+  margin-left: 3%;
+}
+
+/*더보기 버튼*/
+#user_more_img {
+  margin-right: 3%;
+  margin-left: auto;
+  height: 130%;
+  width: 13%;
+  cursor: pointer;
+}
+
+/*이메일*/
+#email {
+  margin-top: 0;
+  font-size: 12px;
+  color: #5a5a5a;
+  margin-left: 3%;
+  margin-bottom: 8px;
+}
+
+/*일정 추가하기 버튼*/
+#upload_button {
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+  border-radius: 10px;
+  height: 33%;
+}
+
+#upload_button button {
+  background-color: white;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+
+  height: 100%;
+}
+
+/*캘린더+사이드바*/
+#calendar_sidebar {
+  width: auto;
+  height: 75%;
+  display: flex;
+  margin-top: 2%;
+}
+
+/*캘린더 박스*/
+#calendar {
+  width: 72%;
+  height: auto;
+  margin-left: 1%;
+  overflow: visible;
+}
+
+/*캘린더 전체 요소*/
+#calendar_element {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  box-sizing: border-box;
+  padding: 16px;
+  background-color: #ffffff; /* 달력 배경을 하얀색으로 명시 */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/*캘린더 헤더*/
+#calendar_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/*년+월*/
+#monthTitle {
+  display: flex;
+}
+
+/*월*/
+#month {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #111111;
+  font-weight: bolder;
+}
+
+/*년도*/
+#year {
+  font-size: 1.2rem;
+  font-weight: 100;
+  margin-left: 3%;
+}
+
+/*한달 씩 옮기는 버튼*/
+#calendar_header button {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  background-color: white;
+  outline: none;
+}
+
+#prevBtn {
+  margin-right: 3%;
+  margin-left: auto;
+}
+
+/*달력 그리드*/
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+/*요일*/
+.day_name {
+  text-align: center;
+  font-weight: 600;
+  padding: 8px 0;
+  color: #555555;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/*날짜 하나하나 표*/
+.day_cell {
+  min-height: 60px;
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+/*비어있는 셀*/
+.day_cell.empty {
+  background-color: #f8f9fa;
+  border-color: transparent;
+}
+
+/*셀 위의 날짜*/
+.day_number {
+  text-align: center;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 4px;
+}
+
+/*이벤트*/
+.event_tag {
+  border-radius: 3px;
+  padding: 2px 4px;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*오른쪽 사이드바*/
+#right_sidebar {
+  position: relative;
+  width: 23%;
+  height: 100%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+  margin-left: 1%;
+  border-radius: 10px;
+}
+
+/*추가 버튼*/
+#plus_button {
+  position: absolute;
+  width: 8%;
+  height: 5%;
+  outline: none;
+  background-color: white;
+  border: none;
+  padding: 0;
+  margin-top: 1%;
+  right: 1%;
+  cursor: pointer;
+}
+
+/*선택된 날짜*/
+#select_date {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* 사이드바 그룹 전체 컨테이너 */
+#sidebar_schedule {
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+/*시간 표시되는 자리*/
+#time_title {
+  font-size: 15px;
+  color: #5a5a5a;
+  margin-bottom: 8px;
+}
+
+/*시간+ 스케줄 들어가는 자리*/
+.schedule_group {
+  margin-bottom: 20px;
+}
+
+/*일정 들어가는 컨테이너*/
+.schedule_card {
+  width: 100%;
+  padding: 5px 10px;
+  margin-bottom: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  color: #333333;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+}

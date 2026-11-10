@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./sign_up.css" />
+    <title>회원가입 화면</title>
+  </head>
+  <body>
+    <div id="screen_box">
+      <div id="signup_element">
+        <div id="logo">
+          <img
+            src="../assets/logo.png"
+            alt="로고 이미지"
+            id="logo_img"
+            width="100%"
+            height="100%"
+          />
+        </div>
+        <!--logo(로고 이미지)-->
+
+        <h2 id="start_text">시작하기</h2>
+        <p id="information_text">
+          Weave에 로그인하고 <br />
+          지인들과 함께 일정을 관리해보세요!
+        </p>
+        <!--start_text(안내 텍스트 모음)-->
+        <div class="signup_input_box">
+          <p>이름</p>
+          <input type="text" id="signUpName" placeholder="이름 입력하세요" />
+        </div>
+        <div class="signup_input_box">
+          <p>이메일</p>
+          <input
+            type="text"
+            id="signUpEmail"
+            placeholder="이메일을 입력하세요"
+          />
+        </div>
+        <div class="signup_input_box">
+          <p>비밀번호</p>
+          <input
+            type="text"
+            id="signUpPassword"
+            placeholder="비밀번호를 입력하세요"
+          />
+        </div>
+        <div class="signup_input_box">
+          <p>비밀번호 확인</p>
+          <input
+            type="text"
+            id="signUpPasswordCheck"
+            placeholder="비밀번호를 다시 입력하세요"
+          />
+        </div>
+
+        <!--logup_upput (로그인 입력)-->
+
+        <button id="signup_button">회원 가입</button>
+        <!--로그인 버튼-->
+
+        <div id="signup_text">
+          회원이신가요? <a href="./sign_in.html">로그인</a>
+        </div>
+      </div>
+      <!--login_element(로고+텍스트+로그인 페이지)-->
+    </div>
+    <!--screen_box)-->
+
+    <script type="module">
+      import { signUp } from "../src/services/auth.js";
+
+      const signUpEmailInput = document.getElementById("signUpEmail");
+      const signUpPasswordInput = document.getElementById("signUpPassword");
+      const signUpNameInput = document.getElementById("signUpName");
+      const signUpPasswordCheckInput = document.getElementById(
+        "signUpPasswordCheck",
+      );
+      const signUpButton = document.getElementById("signup_button");
+
+      signUpButton.addEventListener("click", async () => {
+        const email = signUpEmailInput.value;
+        const password = signUpPasswordInput.value;
+        const name = signUpNameInput.value;
+        const password_check = signUpPasswordCheckInput.value;
+
+        console.log("회원가입 실행됨.", email);
+
+        // 사용자 출력 칸
+        try {
+          const user = await signUp(name, email, password);
+          alert("회원 가입 성공! 로그인 페이지로 이동합니다.");
+          location.href = "./sign_in.html";
+        } catch (e) {
+          if (e.code === "auth/weak-password") {
+            // 너무 약한 비번(6자리, 특수문자, 소문자, 숫자)
+            console.error("너무 약한 비밀번호");
+          } else if (e.code === "auth/email-already-in-use") {
+            alert("이미 회원가입이 완료되었습니다.");
+            console.log("이미 등록된 회원입니다.");
+          } else {
+            alert(
+              "회원가입에 실패하였습니다, 아이디와 비밀번호를 확인해주세요",
+            );
+            console.log(e.code);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

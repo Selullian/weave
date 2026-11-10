@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./combinedPage.css" />
+    <link rel="stylesheet" href="./pop_up.css" />
+    <script src="./calendar.js" defer></script>
+    <script type="module" src="./pop_up.js"></script>
+  </head>
+  <body>
+    <div id="top_menu">
+      <div id="logo">
+        <img
+          src="../assets/logo.png"
+          alt="로고 이미지"
+          width="100%"
+          height="100%"
+        />
+      </div>
+      <!--로고 이미지-->
+      <div id="texts">
+        <div id="my_calendar">
+          <p>내 캘린더</p>
+        </div>
+        <div id="group">
+          <p>그룹</p>
+        </div>
+      </div>
+      <!--위에 내 캘린더 그룹 글자-->
+    </div>
+    <!--탑 메뉴-->
+
+    <div id="side_bar">
+      <div id="sidebar_elements">
+        <div id="title_side">
+          <div id="title_alarm">
+            <h1>내 캘린더</h1>
+            <div id="title_alarm_img">
+              <img
+                src="../assets/alarm.png"
+                alt="알람 이미지"
+                width="100%"
+                height="100%"
+              />
+            </div>
+          </div>
+          <!--제목 및 알람-->
+          <div id="group_search_box">
+            <input type="text" placeholder="그룹 검색" />
+            <button>
+              <img
+                src="../assets/Search.png"
+                alt="검색 버튼"
+                width="100%"
+                height="100%"
+              />
+            </button>
+            <!--버튼-->
+          </div>
+          <!--검색 도구-->
+        </div>
+        <!--위쪽에 있는 제목-->
+
+        <div id="group_box">
+          <div id="title_button">
+            <p>그룹_</p>
+            <button id="add_btn">+그룹추가</button>
+          </div>
+          <!--제목 및 그룹추가 버튼-->
+          <div id="result_group"></div>
+        </div>
+        <!--아래쪽에 있는 그룹박스-->
+      </div>
+      <!--모든 요소가 들어가는 div-->
+    </div>
+    <!--사이드바 끝-->
+
+    <div id="main_board">
+      <div id="header_profile_btn">
+        <!--가로 1137, 세로 962-->
+        <div id="header">
+          <p>통합캘린더</p>
+        </div>
+        <!--통합캘린더 헤더 부분-->
+        <div id="profile_btn">
+          <div id="profile"></div>
+          <div id="upload_button">
+            <button>.ics 파일로 불러오기</button>
+          </div>
+        </div>
+        <!--헤더 옆에 같이 있는 버튼 2개-->
+      </div>
+      <!--헤더+버튼2개-->
+      <div id="calendar_sidebar">
+        <div id="calendar">
+          <div id="calendar_element">
+            <div id="calendar_header">
+              <div id="monthTitle">
+                <div id="month"></div>
+                <div id="year"></div>
+              </div>
+              <button id="prevBtn">&lt;</button>
+              <button id="nextBtn">&gt;</button>
+            </div>
+            <!--달력 헤더-->
+            <div class="grid" id="calendarGrid"></div>
+            <!--달력-->
+          </div>
+          <!--달력 요소-->
+        </div>
+        <!--달력-->
+
+        <div id="right_sidebar">
+          <button id="plus_button">
+            <img
+              id="plusBtn"
+              src="../assets/Plus.png"
+              alt="추가 버튼"
+              width="100%"
+              height="100%"
+            />
+          </button>
+          <p id="select_date"></p>
+          <!--선택된 날짜-->
+          <div id="sidebar_schedule"></div>
+        </div>
+        <!--사이드바-->
+      </div>
+    </div>
+    <!--메인보드-->
+
+    <script type="module">
+      import { getAuthUser } from "../src/services/auth.js";
+      import { getUserGroups } from "../src/services/group.js";
+
+      let email = "";
+      let name = "";
+
+      /* 유저 DOM 렌더링 함수 */
+      let renderUser = () => {
+        let str = `<div id="name_btn">
+                <p>${name || "이름 없음"}</p>
+                <div id="user_more_img">
+                  <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%" />
+                </div>
+              </div>
+              <p id="email">${email}</p>`;
+
+        const profileEl = document.getElementById("profile");
+        if (profileEl) profileEl.innerHTML = str;
+      };
+
+      /* 유저 정보 가져온 뒤 렌더링 호출 */
+      async function getUsersInfo() {
+        try {
+          const userInfo = await getAuthUser();
+
+          if (!userInfo) {
+            alert("사용자 정보가 조회되지 않습니다.");
+          } else {
+            console.log("불러온 유저 정보:", userInfo);
+
+            // auth.js의 반환 구조에 맞게 가져오기 (displayName 또는 name)
+            email = userInfo.email || "";
+            name = userInfo.displayName || userInfo.name || "";
+
+            renderUser();
+          }
+        } catch (e) {
+          console.error("사용자 정보 조회 실패", e);
+        }
+      }
+
+      export async function runTest(title, callback) {
+        try {
+          const result = await callback();
+          if (typeof printResult === "function") {
+            printResult(title, result);
+          }
+          return result;
+        } catch (error) {
+          const errorResult = {
+            success: false,
+            message: error.message,
+            stack: error.stack,
+          };
+          if (typeof printResult === "function") {
+            printResult(title + " - 예외 발생", errorResult);
+          }
+          return errorResult;
+        }
+      }
+
+      /* 내 그룹 전체 조회 후 화면에 그리기 */
+      async function selectGroup() {
+        const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
+        console.log(res);
+
+        if (!res || res.success === false) {
+          document.getElementById("result_group").innerHTML =
+            `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
+          return;
+        }
+
+        if (res && res.success && Array.isArray(res.data)) {
+          renderGroup(res.data);
+        } else if (Array.isArray(res)) {
+          renderGroup(res);
+        } else {
+          console.log("실패!");
+        }
+      }
+
+      // 1. 초기 실행을 감싸는 초기화 함수 정의
+      async function initApp() {
+        await getUsersInfo();
+        await selectGroup();
+      }
+
+      // 2. 앱 시작 (페이지 로드 시 호출)
+      initApp();
+      window.runTest = runTest;
+      // 💡 window 객체에 등록하여 외부 파일(popup.js 등)에서도 호출할 수 있게 만듭니다.
+      window.renderGroup = async function () {
+        try {
+          console.log("🔄 그룹 목록 갱신 시작...");
+
+          // 1. 그룹 데이터 요청
+          console.log("1. getUserGroups 실행 직전");
+
+          const res = await getUserGroups();
+
+          console.log("2. getUserGroups 반환값:", res);
+          console.log("3. success:", res?.success);
+          console.log("4. data:", res?.data);
+
+          // 2. 응답 확인
+          if (!res) {
+            console.error("❌ getUserGroups가 아무것도 반환하지 않았습니다.");
+            return;
+          }
+
+          if (!res.success) {
+            console.error("❌ 그룹 조회 실패:", res);
+            return;
+          }
+
+          if (!Array.isArray(res.data)) {
+            console.error("❌ 그룹 데이터가 배열이 아닙니다:", res.data);
+            return;
+          }
+
+          // 3. HTML 요소 확인
+          const groupListContainer = document.getElementById("result_group");
+
+          console.log("5. group_list 요소:", groupListContainer);
+
+          if (!groupListContainer) {
+            console.error("group_list 요소를 찾을 수 없습니다.");
+            return;
+          }
+
+          // 4. 기존 목록 제거
+          groupListContainer.innerHTML = "";
+
+          // 5. 그룹 렌더링
+          res.data.forEach((group) => {
+            console.log("렌더링할 그룹:", group);
+
+            const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupid}">
+          <div class="title_more">
+            <h3>${group.name}</h3>
+            <div class="title_more_img">
+              <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
+            </div>
+          </div>
+          <p>${group.description}</p>
+        </div>`;
+
+            groupListContainer.insertAdjacentHTML("beforeend", groupItem);
+          });
+
+          console.log("✅ 그룹 목록 UI 렌더링 완료!");
+        } catch (error) {
+          console.error("🚨 renderGroup 실행 중 오류:", error);
+        }
+      };
+    </script>
+  </body>
+</html>
