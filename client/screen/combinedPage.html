@@ -115,6 +115,7 @@
         <div id="right_sidebar">
           <button id="plus_button">
             <img
+              id="plusBtn"
               src="../assets/Plus.png"
               alt="추가 버튼"
               width="100%"
@@ -134,7 +135,6 @@
       import { getAuthUser } from "../src/services/auth.js";
       import { getUserGroups } from "../src/services/group.js";
 
-      // 1. const 대신 let으로 변수 선언
       let email = "";
       let name = "";
 
@@ -173,29 +173,6 @@
         }
       }
 
-      /*             function renderGroup(arr = []) {
-        const resultGroupEl = document.getElementById("result_group");
-        if (!resultGroupEl) return;
-
-        if (arr.length === 0) {
-          resultGroupEl.innerHTML = `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
-        } else {
-          let render_group = arr.map(
-            (group) =>
-              `<div class="render_group" style="background-color: ${group.color};" key="${group.groupid}">
-          <div class="title_more">
-            <h3>${group.groupname}</h3>
-            <div class="title_more_img">
-              <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
-            </div>
-          </div>
-          <p>${group.groupinfo}</p>
-        </div>`,
-          );
-          resultGroupEl.innerHTML = render_group.join("");
-        }
-      }
- */
       export async function runTest(title, callback) {
         try {
           const result = await callback();

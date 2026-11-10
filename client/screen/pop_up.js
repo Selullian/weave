@@ -57,14 +57,40 @@ let create_group_popup = `
     </div>
 </div>`;
 
-window.addEventListener("DOMContentLoaded", () => {
-  let inputs = document.getElementsByClassName("color_input");
-  for (let i = 0; i < inputs.length; i++) {
-    inputs[i].value = "#";
-  }
-});
+let add_schedule_popup = `
+<div id="add_schedule_popup" class="schedules_popup">
+    <div class="popup_header">
+        <span class="back_btn" id="schedule_back_btn">&lt;</span>
+        <h2>일정 추가</h2>
+    </div>
+    <div class="input_schedule">
+        <label for="scheduleTitle">일정명</label>
+        <input type="text" id="scheduleTitle" class="popup_input" />
+    </div>
+    <div class="input_schedule">
+        <label for="scheduleDate">날짜</label>
+        <input type="text" id="scheduleDate" class="popup_input" />
+    </div>
+    <div class="input_schedule">
+        <label for="scheduleMemo">메모</label>
+        <textarea id="scheduleMemo" class="popup_textarea"></textarea>
+    </div>
+    <div class="toggle_group">
+        <span>공개 여부</span>
+        <label class="switch">
+            <input type="checkbox" id="scheduleIsPublic" checked />
+            <span class="slider round"></span>
+        </label>
+    </div>
+    <div class="popup_buttons">
+        <button type="button" id="cancel_schedule_btn" class="btn_cancel">취소</button>
+        <button type="button" id="submit_schedule_btn" class="btn_submit">확인</button>
+    </div>
+</div>
+`;
 
 document.addEventListener("click", async (e) => {
+  console.log(e.target);
   const logout_btn = e.target.closest("#logout_btn");
   if (logout_btn) {
     console.log(logout_btn);
@@ -115,6 +141,21 @@ document.addEventListener("click", async (e) => {
       }
     }
   }
+
+  const submitScheduleBtn = e.target.closest("#submit_schedule_btn");
+  if (submitScheduleBtn) {
+    e.preventDefault();
+    const title = document.getElementById("scheduleTitle")?.value.trim();
+    const date = document.getElementById("scheduleDate")?.value;
+    const memo = document.getElementById("scheduleMemo")?.value.trim();
+    const isPublic = document.getElementById("scheduleIsPublic")?.checked;
+
+    if (!title) return alert("일정명을 입력해 주세요.");
+    if (!date) return alert("날짜를 선택해 주세요.");
+
+    console.log("입력 데이터:", { title, date, memo, isPublic });
+    // 백엔드/Firestore 데이터 저장 함수를 여기서 호출하시면 됩니다!
+  }
   // 1. [취소 버튼 클릭 처리]
   const cancelBtn = e.target.closest("#cancel_btn");
   if (cancelBtn) {
@@ -133,9 +174,17 @@ document.addEventListener("click", async (e) => {
     }
   }
 
+  const closeScheduleBtn = e.target.closest(
+    "#schedule_back_btn, #cancel_schedule_btn",
+  );
+  if (closeScheduleBtn) {
+    closeScheduleBtn.closest("#add_schedule_popup")?.classList.remove("active");
+    return;
+  }
+
   const cancel_btn = e.target.closest("#cancel_create_btn");
   if (cancel_btn) {
-    const createPopup = cancelBtn.closest("#create_group_popup");
+    const createPopup = cancel_btn.closest("#create_group_popup");
     if (createPopup) {
       createPopup.classList.remove("active");
     }
@@ -218,5 +267,29 @@ document.addEventListener("click", async (e) => {
     if (create_group) {
       create_group.classList.toggle("active");
     }
+  }
+
+  const scheduleAddBtn = e.target.closest("#plusBtn");
+  if (scheduleAddBtn) {
+    console.log("일정 추가 버튼 클릭 감지!");
+
+    const sidebar = document.getElementById("right_sidebar");
+
+    console.log("사이드바 요소:", sidebar);
+
+    if (!sidebar) {
+      console.error("#right_sidebar를 찾을 수 없습니다.");
+      return;
+    }
+
+    let popup = document.querySelector("#add_schedule_popup");
+
+    if (!popup) {
+      sidebar.insertAdjacentHTML("beforeend", add_schedule_popup);
+      popup = document.querySelector("#add_schedule_popup");
+    }
+
+    popup?.classList.add("active");
+    return;
   }
 });
