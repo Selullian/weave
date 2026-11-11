@@ -360,7 +360,7 @@ export async function getMonthEventDocs(uid, year, month) {
                 ? where("uid", "==", uid)
                 : or(where("uid", "==", uid), where("groupId", "in", groupIds));
 
-        // 이번 달에 '하루라도' 걸쳐 있는 일정을 모두 가져오는 쿼리
+        // 이번 달에 하루라도 걸쳐 있는 일정을 모두 가져오는 쿼리
         const q = query(
             eventRef,
             and(

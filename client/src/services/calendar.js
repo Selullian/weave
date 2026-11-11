@@ -158,7 +158,7 @@ export async function getUserEvents() {
         const groupEvents = groupResults.flatMap((events) => events ?? []);
 
         // 4. 개인 일정과 그룹 일정 합치기
-        const result = [...userEvents /* ...groupEvents */];
+        const result = [...userEvents];
 
         return ok(result);
     } catch (e) {
@@ -400,7 +400,7 @@ function parseIcsDate(value) {
     const minute = Number(value.substring(11, 13));
     const second = Number(value.substring(13, 15));
 
-    // Z로 끝나면 UTC 시간 → 브라우저가 한국 시간으로 변환
+    // Z로 끝나면 UTC 시간 -> 브라우저가 한국 시간으로 변환
     if (value.endsWith("Z")) {
         return new Date(Date.UTC(year, month, day, hour, minute, second));
     }
