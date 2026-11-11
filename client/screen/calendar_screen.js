@@ -103,7 +103,6 @@ export async function getMyEvent() {
 
     console.log("날짜별로 묶인 일정:", calendarData);
     renderSchedule(calendarData);
-    console.log(JSON.stringify(calendarData, null, 2));
   }
 }
 getMyEvent();
