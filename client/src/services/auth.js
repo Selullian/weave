@@ -18,17 +18,17 @@
 */
 
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import { auth } from "../../app.js";
 import {
-  createUserDoc,
-  getUserDoc,
-  updateUserInfoDoc,
+    createUserDoc,
+    getUserDoc,
+    updateUserInfoDoc,
 } from "../repository/auth_repository.js";
 import { ok, fail, requiredUid } from "./common.js";
 
@@ -36,188 +36,225 @@ import { ok, fail, requiredUid } from "./common.js";
  * 현재 로그인한 사용자를 가져오는 간단한 함수
  */
 export async function getAuthUser() {
-  // 1. 이미 로그인 정보가 로딩됐으면 바로 반환
-  if (auth.currentUser) {
-    return auth.currentUser;
-  }
+    // 1. 이미 로그인 정보가 로딩됐으면 바로 반환
+    if (auth.currentUser) {
+        return auth.currentUser;
+    }
 
-  // 2. 새로고침 직후 로딩 중이라면 준비될 때까지 기다렸다가 반환
-  return new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe(); // 리스너 종료
-      resolve(user); // 유저 정보 (비로그인이면 null)
+    // 2. 새로고침 직후 로딩 중이라면 준비될 때까지 기다렸다가 반환
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe(); // 리스너 종료
+            resolve(user); // 유저 정보 (비로그인이면 null)
+        });
     });
-  });
 }
 
-// 회원가입
+/**
+ * 회원 가입
+ *
+ * firebase auth계정 추가 및 문서 생성
+ * @param {*} name
+ * @param {*} email
+ * @param {*} password
+ * @returns 성공 시 유저 반환
+ */
 export async function signUp(name, email, password) {
-  try {
-    // 입력값 유효성 검사
-    if (
-      !email ||
-      email.trim() === "" ||
-      !password ||
-      password.trim() === "" ||
-      !name ||
-      name.trim() === ""
-    ) {
-      return fail({ code: 400, message: "모든 항목을 입력해주세요." });
+    try {
+        // 입력값 유효성 검사
+        if (
+            !email ||
+            email.trim() === "" ||
+            !password ||
+            password.trim() === "" ||
+            !name ||
+            name.trim() === ""
+        ) {
+            return fail({ code: 400, message: "모든 항목을 입력해주세요." });
+        }
+
+        // firebase 회원가입 요청
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password,
+        );
+
+        // 생성된 사용자 정보
+        const user = userCredential.user;
+        console.log("회원가입 auth 성공!");
+
+        // firestore 회원 문서 생성
+        await createUserDoc(user.uid, user.email, name);
+        console.log("회원 문서 생성 성공!");
+
+        return ok(user);
+    } catch (e) {
+        if (e.code === "auth/email-already-in-use") {
+            console.error("이미 등록된 사용자입니다.", e);
+        } else {
+            console.error("회원가입 실패!", e);
+        }
+
+        return fail(e);
     }
-
-    // firebase 회원가입 요청
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-
-    // 생성된 사용자 정보
-    const user = userCredential.user;
-    console.log("회원가입 auth 성공!");
-
-    //await updateProfile(user);
-
-    // firestore 회원 문서 생성
-    await createUserDoc(user.uid, user.email, name);
-
-    return ok(user);
-  } catch (e) {
-    if (e.code === "auth/email-already-in-use") {
-      console.error("이미 등록된 사용자입니다.", e);
-    } else {
-      console.error("회원가입 실패!", e);
-    }
-
-    return fail(e);
-  }
 }
 
-// 로그인
+/**
+ * 로그인
+ *
+ * firebase 기능을 활용해 로그인
+ *
+ * @param {*} email
+ * @param {*} password
+ * @returns 성공 유무
+ */
 export async function signIn(email, password) {
-  const currentUser = auth.currentUser;
-  if (currentUser) {
-    return fail({ code: 400, message: "이미 로그인 되어있습니다." });
-  }
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-
-    const user = userCredential.user;
-    console.log("로그인 성공!");
-
-    return ok(user);
-  } catch (e) {
-    if (e.code === "auth/missing-password") {
-      console.error("로그인 실패 : 비밀번호 미입력");
-    } else if (e.code === "auth/weak-password") {
-      console.error("로그인 실패 : 너무 약한 비밀번호");
-    } else {
-      console.error("로그인 실패", e);
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+        return fail({ code: 400, message: "이미 로그인 되어있습니다." });
     }
-    return fail(e);
-  }
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password,
+        );
+
+        const user = userCredential.user;
+        console.log("로그인 성공!");
+
+        return ok(user);
+    } catch (e) {
+        if (e.code === "auth/missing-password") {
+            console.error("로그인 실패 : 비밀번호 미입력");
+        } else if (e.code === "auth/weak-password") {
+            console.error("로그인 실패 : 너무 약한 비밀번호");
+        } else {
+            console.error("로그인 실패", e);
+        }
+        return fail(e);
+    }
 }
 
-// 로그아웃
+/**
+ * 로그아웃
+ *
+ * @returns 성공 유무
+ */
 export async function logOut() {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      return fail({ code: 400, message: "로그인 상태가 아닙니다." });
-    }
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            return fail({ code: 400, message: "로그인 상태가 아닙니다." });
+        }
 
-    await signOut(auth);
-    console.log(`로그아웃 성공!`);
-    return ok(true);
-  } catch (e) {
-    console.error("로그아웃 실패", e);
-    return fail(e);
-  }
+        await signOut(auth);
+        console.log(`로그아웃 성공!`);
+        return ok(true);
+    } catch (e) {
+        console.error("로그아웃 실패", e);
+        return fail(e);
+    }
 }
 
-// 사용자 정보 조회
+/**
+ * 유저 정보 조회
+ *
+ * 유저의 문서를 조회해 객체로 반환함.
+ * 그 중 정보만 반환
+ *
+ * @returns 유저 정보(name, email, groupIds)
+ */
 export async function getUserInfo() {
-  try {
-    const user = await getAuthUser();
+    try {
+        const user = await getAuthUser();
 
-    const userData = await getUserDoc(user.uid);
-    if (!userData) {
-      return ok(null);
+        const userData = await getUserDoc(user.uid);
+        if (!userData) {
+            return ok(null);
+        }
+
+        return ok({
+            name: userData.name,
+            email: userData.email,
+            groupIds: userData.groupIds,
+        });
+    } catch (e) {
+        console.error("사용자 정보 조회 실패:", e.message);
+        return fail(e);
     }
-
-    return ok({
-      name: userData.name,
-      email: userData.email,
-      groupIds: userData.groupIds,
-    });
-  } catch (e) {
-    console.error("사용자 정보 조회 실패:", e.message);
-    return fail(e);
-  }
 }
 
-// 사용자 그룹 목록 조회 (groupId:#hex)
+/**
+ * 사용자 그룹 목록 조회
+ *
+ * 사용자가 가입된 그룹 목록(groupId:#hex)을 조회
+ *
+ * @returns 그룹 정보
+ */
 export async function getUserGroupIds() {
-  try {
-    const user = await getAuthUser();
+    try {
+        const user = await getAuthUser();
 
-    const userData = await getUserDoc(user.uid);
-    if (!userData) {
-      return ok(null);
+        const userData = await getUserDoc(user.uid);
+        if (!userData) {
+            return ok(null);
+        }
+
+        // 그룹 정보 반환
+        return ok(userData.groupIds);
+    } catch (e) {
+        console.error("사용자의 그룹 목록 조회 실패:", e.message);
+        return fail(e);
     }
-
-    // 그룹 정보 반환
-    return ok(userData.groupIds);
-  } catch (e) {
-    console.error("사용자의 그룹 목록 조회 실패:", e.message);
-    return fail(e);
-  }
 }
 
-// 회원 정보 수정
+/**
+ * 회원 정보 수정
+ *
+ * @param {*} param0
+ * @returns
+ */
 export async function updateUserInfo({
-  name = null,
-  groupInfo = null,
-  removeGroupId = null,
+    name = null,
+    groupInfo = null,
+    removeGroupId = null,
 } = {}) {
-  try {
-    console.log("회원 정보 수정 실행");
-    if (!name && !groupInfo && !removeGroupId) {
-      console.warn("수정할 정보가 없습니다.");
-      return ok(null);
+    try {
+        console.log("회원 정보 수정 실행");
+        if (!name && !groupInfo && !removeGroupId) {
+            console.warn("수정할 정보가 없습니다.");
+            return ok(null);
+        }
+
+        const uid = requiredUid();
+
+        const isSuccess = await updateUserInfoDoc({
+            uid,
+            name,
+            groupInfo,
+            removeGroupId,
+        });
+        return ok(isSuccess);
+    } catch (e) {
+        console.error("회원 정보 수정 실패 : ", e);
+        return fail(e);
     }
-
-    const uid = requiredUid();
-
-    const isSuccess = await updateUserInfoDoc({
-      uid,
-      name,
-      groupInfo,
-      removeGroupId,
-    });
-    return ok(isSuccess);
-  } catch (e) {
-    console.error("회원 정보 수정 실패 : ", e);
-    return fail(e);
-  }
 }
 
 export function waitForAuth() {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe();
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
 
-      if (!user) {
-        reject(new Error("로그인이 필요합니다."));
-        return;
-      }
+            if (!user) {
+                reject(new Error("로그인이 필요합니다."));
+                return;
+            }
 
-      resolve(user);
+            resolve(user);
+        });
     });
-  });
 }
