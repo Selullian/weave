@@ -87,22 +87,19 @@
         console.log("회원가입 실행됨.", email);
 
         // 사용자 출력 칸
-        try {
-          const user = await signUp(name, email, password);
-          alert("회원 가입 성공! 로그인 페이지로 이동합니다.");
-          location.href = "./sign_in.html";
-        } catch (e) {
-          if (e.code === "auth/weak-password") {
-            console.error("너무 약한 비밀번호");
-          } else if (e.code === "auth/email-already-in-use") {
-            alert("이미 회원가입이 완료되었습니다.");
-            console.log("이미 등록된 회원입니다.");
+        const result = await signUp(name, email, password);
+
+        if (!result.success) {
+          if (result.error.code === "auth/weak-password") {
+            alert("비밀번호가 너무 약합니다.");
+          } else if (result.error.code === "auth/email-already-in-use") {
+            alert("이미 회원가입된 이메일입니다.");
           } else {
-            alert(
-              "회원가입에 실패하였습니다, 아이디와 비밀번호를 확인해주세요",
-            );
-            console.log(e.code);
+            alert("회원가입에 실패했습니다.");
+            console.error(result.error);
           }
+
+          return;
         }
       });
     </script>
