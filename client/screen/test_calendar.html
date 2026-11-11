@@ -1,408 +1,881 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weave 일정 관리 테스트</title>
-
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 0 20px;
-        line-height: 1.6;
-      }
-
-      h1 {
-        border-bottom: 2px solid #333;
-        padding-bottom: 10px;
-      }
-
-      section {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-      }
-
-      label {
-        display: block;
-        margin-top: 10px;
-        font-weight: bold;
-      }
-
-      input,
-      textarea,
-      button {
-        box-sizing: border-box;
-        width: 100%;
-        margin-top: 5px;
-        padding: 10px;
-        font-size: 14px;
-      }
-
-      textarea {
-        resize: vertical;
-      }
-
-      button {
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-        background-color: #333;
-        color: white;
-        margin-top: 12px;
-      }
-
-      button:hover {
-        background-color: #555;
-      }
-
-      pre {
-        background-color: #f5f5f5;
-        padding: 15px;
-        border-radius: 5px;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        min-height: 80px;
-      }
-
-      .description {
-        color: #666;
-        font-size: 13px;
-      }
-    </style>
-  </head>
-
-  <body>
-    <h1>Weave 일정 관리 테스트</h1>
-
-    <p class="description">
-      Firebase 로그인이 완료된 상태에서 테스트해 주세요. 각 테스트의 결과는 아래
-      결과 창에 표시됩니다.
-    </p>
-
-    <!-- 1. 일정 생성 -->
-    <section>
-      <h2>1. 일정 생성</h2>
-
-      <label for="createTitle">일정 제목</label>
-      <input type="text" id="createTitle" placeholder="예: 프로젝트 회의" />
-
-      <label for="createStartAt">시작 일시</label>
-      <input type="datetime-local" id="createStartAt" />
-
-      <label for="createEndAt">종료 일시</label>
-      <input type="datetime-local" id="createEndAt" />
-
-      <label for="createMemo">메모</label>
-      <textarea
-        id="createMemo"
-        rows="3"
-        placeholder="일정에 대한 메모"
-      ></textarea>
-
-      <label for="createGroupId">그룹 ID (선택)</label>
-      <input
-        type="text"
-        id="createGroupId"
-        placeholder="그룹 일정이 아니라면 비워 두세요."
-      />
-
-      <label>
-        <input type="checkbox" id="createIsPublic" style="width: auto" />
-        공개 일정
-      </label>
-
-      <button id="createBtn">일정 생성</button>
-    </section>
-
-    <!-- 2. 내 일정 조회 -->
-    <section>
-      <h2>2. 내 일정 조회</h2>
-
-      <button id="getUserEventsBtn">내 일정 조회</button>
-    </section>
-
-    <!-- 3. 그룹 일정 조회 -->
-    <section>
-      <h2>3. 그룹 일정 조회</h2>
-
-      <label for="searchGroupId">그룹 ID</label>
-      <input type="text" id="searchGroupId" placeholder="조회할 그룹 ID" />
-
-      <button id="getGroupEventsBtn">그룹 일정 조회</button>
-    </section>
-
-    <!-- 4. 일정 제목 검색 -->
-    <section>
-      <h2>4. 일정 제목 검색</h2>
-
-      <label for="findTitle">검색할 제목</label>
-      <input type="text" id="findTitle" placeholder="검색어 입력" />
-
-      <button id="findBtn">일정 검색</button>
-    </section>
-
-    <!-- 5. 일정 수정 -->
-    <section>
-      <h2>5. 일정 수정</h2>
-
-      <label for="updateEventId">수정할 일정 ID</label>
-      <input type="text" id="updateEventId" placeholder="Firestore 문서 ID" />
-
-      <label for="updateTitle">새 제목</label>
-      <input type="text" id="updateTitle" placeholder="변경할 제목" />
-
-      <label for="updateMemo">새 메모</label>
-      <textarea id="updateMemo" rows="3" placeholder="변경할 메모"></textarea>
-
-      <button id="updateBtn">일정 수정</button>
-    </section>
-
-    <!-- 6. 일정 삭제 -->
-    <section>
-      <h2>6. 일정 삭제</h2>
-
-      <label for="deleteEventId">삭제할 일정 ID</label>
-      <input type="text" id="deleteEventId" placeholder="Firestore 문서 ID" />
-
-      <button id="deleteBtn">일정 삭제</button>
-    </section>
-
-    <!-- 7. ICS 파일 -->
-    <section>
-      <h2>7. ICS 파일 가져오기</h2>
-
-      <label for="icsFile">ICS 파일 선택</label>
-      <input type="file" id="icsFile" accept=".ics" />
-
-      <p class="description">
-        현재 calendar.js에 ICS 가져오기 함수가 구현되어 있지 않습니다. 파일
-        선택만 가능하며 실제 가져오기는 아직 실행되지 않습니다.
-      </p>
-
-      <button id="icsBtn">ICS 가져오기 기능 확인</button>
-    </section>
-
-    <!-- 결과 -->
-    <section>
-      <h2>테스트 결과</h2>
-      <pre id="result">테스트 결과가 여기에 표시됩니다.</pre>
-      <button id="clearBtn">결과 지우기</button>
-    </section>
-
-    <script type="module">
-      import {
-        createEvent,
-        getUserEvents,
-        getGroupEvents,
-        updateEvent,
-        findEventByTitle,
-        deleteEvent,
-      } from "../src/services/calendar.js";
-
-      const $ = (id) => document.getElementById(id);
-      const result = $("result");
-
-      // 결과를 화면에 출력
-      function showResult(title, data) {
-        result.textContent = `[${title}]\n` + JSON.stringify(data, null, 2);
-      }
-
-      // 서비스 함수의 반환값을 확인
-      // 서비스 함수는 { success, data } 또는 { success, error }를 반환
-      async function runTest(title, callback) {
-        try {
-          const response = await callback();
-
-          showResult(title, response);
-
-          if (response && response.success === false) {
-            console.error(title, response.error);
-          }
-
-          return response;
-        } catch (error) {
-          const errorInfo = {
-            success: false,
-            error: {
-              message: error.message,
-              code: error.code ?? null,
-            },
-          };
-
-          showResult(title, errorInfo);
-          console.error(title, error);
-
-          return errorInfo;
-        }
-      }
-
-      // 1. 일정 생성
-      $("createBtn").addEventListener("click", async () => {
-        const title = $("createTitle").value.trim();
-        const startValue = $("createStartAt").value;
-        const endValue = $("createEndAt").value;
-        const memo = $("createMemo").value.trim();
-        const groupId = $("createGroupId").value.trim();
-        const isPublic = $("createIsPublic").checked;
-
-        if (!title || !startValue || !endValue) {
-          showResult("일정 생성", {
-            message: "제목, 시작 일시, 종료 일시를 입력해 주세요.",
-          });
-          return;
-        }
-
-        const startAt = new Date(startValue);
-        const endAt = new Date(endValue);
-
-        if (
-          Number.isNaN(startAt.getTime()) ||
-          Number.isNaN(endAt.getTime()) ||
-          endAt <= startAt
-        ) {
-          showResult("일정 생성", {
-            message: "종료 일시는 시작 일시보다 늦어야 합니다.",
-          });
-          return;
-        }
-
-        const contents = {
-          title,
-          startAt,
-          endAt,
-          memo,
-          isPublic,
-          source: "manual",
-          ...(groupId ? { groupId } : {}),
-        };
-        await runTest("일정 생성", () =>
-          createEvent(
-            contents.title,
-            contents.startAt,
-            contents.endAt,
-            contents.memo,
-            contents.isPublic,
-            contents.source,
-            contents.groupId,
-          ),
-        );
-      });
-
-      // 2. 내 일정 조회
-      $("getUserEventsBtn").addEventListener("click", async () => {
-        await runTest("내 일정 조회", () => getUserEvents());
-      });
-
-      // 3. 그룹 일정 조회
-      $("getGroupEventsBtn").addEventListener("click", async () => {
-        const groupId = $("searchGroupId").value.trim();
-
-        if (!groupId) {
-          showResult("그룹 일정 조회", {
-            message: "그룹 ID를 입력해 주세요.",
-          });
-          return;
-        }
-
-        await runTest("그룹 일정 조회", () => getGroupEvents(groupId));
-      });
-
-      // 4. 일정 제목 검색
-      $("findBtn").addEventListener("click", async () => {
-        const keyword = $("findTitle").value.trim();
-
-        if (!keyword) {
-          showResult("일정 검색", {
-            message: "검색어를 입력해 주세요.",
-          });
-          return;
-        }
-
-        await runTest("일정 제목 검색", () => findEventByTitle(keyword));
-      });
-
-      // 5. 일정 수정
-      $("updateBtn").addEventListener("click", async () => {
-        const eventId = $("updateEventId").value.trim();
-        const title = $("updateTitle").value.trim();
-        const memo = $("updateMemo").value.trim();
-
-        if (!eventId) {
-          showResult("일정 수정", {
-            message: "수정할 일정 ID를 입력해 주세요.",
-          });
-          return;
-        }
-
-        const contents = {};
-
-        if (title) contents.title = title;
-        if (memo) contents.memo = memo;
-
-        if (Object.keys(contents).length === 0) {
-          showResult("일정 수정", {
-            message: "변경할 제목이나 메모를 입력해 주세요.",
-          });
-          return;
-        }
-
-        await runTest("일정 수정", () => updateEvent(eventId, contents));
-      });
-
-      // 6. 일정 삭제
-      $("deleteBtn").addEventListener("click", async () => {
-        const eventId = $("deleteEventId").value.trim();
-
-        if (!eventId) {
-          showResult("일정 삭제", {
-            message: "삭제할 일정 ID를 입력해 주세요.",
-          });
-          return;
-        }
-
-        if (!confirm(`일정 ${eventId}를 삭제할까요?`)) {
-          return;
-        }
-
-        await runTest("일정 삭제", () => deleteEvent(eventId));
-      });
-
-      // 7. ICS 파일 가져오기 기능 확인
-      $("icsBtn").addEventListener("click", () => {
-        const file = $("icsFile").files[0];
-
-        if (!file) {
-          showResult("ICS 파일", {
-            message: "먼저 ICS 파일을 선택해 주세요.",
-          });
-          return;
-        }
-
-        if (!file.name.toLowerCase().endsWith(".ics")) {
-          showResult("ICS 파일", {
-            message: "확장자가 .ics인 파일을 선택해 주세요.",
-          });
-          return;
-        }
-
-        showResult("ICS 파일", {
-          fileName: file.name,
-          fileSize: file.size,
-          message:
-            "파일 선택은 완료되었습니다. " +
-            "실제 가져오기를 수행하려면 calendar.js에 " +
-            "ICS 가져오기 함수를 구현해야 합니다.",
-        });
-      });
-
-      // 결과 지우기
-      $("clearBtn").addEventListener("click", () => {
-        result.textContent = "테스트 결과가 여기에 표시됩니다.";
-      });
-    </script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Weave 일정 관리 테스트</title>
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                line-height: 1.5;
+                background-color: #fafafa;
+                color: #222;
+            }
+
+            h1 {
+                margin: 0 0 6px;
+            }
+
+            .description {
+                color: #666;
+                font-size: 13px;
+                margin: 4px 0;
+            }
+
+            .layout {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 20px;
+                align-items: start;
+            }
+
+            .result-panel {
+                position: sticky;
+                top: 20px;
+            }
+
+            section {
+                background-color: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 16px 20px;
+                margin-bottom: 16px;
+            }
+
+            h2 {
+                font-size: 17px;
+                margin: 0 0 4px;
+            }
+
+            h2 code {
+                font-size: 13px;
+                color: #888;
+                font-weight: normal;
+            }
+
+            label {
+                display: block;
+                margin-top: 10px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            label.inline {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: normal;
+            }
+
+            input,
+            textarea,
+            select,
+            button {
+                width: 100%;
+                margin-top: 4px;
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            input[type="checkbox"] {
+                width: auto;
+                margin: 0;
+            }
+
+            .row {
+                display: flex;
+                gap: 10px;
+            }
+
+            .row > div {
+                flex: 1;
+            }
+
+            textarea {
+                resize: vertical;
+            }
+
+            button {
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background-color: #333;
+                color: white;
+                margin-top: 12px;
+            }
+
+            button:hover {
+                background-color: #555;
+            }
+
+            button.secondary {
+                background-color: #888;
+            }
+
+            button.danger {
+                background-color: #b3261e;
+            }
+
+            #authStatus {
+                font-weight: bold;
+            }
+
+            #authStatus.on {
+                color: #1a7f37;
+            }
+
+            #authStatus.off {
+                color: #b3261e;
+            }
+
+            .result-title {
+                font-weight: bold;
+                margin-bottom: 6px;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 12px;
+                color: white;
+                margin-left: 6px;
+            }
+
+            .badge.success {
+                background-color: #1a7f37;
+            }
+
+            .badge.fail {
+                background-color: #b3261e;
+            }
+
+            .badge.info {
+                background-color: #666;
+            }
+
+            pre {
+                background-color: #f5f5f5;
+                padding: 12px;
+                border-radius: 5px;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+                min-height: 120px;
+                max-height: 60vh;
+                overflow-y: auto;
+                font-size: 13px;
+                margin: 0;
+            }
+
+            #eventIds {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-top: 8px;
+            }
+
+            #eventIds button {
+                width: auto;
+                margin: 0;
+                padding: 4px 8px;
+                font-size: 12px;
+                background-color: #e8e8e8;
+                color: #222;
+            }
+
+            #eventIds button:hover {
+                background-color: #d0d0d0;
+            }
+
+            @media (max-width: 800px) {
+                .layout {
+                    grid-template-columns: 1fr;
+                }
+
+                .result-panel {
+                    position: static;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Weave 일정 관리 테스트</h1>
+        <p class="description">
+            calendar.js의 모든 export 함수를 테스트합니다. 로그인이 필요한
+            함수가 대부분이므로 먼저 로그인해 주세요.
+        </p>
+
+        <div class="layout">
+            <!-- 왼쪽: 테스트 입력 -->
+            <div>
+                <!-- 0. 로그인 -->
+                <section>
+                    <h2>0. 로그인 상태</h2>
+                    <p>
+                        현재 상태 :
+                        <span id="authStatus" class="off">확인 중...</span>
+                    </p>
+
+                    <div class="row">
+                        <div>
+                            <label for="email">이메일</label>
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="test@example.com"
+                            />
+                        </div>
+                        <div>
+                            <label for="password">비밀번호</label>
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="비밀번호"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div><button id="signInBtn">로그인</button></div>
+                        <div>
+                            <button id="logOutBtn" class="secondary">
+                                로그아웃
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 1. 일정 생성 -->
+                <section>
+                    <h2>1. 일정 생성 <code>createEvent()</code></h2>
+
+                    <label for="createTitle">일정 제목</label>
+                    <input
+                        type="text"
+                        id="createTitle"
+                        placeholder="예: 프로젝트 회의"
+                    />
+
+                    <div class="row">
+                        <div>
+                            <label for="createStartAt">시작 일시</label>
+                            <input type="datetime-local" id="createStartAt" />
+                        </div>
+                        <div>
+                            <label for="createEndAt">종료 일시</label>
+                            <input type="datetime-local" id="createEndAt" />
+                        </div>
+                    </div>
+
+                    <label for="createMemo">메모</label>
+                    <textarea
+                        id="createMemo"
+                        rows="2"
+                        placeholder="일정에 대한 메모"
+                    ></textarea>
+
+                    <div class="row">
+                        <div>
+                            <label for="createGroupId">그룹 ID (선택)</label>
+                            <input
+                                type="text"
+                                id="createGroupId"
+                                placeholder="개인 일정이면 비워 두세요."
+                            />
+                        </div>
+                        <div>
+                            <label for="createSource">출처</label>
+                            <select id="createSource">
+                                <option value="manual">manual</option>
+                                <option value="ics">ics</option>
+                                <option value="wrong">
+                                    wrong (검증 실패 테스트)
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="inline">
+                        <input type="checkbox" id="createIsPublic" />
+                        공개 일정
+                    </label>
+
+                    <label class="inline">
+                        <input type="checkbox" id="createSkipCheck" />
+                        입력값 확인 건너뛰기 (빈 값 그대로 함수에 전달해 검증
+                        로직 테스트)
+                    </label>
+
+                    <button id="createBtn">일정 생성</button>
+                </section>
+
+                <!-- 2. 단일 일정 조회 -->
+                <section>
+                    <h2>2. 단일 일정 조회 <code>getEventById()</code></h2>
+
+                    <label for="getEventId">일정 ID</label>
+                    <input
+                        type="text"
+                        id="getEventId"
+                        placeholder="Firestore 문서 ID"
+                    />
+
+                    <button id="getEventBtn">단일 일정 조회</button>
+                </section>
+
+                <!-- 3. 내 일정 / 공개 일정 조회 -->
+                <section>
+                    <h2>
+                        3. 내 일정 조회 <code>getUserEvents()</code> /
+                        <code>getUserPublicEvents()</code>
+                    </h2>
+
+                    <div class="row">
+                        <div>
+                            <button id="getUserEventsBtn">내 전체 일정</button>
+                        </div>
+                        <div>
+                            <button id="getUserPublicEventsBtn">
+                                내 공개 일정
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. 그룹 일정 조회 -->
+                <section>
+                    <h2>4. 그룹 일정 조회 <code>getGroupEvents()</code></h2>
+
+                    <label for="searchGroupId">그룹 ID</label>
+                    <input
+                        type="text"
+                        id="searchGroupId"
+                        placeholder="조회할 그룹 ID"
+                    />
+
+                    <button id="getGroupEventsBtn">그룹 일정 조회</button>
+                </section>
+
+                <!-- 5. 월별 일정 조회 -->
+                <section>
+                    <h2>5. 월별 일정 조회 <code>getMonthEvents()</code></h2>
+
+                    <div class="row">
+                        <div>
+                            <label for="monthYear">연도</label>
+                            <input
+                                type="number"
+                                id="monthYear"
+                                min="2000"
+                                max="2100"
+                            />
+                        </div>
+                        <div>
+                            <label for="monthMonth">월</label>
+                            <input
+                                type="number"
+                                id="monthMonth"
+                                min="1"
+                                max="12"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div>
+                            <button id="prevMonthBtn" class="secondary">
+                                ◀ 이전 달
+                            </button>
+                        </div>
+                        <div>
+                            <button id="getMonthEventsBtn">
+                                월별 일정 조회
+                            </button>
+                        </div>
+                        <div>
+                            <button id="nextMonthBtn" class="secondary">
+                                다음 달 ▶
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. 일정 제목 검색 -->
+                <section>
+                    <h2>6. 일정 제목 검색 <code>findEventByTitle()</code></h2>
+
+                    <label for="findTitle">검색할 제목 (앞부분 일치)</label>
+                    <input
+                        type="text"
+                        id="findTitle"
+                        placeholder="검색어 입력"
+                    />
+
+                    <button id="findBtn">일정 검색</button>
+                </section>
+
+                <!-- 7. 일정 수정 -->
+                <section>
+                    <h2>7. 일정 수정 <code>updateEvent()</code></h2>
+
+                    <label for="updateEventId">수정할 일정 ID</label>
+                    <input
+                        type="text"
+                        id="updateEventId"
+                        placeholder="Firestore 문서 ID"
+                    />
+
+                    <label for="updateTitle">새 제목</label>
+                    <input
+                        type="text"
+                        id="updateTitle"
+                        placeholder="비워 두면 변경 안 함"
+                    />
+
+                    <div class="row">
+                        <div>
+                            <label for="updateStartAt">새 시작 일시</label>
+                            <input type="datetime-local" id="updateStartAt" />
+                        </div>
+                        <div>
+                            <label for="updateEndAt">새 종료 일시</label>
+                            <input type="datetime-local" id="updateEndAt" />
+                        </div>
+                    </div>
+
+                    <label for="updateMemo">새 메모</label>
+                    <textarea
+                        id="updateMemo"
+                        rows="2"
+                        placeholder="비워 두면 변경 안 함"
+                    ></textarea>
+
+                    <label for="updateIsPublic">공개 여부</label>
+                    <select id="updateIsPublic">
+                        <option value="">변경 안 함</option>
+                        <option value="true">공개</option>
+                        <option value="false">비공개</option>
+                    </select>
+
+                    <button id="updateBtn">일정 수정</button>
+                </section>
+
+                <!-- 8. 일정 삭제 -->
+                <section>
+                    <h2>8. 일정 삭제 <code>deleteEvent()</code></h2>
+
+                    <label for="deleteEventId">삭제할 일정 ID</label>
+                    <input
+                        type="text"
+                        id="deleteEventId"
+                        placeholder="Firestore 문서 ID"
+                    />
+
+                    <button id="deleteBtn" class="danger">일정 삭제</button>
+                </section>
+
+                <!-- 9. ICS 가져오기 -->
+                <section>
+                    <h2>9. ICS 파일 가져오기 <code>importIcsEvents()</code></h2>
+
+                    <label for="icsFile">ICS 파일 선택</label>
+                    <input type="file" id="icsFile" accept=".ics" />
+
+                    <p class="description">
+                        기존에 가져온 ics 일정은 모두 삭제되고 새 파일의
+                        일정으로 대체됩니다. (직접 입력한 manual 일정은 유지)
+                    </p>
+
+                    <button id="icsBtn">ICS 가져오기</button>
+                </section>
+            </div>
+
+            <!-- 오른쪽: 결과 -->
+            <div class="result-panel">
+                <section>
+                    <h2>테스트 결과</h2>
+                    <div class="result-title" id="resultTitle">
+                        아직 실행한 테스트가 없습니다.
+                    </div>
+                    <pre id="result">테스트 결과가 여기에 표시됩니다.</pre>
+
+                    <p class="description">
+                        결과에 있는 일정 ID를 누르면 단일 조회 / 수정 / 삭제
+                        입력칸에 채워집니다.
+                    </p>
+                    <div id="eventIds"></div>
+
+                    <button id="clearBtn" class="secondary">결과 지우기</button>
+                </section>
+            </div>
+        </div>
+
+        <script type="module">
+            import { auth } from "../app.js";
+            import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+            import { signIn, logOut } from "../src/services/auth.js";
+            import {
+                createEvent,
+                getEventById,
+                getUserEvents,
+                getUserPublicEvents,
+                getGroupEvents,
+                updateEvent,
+                findEventByTitle,
+                deleteEvent,
+                getMonthEvents,
+                importIcsEvents,
+            } from "../src/services/calendar.js";
+
+            const $ = (id) => document.getElementById(id);
+
+            // ---------- 공통 ----------
+
+            // Firestore Timestamp / Date를 읽기 쉬운 문자열로 변환
+            function formatDate(date) {
+                return date.toLocaleString("ko-KR", { hour12: false });
+            }
+
+            function replacer(key, value) {
+                // Firestore Timestamp ({ seconds, nanoseconds })
+                if (
+                    value &&
+                    typeof value === "object" &&
+                    typeof value.seconds === "number" &&
+                    typeof value.nanoseconds === "number"
+                ) {
+                    return `${formatDate(new Date(value.seconds * 1000))} (Timestamp)`;
+                }
+                // JSON.stringify는 Date를 먼저 toJSON()으로 바꾸므로 this[key]로 원본 확인
+                if (this[key] instanceof Date) {
+                    return `${formatDate(this[key])} (Date)`;
+                }
+                return value;
+            }
+
+            // 결과 안의 일정 id 수집
+            function collectEventIds(data) {
+                const ids = new Set();
+                const visit = (value) => {
+                    if (Array.isArray(value)) value.forEach(visit);
+                    else if (value && typeof value === "object") {
+                        if (typeof value.id === "string" && "title" in value)
+                            ids.add(value.id);
+                        Object.values(value).forEach(visit);
+                    }
+                };
+                visit(data);
+                return [...ids];
+            }
+
+            function renderEventIds(ids) {
+                const box = $("eventIds");
+                box.innerHTML = "";
+                ids.forEach((id) => {
+                    const btn = document.createElement("button");
+                    btn.textContent = id;
+                    btn.title = "단일 조회 / 수정 / 삭제 입력칸에 채우기";
+                    btn.addEventListener("click", () => {
+                        $("getEventId").value = id;
+                        $("updateEventId").value = id;
+                        $("deleteEventId").value = id;
+                    });
+                    box.appendChild(btn);
+                });
+            }
+
+            function showResult(title, data, status = "info", ms = null) {
+                const label = { success: "성공", fail: "실패", info: "안내" }[
+                    status
+                ];
+                const time = ms === null ? "" : ` · ${ms}ms`;
+                $("resultTitle").innerHTML = "";
+                $("resultTitle").append(title);
+                const badge = document.createElement("span");
+                badge.className = `badge ${status}`;
+                badge.textContent = label + time;
+                $("resultTitle").append(badge);
+
+                $("result").textContent =
+                    data === undefined
+                        ? "undefined (함수가 아무것도 반환하지 않음)"
+                        : JSON.stringify(data, replacer, 2);
+
+                renderEventIds(collectEventIds(data));
+            }
+
+            // 서비스 함수 실행 후 결과 출력
+            // 서비스 함수는 { success, data } 또는 { success, error }를 반환
+            async function runTest(title, callback) {
+                const start = performance.now();
+                try {
+                    const response = await callback();
+                    const ms = Math.round(performance.now() - start);
+
+                    let status = "info";
+                    if (response && response.success === true)
+                        status = "success";
+                    else if (response && response.success === false)
+                        status = "fail";
+
+                    showResult(title, response, status, ms);
+                    console.log(`[${title}]`, response);
+                    if (status === "fail") console.error(title, response.error);
+
+                    return response;
+                } catch (error) {
+                    // 서비스 함수 내부에서 처리되지 않은 예외
+                    const ms = Math.round(performance.now() - start);
+                    showResult(
+                        `${title} (처리되지 않은 예외)`,
+                        {
+                            name: error.name,
+                            message: error.message,
+                            code: error.code ?? null,
+                        },
+                        "fail",
+                        ms,
+                    );
+                    console.error(title, error);
+                    return null;
+                }
+            }
+
+            // datetime-local 값 → Date (비어 있으면 null)
+            function toDateOrNull(value) {
+                if (!value) return null;
+                const date = new Date(value);
+                return Number.isNaN(date.getTime()) ? null : date;
+            }
+
+            // Date → datetime-local 입력값 형식
+            function toInputValue(date) {
+                const pad = (n) => String(n).padStart(2, "0");
+                return (
+                    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+                    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+                );
+            }
+
+            // ---------- 초기값 ----------
+
+            const now = new Date();
+            now.setMinutes(0, 0, 0);
+            const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+            $("createStartAt").value = toInputValue(now);
+            $("createEndAt").value = toInputValue(oneHourLater);
+            $("monthYear").value = now.getFullYear();
+            $("monthMonth").value = now.getMonth() + 1;
+
+            // ---------- 0. 로그인 ----------
+
+            onAuthStateChanged(auth, (user) => {
+                const status = $("authStatus");
+                if (user) {
+                    status.textContent = `로그인됨 (${user.email}, uid: ${user.uid})`;
+                    status.className = "on";
+                } else {
+                    status.textContent = "로그아웃 상태";
+                    status.className = "off";
+                }
+            });
+
+            $("signInBtn").addEventListener("click", async () => {
+                await runTest("로그인", () =>
+                    signIn($("email").value.trim(), $("password").value),
+                );
+            });
+
+            $("logOutBtn").addEventListener("click", async () => {
+                await runTest("로그아웃", () => logOut());
+            });
+
+            // ---------- 1. 일정 생성 ----------
+
+            $("createBtn").addEventListener("click", async () => {
+                const title = $("createTitle").value.trim();
+                const startAt = toDateOrNull($("createStartAt").value);
+                const endAt = toDateOrNull($("createEndAt").value);
+                const memo = $("createMemo").value.trim();
+                const groupId = $("createGroupId").value.trim();
+                const source = $("createSource").value;
+                const isPublic = $("createIsPublic").checked;
+
+                if (!$("createSkipCheck").checked) {
+                    if (!title || !startAt || !endAt) {
+                        showResult("일정 생성", {
+                            message:
+                                "제목, 시작 일시, 종료 일시를 입력해 주세요.",
+                        });
+                        return;
+                    }
+                    if (endAt <= startAt) {
+                        showResult("일정 생성", {
+                            message: "종료 일시는 시작 일시보다 늦어야 합니다.",
+                        });
+                        return;
+                    }
+                }
+
+                await runTest("일정 생성", () =>
+                    createEvent(
+                        title,
+                        startAt,
+                        endAt,
+                        memo,
+                        isPublic,
+                        source,
+                        groupId || undefined,
+                    ),
+                );
+            });
+
+            // ---------- 2. 단일 일정 조회 ----------
+
+            $("getEventBtn").addEventListener("click", async () => {
+                const eventId = $("getEventId").value.trim();
+                if (!eventId) {
+                    showResult("단일 일정 조회", {
+                        message: "일정 ID를 입력해 주세요.",
+                    });
+                    return;
+                }
+                await runTest("단일 일정 조회", () => getEventById(eventId));
+            });
+
+            // ---------- 3. 내 일정 / 공개 일정 ----------
+
+            $("getUserEventsBtn").addEventListener("click", async () => {
+                await runTest("내 전체 일정 조회", () => getUserEvents());
+            });
+
+            $("getUserPublicEventsBtn").addEventListener("click", async () => {
+                await runTest("내 공개 일정 조회", () => getUserPublicEvents());
+            });
+
+            // ---------- 4. 그룹 일정 ----------
+
+            $("getGroupEventsBtn").addEventListener("click", async () => {
+                const groupId = $("searchGroupId").value.trim();
+                if (!groupId) {
+                    showResult("그룹 일정 조회", {
+                        message: "그룹 ID를 입력해 주세요.",
+                    });
+                    return;
+                }
+                await runTest("그룹 일정 조회", () => getGroupEvents(groupId));
+            });
+
+            // ---------- 5. 월별 일정 ----------
+
+            function moveMonth(diff) {
+                const date = new Date(
+                    Number($("monthYear").value),
+                    Number($("monthMonth").value) - 1 + diff,
+                    1,
+                );
+                $("monthYear").value = date.getFullYear();
+                $("monthMonth").value = date.getMonth() + 1;
+                $("getMonthEventsBtn").click();
+            }
+
+            $("prevMonthBtn").addEventListener("click", () => moveMonth(-1));
+            $("nextMonthBtn").addEventListener("click", () => moveMonth(1));
+
+            $("getMonthEventsBtn").addEventListener("click", async () => {
+                const year = Number($("monthYear").value);
+                const month = Number($("monthMonth").value);
+                await runTest(`월별 일정 조회 (${year}년 ${month}월)`, () =>
+                    getMonthEvents(year, month),
+                );
+            });
+
+            // ---------- 6. 제목 검색 ----------
+
+            $("findBtn").addEventListener("click", async () => {
+                const keyword = $("findTitle").value;
+                await runTest(`일정 검색 ("${keyword}")`, () =>
+                    findEventByTitle(keyword),
+                );
+            });
+
+            // ---------- 7. 일정 수정 ----------
+
+            $("updateBtn").addEventListener("click", async () => {
+                const eventId = $("updateEventId").value.trim();
+                if (!eventId) {
+                    showResult("일정 수정", {
+                        message: "수정할 일정 ID를 입력해 주세요.",
+                    });
+                    return;
+                }
+
+                const contents = {};
+                const title = $("updateTitle").value.trim();
+                const memo = $("updateMemo").value.trim();
+                const startAt = toDateOrNull($("updateStartAt").value);
+                const endAt = toDateOrNull($("updateEndAt").value);
+                const isPublic = $("updateIsPublic").value;
+
+                if (title) contents.title = title;
+                if (memo) contents.memo = memo;
+                if (startAt) contents.startAt = startAt;
+                if (endAt) contents.endAt = endAt;
+                if (isPublic) contents.isPublic = isPublic === "true";
+
+                if (Object.keys(contents).length === 0) {
+                    showResult("일정 수정", {
+                        message: "변경할 항목을 하나 이상 입력해 주세요.",
+                    });
+                    return;
+                }
+
+                await runTest("일정 수정", () =>
+                    updateEvent(eventId, contents),
+                );
+            });
+
+            // ---------- 8. 일정 삭제 ----------
+
+            $("deleteBtn").addEventListener("click", async () => {
+                const eventId = $("deleteEventId").value.trim();
+                if (!eventId) {
+                    showResult("일정 삭제", {
+                        message: "삭제할 일정 ID를 입력해 주세요.",
+                    });
+                    return;
+                }
+                if (!confirm(`일정 ${eventId}를 삭제할까요?`)) return;
+
+                await runTest("일정 삭제", () => deleteEvent(eventId));
+            });
+
+            // ---------- 9. ICS 가져오기 ----------
+
+            $("icsBtn").addEventListener("click", async () => {
+                const file = $("icsFile").files[0];
+                // 파일 검증은 importIcsEvents 안에서 하므로 그대로 전달
+                await runTest(
+                    `ICS 가져오기${file ? ` (${file.name})` : ""}`,
+                    () => importIcsEvents(file),
+                );
+            });
+
+            // ---------- 결과 지우기 ----------
+
+            $("clearBtn").addEventListener("click", () => {
+                $("resultTitle").textContent = "아직 실행한 테스트가 없습니다.";
+                $("result").textContent = "테스트 결과가 여기에 표시됩니다.";
+                $("eventIds").innerHTML = "";
+            });
+        </script>
+    </body>
 </html>

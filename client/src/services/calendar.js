@@ -2,42 +2,43 @@
 import { getUserGroupIds } from "../services/auth.js";
 import { ok, fail, requiredUid, getToUpdateContent } from "./common.js";
 import {
-  createEventDoc,
-  getUserEventDocs,
-  getUserPublicEventDocs,
-  getGroupEventDocs,
-  updateEventDoc,
-  findEventDoc,
-  deleteEventDoc,
-  isExistEvent,
-  getEventDocById,
-  getMonthEventDocs,
+    createEventDoc,
+    getUserEventDocs,
+    getUserPublicEventDocs,
+    getGroupEventDocs,
+    updateEventDoc,
+    findEventDoc,
+    deleteEventDoc,
+    isExistEvent,
+    getEventDocById,
+    getMonthEventDocs,
+    replaceIcsEventDocs,
 } from "../repository/calendar_repository.js";
 
 /*
-========================
-일정 관리
-------------------------
-1. 일정 생성
-   - createEvent(title, startAt, endAt, memo, isPublic, source, groupId)
-2. 단일 일정 조회
-   - getEventById(eventId)
-3. 사용자 전체 일정 조회
-   - getUserEvents()
-4. 사용자 공개 일정 조회
-   - getUserPublicEvents()
-5. 그룹 일정 조회
-   - getGroupEvents(groupId)
-6. 일정 수정
-   - updateEvent(eventId, contents)
-7. 일정 검색
-   - findEventByTitle(title)
-8. 일정 삭제
-   - deleteEvent(eventId)
-9. ics 파일을 통한 일정 가져오기
-10. 일정 소유자 확인
-========================
-*/
+  ========================
+  일정 관리
+  ------------------------
+  1. 일정 생성
+    - createEvent(title, startAt, endAt, memo, isPublic, source, groupId)
+  2. 단일 일정 조회
+    - getEventById(eventId)
+  3. 사용자 전체 일정 조회
+    - getUserEvents()
+  4. 사용자 공개 일정 조회
+    - getUserPublicEvents()
+  5. 그룹 일정 조회
+    - getGroupEvents(groupId)
+  6. 일정 수정
+    - updateEvent(eventId, contents)
+  7. 일정 검색
+    - findEventByTitle(title)
+  8. 일정 삭제
+    - deleteEvent(eventId)
+  9. ics 파일을 통한 일정 가져오기
+  10. 일정 소유자 확인
+  ========================
+  */
 
 /**
  * timestamp를 date 객체로 변환한다.
@@ -46,7 +47,7 @@ import {
  * @returns {Date|undefined} 변환된 date 객체
  */
 function toDate(date) {
-  if (date.seconds) return new Date(date.seconds * 1000);
+    if (date.seconds) return new Date(date.seconds * 1000);
 }
 
 /**
@@ -65,40 +66,40 @@ function toDate(date) {
  * @returns {Promise<Object>} 일정 생성 결과 (성공 또는 실패 응답)
  */
 export async function createEvent(
-  title,
-  startAt,
-  endAt,
-  memo = "",
-  isPublic = false,
-  source = "manual",
-  groupId = "",
+    title,
+    startAt,
+    endAt,
+    memo = "",
+    isPublic = false,
+    source = "manual",
+    groupId = "",
 ) {
-  try {
-    if (title === "" || startAt === null || endAt === null) {
-      return fail({ code: 400, message: "필수 항목을 입력해주세요." });
-    } else if (source != "manual" && source != "ics") {
-      return fail({ code: 400, message: "잘못된 출처 입력입니다." });
+    try {
+        if (title === "" || startAt === null || endAt === null) {
+            return fail({ code: 400, message: "필수 항목을 입력해주세요." });
+        } else if (source != "manual" && source != "ics") {
+            return fail({ code: 400, message: "잘못된 출처 입력입니다." });
+        }
+
+        const uid = requiredUid();
+
+        let docs = await createEventDoc(
+            uid,
+            title,
+            startAt,
+            endAt,
+            memo,
+            isPublic,
+            source,
+            groupId,
+        );
+
+        console.log("일정 생성 성공!", title);
+        return ok(docs);
+    } catch (e) {
+        console.error("일정 생성 실패 : ", e);
+        return fail(e);
     }
-
-    const uid = requiredUid();
-
-    let docs = await createEventDoc(
-      uid,
-      title,
-      startAt,
-      endAt,
-      memo,
-      isPublic,
-      source,
-      groupId,
-    );
-
-    console.log("일정 생성 성공!", title);
-    return ok(docs);
-  } catch (e) {
-    console.error("일정 생성 실패 : ", e);
-    return fail(e);
-  }
 }
 
 /**
@@ -110,17 +111,17 @@ export async function createEvent(
  * @returns {Promise<Object|null>} 일정 정보 또는 조회 실패 응답
  */
 export async function getEventById(eventId) {
-  try {
-    console.log("단일 일정 조회 실행");
+    try {
+        console.log("단일 일정 조회 실행");
 
-    let result = await getEventDocById(eventId);
-    if (!result) return null;
+        let result = await getEventDocById(eventId);
+        if (!result) return null;
 
-    return ok(result);
-  } catch (e) {
-    console.error("단일 일정 조회 실패 : ", e);
-    return fail(e);
-  }
+        return ok(result);
+    } catch (e) {
+        console.error("단일 일정 조회 실패 : ", e);
+        return fail(e);
+    }
 }
 
 /**
@@ -132,38 +133,38 @@ export async function getEventById(eventId) {
  * @returns {Promise<Object>} 사용자 개인 일정과 그룹 일정 목록
  */
 export async function getUserEvents() {
-  try {
-    console.log("유저 일정 조회 실행");
+    try {
+        console.log("유저 일정 조회 실행");
 
-    const uid = requiredUid();
+        const uid = requiredUid();
 
-    // 1. 사용자의 그룹 ID 목록 가져오기
-    const groupResult = await getUserGroupIds();
+        // 1. 사용자의 그룹 ID 목록 가져오기
+        const groupResult = await getUserGroupIds();
 
-    if (!groupResult.success) {
-      return groupResult;
+        if (!groupResult.success) {
+            return groupResult;
+        }
+
+        const groupIds = groupResult.data ?? [];
+
+        // 2. 개인 일정 가져오기
+        const userEvents = (await getUserEventDocs(uid)) ?? [];
+
+        // 3. 그룹별 일정 가져오기
+        const groupResults = await Promise.all(
+            groupIds.map((groupId) => getGroupEventDocs(groupId)),
+        );
+
+        const groupEvents = groupResults.flatMap((events) => events ?? []);
+
+        // 4. 개인 일정과 그룹 일정 합치기
+        const result = [...userEvents /* ...groupEvents */];
+
+        return ok(result);
+    } catch (e) {
+        console.error("유저 일정 조회 실패:", e);
+        return fail(e);
     }
-
-    const groupIds = groupResult.data ?? [];
-
-    // 2. 개인 일정 가져오기
-    const userEvents = (await getUserEventDocs(uid)) ?? [];
-
-    // 3. 그룹별 일정 가져오기
-    const groupResults = await Promise.all(
-      groupIds.map((groupId) => getGroupEventDocs(groupId)),
-    );
-
-    const groupEvents = groupResults.flatMap((events) => events ?? []);
-
-    // 4. 개인 일정과 그룹 일정 합치기
-    const result = [...userEvents /* ...groupEvents */];
-
-    return ok(result);
-  } catch (e) {
-    console.error("유저 일정 조회 실패:", e);
-    return fail(e);
-  }
 }
 /**
  * 사용자 공개 일정 조회
@@ -174,16 +175,16 @@ export async function getUserEvents() {
  * @returns {Promise<Object>} 사용자 공개 일정 목록
  */
 export async function getUserPublicEvents() {
-  try {
-    let uid = requiredUid();
+    try {
+        let uid = requiredUid();
 
-    let events = await getUserPublicEventDocs(uid);
+        let events = await getUserPublicEventDocs(uid);
 
-    return ok(events);
-  } catch (e) {
-    console.error("유저 공개 일정 조회 실패 : ", e);
-    return fail(e);
-  }
+        return ok(events);
+    } catch (e) {
+        console.error("유저 공개 일정 조회 실패 : ", e);
+        return fail(e);
+    }
 }
 
 /**
@@ -196,27 +197,27 @@ export async function getUserPublicEvents() {
  * @returns {Promise<Object>} 그룹 일정 목록 또는 조회 실패 응답
  */
 export async function getGroupEvents(groupId) {
-  try {
-    console.log("그룹 일정 조회 실행");
-    let uid = requiredUid();
+    try {
+        console.log("그룹 일정 조회 실행");
+        let uid = requiredUid();
 
-    let groupIds = await getUserGroupIds(uid);
+        let groupIds = await getUserGroupIds(uid);
 
-    // 사용자가 속한 그룹인지 확인
-    if (!Object.keys(groupIds).includes(groupId)) {
-      return fail({
-        code: 400,
-        message: "사용자가 속한 그룹이 아닙니다.",
-      });
+        // 사용자가 속한 그룹인지 확인
+        if (!Object.keys(groupIds).includes(groupId)) {
+            return fail({
+                code: 400,
+                message: "사용자가 속한 그룹이 아닙니다.",
+            });
+        }
+
+        let result = await getGroupEventDocs(groupId);
+
+        return ok(result);
+    } catch (e) {
+        console.error("유저 일정 조회 실패 :", e);
+        fail(e);
     }
-
-    let result = await getGroupEventDocs(groupId);
-
-    return ok(result);
-  } catch (e) {
-    console.error("유저 일정 조회 실패 :", e);
-    fail(e);
-  }
 }
 
 /**
@@ -230,37 +231,41 @@ export async function getGroupEvents(groupId) {
  * @returns {Promise<Object>} 일정 수정 결과 (성공 또는 실패 응답)
  */
 export async function updateEvent(eventId, contents = {}) {
-  try {
-    console.log("일정 수정 실행");
+    try {
+        console.log("일정 수정 실행");
 
-    if (!eventId || !contents)
-      return fail({
-        code: 400,
-        message: "필수 입력 사항을 확인해주세요.",
-      });
+        if (!eventId || !contents)
+            return fail({
+                code: 400,
+                message: "필수 입력 사항을 확인해주세요.",
+            });
 
-    requiredUid();
+        requiredUid();
 
-    if (!(await isExistEvent(eventId))) {
-      return fail({
-        code: 400,
-        message: "수정할 일정이 존재하지 않습니다.",
-      });
+        if (!(await isExistEvent(eventId))) {
+            return fail({
+                code: 400,
+                message: "수정할 일정이 존재하지 않습니다.",
+            });
+        }
+
+        const updateField = await getToUpdateContent(
+            "events",
+            eventId,
+            contents,
+        );
+
+        if (!updateField) {
+            return fail({ code: 400, message: "변경된 항목이 없습니다." });
+        }
+
+        let result = await updateEventDoc(eventId, updateField);
+
+        return ok(result);
+    } catch (e) {
+        console.error("일정 수정 실패", e);
+        return fail(e);
     }
-
-    const updateField = await getToUpdateContent("events", eventId, contents);
-
-    if (!updateField) {
-      return fail({ code: 400, message: "변경된 항목이 없습니다." });
-    }
-
-    let result = await updateEventDoc(eventId, updateField);
-
-    return ok(result);
-  } catch (e) {
-    console.error("일정 수정 실패", e);
-    return fail(e);
-  }
 }
 
 /**
@@ -273,30 +278,29 @@ export async function updateEvent(eventId, contents = {}) {
  * @returns {Promise<Object>} 검색된 일정 목록 (검색어가 없으면 null)
  */
 export async function findEventByTitle(title) {
-  try {
-    console.log("일정 검색 실행");
+    try {
+        console.log("일정 검색 실행");
 
-    title = title.trim();
-    if (!title) return ok(null);
+        title = title.trim();
+        if (!title) return ok(null);
 
-    let uid = requiredUid();
+        let uid = requiredUid();
 
-    let events = await findEventDoc(uid, title);
+        let events = await findEventDoc(uid, title);
+        if (events === null) return ok(null);
 
-    const result = events.map((event) => ({
-      ...event,
-      startAt: toDate(event.startAt),
-      endAt: toDate(event.endAt),
-      updateAt: toDate(event.updateAt),
-    }));
+        const result = events.map((event) => ({
+            ...event,
+            startAt: toDate(event.startAt),
+            endAt: toDate(event.endAt),
+            updateAt: toDate(event.updateAt),
+        }));
 
-    console.log(result);
-
-    return ok(result);
-  } catch (e) {
-    console.error("일정 검색 실패", e);
-    return fail(e);
-  }
+        return ok(result);
+    } catch (e) {
+        console.error("일정 검색 실패", e);
+        return fail(e);
+    }
 }
 
 /**
@@ -308,26 +312,26 @@ export async function findEventByTitle(title) {
  * @returns {Promise<Object>} 일정 삭제 결과 (성공 또는 실패 응답)
  */
 export async function deleteEvent(eventId) {
-  try {
-    console.log("일정 삭제 실행");
+    try {
+        console.log("일정 삭제 실행");
 
-    if (!eventId) {
-      return fail({ code: 400, message: "필수 항목을 입력해주세요" });
-    } else if (!(await isExistEvent(eventId))) {
-      return fail({
-        code: 400,
-        message: "삭제할 일정이 존재하지 않습니다.",
-      });
+        if (!eventId) {
+            return fail({ code: 400, message: "필수 항목을 입력해주세요" });
+        } else if (!(await isExistEvent(eventId))) {
+            return fail({
+                code: 400,
+                message: "삭제할 일정이 존재하지 않습니다.",
+            });
+        }
+
+        let result = await deleteEventDoc(eventId);
+
+        if (result) return ok(result);
+        else return fail({ code: 400, message: "존재하지 않는 일정입니다." });
+    } catch (e) {
+        console.error("일정 삭제 실패: ", e);
+        return fail(e);
     }
-
-    let result = await deleteEventDoc(eventId);
-
-    if (result) return ok(result);
-    else return fail({ code: 400, message: "존재하지 않는 일정입니다." });
-  } catch (e) {
-    console.error("일정 삭제 실패: ", e);
-    return fail(e);
-  }
 }
 
 /**
@@ -341,25 +345,25 @@ export async function deleteEvent(eventId) {
  * @returns
  */
 export async function getMonthEvents(year, month) {
-  try {
-    console.log("월별 일정 조회 실행");
-    if (!year || !month) {
-      return fail({
-        code: 400,
-        message: "필수 입력 항목을 입력해주세요",
-      });
+    try {
+        console.log("월별 일정 조회 실행");
+        if (!year || !month) {
+            return fail({
+                code: 400,
+                message: "필수 입력 항목을 입력해주세요",
+            });
+        }
+
+        const uid = requiredUid();
+
+        const result = await getMonthEventDocs(uid, year, month);
+        if (result === null) console.warn("조회된 일정이 없습니다.");
+
+        return ok(result);
+    } catch (e) {
+        console.error("월별 일정 조회 실패 : ", e);
+        return fail(e);
     }
-
-    const uid = requiredUid();
-
-    const result = await getMonthEventDocs(uid, year, month);
-    if (result === null) console.warn("조회된 일정이 없습니다.");
-
-    return ok(result);
-  } catch (e) {
-    console.error("월별 일정 조회 실패 : ", e);
-    return fail(e);
-  }
 }
 
 // ---------ics
@@ -371,11 +375,11 @@ export async function getMonthEvents(year, month) {
  * @returns {string} 복원된 텍스트
  */
 function escapeToText(text) {
-  return text
-    .replace(/\\n/gi, "\n")
-    .replace(/\\,/g, ",")
-    .replace(/\\;/g, ";")
-    .replace(/\\\\/g, "\\");
+    return text
+        .replace(/\\n/gi, "\n")
+        .replace(/\\,/g, ",")
+        .replace(/\\;/g, ";")
+        .replace(/\\\\/g, "\\");
 }
 
 /**
@@ -385,23 +389,23 @@ function escapeToText(text) {
  * @returns {Date} 변환된 date 객체
  */
 function parseIcsDate(value) {
-  const year = Number(value.substring(0, 4));
-  const month = Number(value.substring(4, 6)) - 1; // 월은 0부터
-  const day = Number(value.substring(6, 8));
+    const year = Number(value.substring(0, 4));
+    const month = Number(value.substring(4, 6)) - 1; // 월은 0부터
+    const day = Number(value.substring(6, 8));
 
-  // 날짜만 있는 경우 (종일 일정)
-  if (value.length === 8) return new Date(year, month, day);
+    // 날짜만 있는 경우 (종일 일정)
+    if (value.length === 8) return new Date(year, month, day);
 
-  const hour = Number(value.substring(9, 11));
-  const minute = Number(value.substring(11, 13));
-  const second = Number(value.substring(13, 15));
+    const hour = Number(value.substring(9, 11));
+    const minute = Number(value.substring(11, 13));
+    const second = Number(value.substring(13, 15));
 
-  // Z로 끝나면 UTC 시간 → 브라우저가 한국 시간으로 변환
-  if (value.endsWith("Z")) {
-    return new Date(Date.UTC(year, month, day, hour, minute, second));
-  }
+    // Z로 끝나면 UTC 시간 → 브라우저가 한국 시간으로 변환
+    if (value.endsWith("Z")) {
+        return new Date(Date.UTC(year, month, day, hour, minute, second));
+    }
 
-  return new Date(year, month, day, hour, minute, second);
+    return new Date(year, month, day, hour, minute, second);
 }
 
 /**
@@ -411,39 +415,42 @@ function parseIcsDate(value) {
  * @returns {Object[]} { SUMMARY, DTSTART, DTEND, DESCRIPTION, ... } 형태의 객체 배열
  */
 function parseIcs(text) {
-  // 줄 나누기 (공백/탭으로 시작하는 줄은 이전 줄에 이어붙이기)
-  const lines = [];
-  for (const line of text.split(/\r?\n/)) {
-    if ((line.startsWith(" ") || line.startsWith("\t")) && lines.length > 0) {
-      lines[lines.length - 1] += line.substring(1);
-    } else if (line) {
-      lines.push(line);
+    // 줄 나누기 (공백/탭으로 시작하는 줄은 이전 줄에 이어붙이기)
+    const lines = [];
+    for (const line of text.split(/\r?\n/)) {
+        if (
+            (line.startsWith(" ") || line.startsWith("\t")) &&
+            lines.length > 0
+        ) {
+            lines[lines.length - 1] += line.substring(1);
+        } else if (line) {
+            lines.push(line);
+        }
     }
-  }
 
-  // BEGIN:VEVENT ~ END:VEVENT 사이를 하나의 일정으로 묶기
-  const events = [];
-  let current = null;
-  let inAlarm = false; // 일정 안의 알림(VALARM) 영역은 무시
+    // BEGIN:VEVENT ~ END:VEVENT 사이를 하나의 일정으로 묶기
+    const events = [];
+    let current = null;
+    let inAlarm = false; // 일정 안의 알림(VALARM) 영역은 무시
 
-  for (const line of lines) {
-    if (line === "BEGIN:VEVENT") current = {};
-    else if (line === "END:VEVENT") {
-      if (current) events.push(current);
-      current = null;
-    } else if (line === "BEGIN:VALARM") inAlarm = true;
-    else if (line === "END:VALARM") inAlarm = false;
-    else if (current && !inAlarm) {
-      // 값 안에도 ':'가 있을 수 있으므로 첫 번째 ':' 기준으로만 나누기
-      const index = line.indexOf(":");
-      if (index === -1) continue;
+    for (const line of lines) {
+        if (line === "BEGIN:VEVENT") current = {};
+        else if (line === "END:VEVENT") {
+            if (current) events.push(current);
+            current = null;
+        } else if (line === "BEGIN:VALARM") inAlarm = true;
+        else if (line === "END:VALARM") inAlarm = false;
+        else if (current && !inAlarm) {
+            // 값 안에도 ':'가 있을 수 있으므로 첫 번째 ':' 기준으로만 나누기
+            const index = line.indexOf(":");
+            if (index === -1) continue;
 
-      const name = line.substring(0, index).split(";")[0];
-      current[name] = line.substring(index + 1);
+            const name = line.substring(0, index).split(";")[0];
+            current[name] = line.substring(index + 1);
+        }
     }
-  }
 
-  return events;
+    return events;
 }
 
 /**
@@ -457,49 +464,49 @@ function parseIcs(text) {
  * @returns {Promise<Object>} 저장된 일정 개수 (성공 또는 실패 응답)
  */
 export async function importIcsEvents(file) {
-  try {
-    console.log("ics 일정 가져오기 실행");
+    try {
+        console.log("ics 일정 가져오기 실행");
 
-    if (!file || !file.name.toLowerCase().endsWith(".ics")) {
-      return fail({ code: 400, message: "ics 파일을 선택해주세요." });
+        if (!file || !file.name.toLowerCase().endsWith(".ics")) {
+            return fail({ code: 400, message: "ics 파일을 선택해주세요." });
+        }
+
+        const uid = requiredUid();
+
+        const text = await file.text();
+        const events = [];
+
+        for (const raw of parseIcs(text)) {
+            // 시작 날짜가 없으면 건너뛰기
+            if (!raw.DTSTART) continue;
+
+            const startAt = parseIcsDate(raw.DTSTART);
+            if (isNaN(startAt)) continue;
+
+            let endAt = raw.DTEND ? parseIcsDate(raw.DTEND) : startAt;
+
+            // 종일 일정의 DTEND는 다음 날 0시니까 1ms 빼서 전날 23:59:59로 맞추기
+            if (raw.DTSTART.length === 8 && raw.DTEND) {
+                endAt = new Date(endAt.getTime() - 1);
+            }
+
+            events.push({
+                title: raw.SUMMARY ? escapeToText(raw.SUMMARY) : "(제목 없음)",
+                startAt: startAt,
+                endAt: endAt,
+                memo: raw.DESCRIPTION ? escapeToText(raw.DESCRIPTION) : "",
+            });
+        }
+
+        if (events.length === 0) {
+            return fail({ code: 400, message: "가져올 일정이 없습니다." });
+        }
+
+        const count = await replaceIcsEventDocs(uid, events);
+
+        return ok(count);
+    } catch (e) {
+        console.error("ics 일정 가져오기 실패 : ", e);
+        return fail(e);
     }
-
-    const uid = requiredUid();
-
-    const text = await file.text();
-    const events = [];
-
-    for (const raw of parseIcs(text)) {
-      // 시작 날짜가 없으면 건너뛰기
-      if (!raw.DTSTART) continue;
-
-      const startAt = parseIcsDate(raw.DTSTART);
-      if (isNaN(startAt)) continue;
-
-      let endAt = raw.DTEND ? parseIcsDate(raw.DTEND) : startAt;
-
-      // 종일 일정의 DTEND는 다음 날 0시니까 1ms 빼서 전날 23:59:59로 맞추기
-      if (raw.DTSTART.length === 8 && raw.DTEND) {
-        endAt = new Date(endAt.getTime() - 1);
-      }
-
-      events.push({
-        title: raw.SUMMARY ? escapeToText(raw.SUMMARY) : "(제목 없음)",
-        startAt: startAt,
-        endAt: endAt,
-        memo: raw.DESCRIPTION ? escapeToText(raw.DESCRIPTION) : "",
-      });
-    }
-
-    if (events.length === 0) {
-      return fail({ code: 400, message: "가져올 일정이 없습니다." });
-    }
-
-    const count = await replaceIcsEventDocs(uid, events);
-
-    return ok(count);
-  } catch (e) {
-    console.error("ics 일정 가져오기 실패 : ", e);
-    return fail(e);
-  }
 }
