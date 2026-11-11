@@ -54,7 +54,6 @@
             placeholder="비밀번호를 다시 입력하세요"
           />
         </div>
-
         <!--logup_upput (로그인 입력)-->
 
         <button id="signup_button">회원 가입</button>
@@ -94,7 +93,6 @@
           location.href = "./sign_in.html";
         } catch (e) {
           if (e.code === "auth/weak-password") {
-            // 너무 약한 비번(6자리, 특수문자, 소문자, 숫자)
             console.error("너무 약한 비밀번호");
           } else if (e.code === "auth/email-already-in-use") {
             alert("이미 회원가입이 완료되었습니다.");

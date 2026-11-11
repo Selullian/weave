@@ -4,8 +4,6 @@ import { getGroupInfo } from "../src/services/group.js";
 
 let currentDate = new Date();
 
-let selected_groupId = null;
-
 export async function runTest(title, callback) {
   try {
     const result = await callback();
@@ -217,7 +215,7 @@ document.getElementById("nextBtn").onclick = () => {
   renderSchedule(eventsData);
 };
 
-function Choose_color(hexColor) {
+export function Choose_color(hexColor) {
   let temp_hex = hexColor.replace("#", "");
   if (hexColor === "white") {
     temp_hex = "FFFFFF";
@@ -268,14 +266,10 @@ function render_sidebar_schedule(arr, dateKey) {
   for (let [time, infoList] of Object.entries(render_schedule)) {
     let temp_info = infoList.toString().split(",");
     console.log("infoList : ", infoList);
-
-    // 1. 시간대 안의 일정 카드(card)들을 먼저 백틱으로 조립
     let card_temp = "";
-
     infoList.forEach((infoText) => {
-      // class로 변경하여 중복 id 문제 해결
       card_temp += `
-      <div class="schedule_card" style="background-color: ${temp_info[1]};">
+      <div class="schedule_card" style="background-color: ${temp_info[1]}; color: ${Choose_color(temp_info[0])}">
         ${temp_info[0]}
       </div>
     `;

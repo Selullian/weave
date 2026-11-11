@@ -76,7 +76,7 @@ export async function signUp(name, email, password) {
     const user = userCredential.user;
     console.log("회원가입 auth 성공!");
 
-    await updateProfile(user, { displayName: name });
+    //await updateProfile(user);
 
     // firestore 회원 문서 생성
     await createUserDoc(user.uid, user.email, name);

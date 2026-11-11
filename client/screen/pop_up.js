@@ -242,12 +242,10 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // 3. [첫 번째 버튼: .title_more_img 클릭 처리]
+  //그룹 배경색 다르게하는 팝업 처리
   const titleBtn = e.target.closest(".title_more_img");
   if (titleBtn) {
     let popup = titleBtn.querySelector(".group_color_popup");
-
-    // 팝업 없으면 동적 생성
     if (!popup) {
       titleBtn.insertAdjacentHTML("beforeend", color_popup);
       popup = titleBtn.querySelector(".group_color_popup");
@@ -257,47 +255,41 @@ document.addEventListener("click", async (e) => {
         newInputs[i].value = "#";
       }
     }
-
-    // 토글
     if (popup) {
       popup.classList.toggle("active");
     }
-    return; // 처리 완료 후 종료
+    return;
   }
 
-  // 4. [두 번째 버튼: #user_more_img 클릭 처리]
+  //로그아웃 및 취소 버튼 처리
   const userBtn = e.target.closest("#user_more_img");
   if (userBtn) {
     let morePopup = userBtn.querySelector(".group_buttons");
-
-    // 팝업 없으면 동적 생성
     if (!morePopup) {
       userBtn.insertAdjacentHTML("beforeend", logout_popup);
       morePopup = userBtn.querySelector(".group_buttons");
     }
-
-    // 토글 (morePopup 변수 사용)
     if (morePopup) {
       morePopup.classList.toggle("active");
     }
-    return; // 처리 완료 후 종료
+    return;
   }
 
+  //일정 추가 버튼 처리
   const uploadBtn = e.target.closest("#upload_button");
   if (uploadBtn) {
     let importBtn = uploadBtn.querySelector("#import_popup");
-
     if (!importBtn) {
       uploadBtn.insertAdjacentHTML("beforeend", import_popup);
       importBtn = uploadBtn.querySelector("#import_popup");
     }
-
     if (importBtn) {
       importBtn.classList.toggle("active");
     }
     return;
   }
 
+  //그룹 추가 버튼 처리
   const createGroupBtn = e.target.closest("#add_btn");
   if (createGroupBtn) {
     let create_group = createGroupBtn.querySelector("#create_group_popup");
@@ -312,6 +304,7 @@ document.addEventListener("click", async (e) => {
     }
   }
 
+  //일정 추가 버튼 처리
   const scheduleAddBtn = e.target.closest("#plusBtn");
   if (scheduleAddBtn) {
     let popup = document.querySelector("#add_schedule_popup");
@@ -343,32 +336,21 @@ import { waitForAuth } from "../src/services/auth.js";
 async function renderOptionGroups() {
   try {
     await waitForAuth();
-    console.log("2. 로그인 확인 완료");
-
     const res = await getUserGroups();
-    console.log("3. 그룹 조회 결과:", res);
-
     if (!res || res.success === false) {
       console.error("그룹 데이터 조회 실패");
       return;
     }
-
     const optionContainer = document.getElementById("scheduleGroup");
-
-    console.log("4. select 요소:", optionContainer);
-
     if (!optionContainer) {
       console.error("scheduleGroup 요소가 없습니다.");
       return;
     }
-
     optionContainer.innerHTML = `<option value="">그룹을 선택하세요</option>`;
-
     if (!res.data || res.data.length === 0) {
       console.log("등록된 그룹이 없습니다.");
       return;
     }
-
     res.data.forEach((group) => {
       console.log("추가할 그룹:", group);
 
@@ -378,8 +360,6 @@ async function renderOptionGroups() {
 
       optionContainer.appendChild(option);
     });
-
-    console.log("5. 최종 select HTML:", optionContainer.innerHTML);
   } catch (e) {
     console.error("그룹 옵션 렌더링 오류:", e);
   }

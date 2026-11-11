@@ -132,9 +132,10 @@
     <!--메인보드-->
 
     <script type="module">
-      import { getAuthUser } from "../src/services/auth.js";
+      import { getUserInfo } from "../src/services/auth.js";
       import { getUserGroups } from "../src/services/group.js";
       import { getUserEvents } from "../src/services/calendar.js";
+      import { Choose_color } from "./calendar.js";
 
       let email = "";
       let name = "";
@@ -142,7 +143,7 @@
       /* 유저 DOM 렌더링 함수 */
       let renderUser = () => {
         let str = `<div id="name_btn">
-                <p>${name || "김연서"}</p>
+                <p>${name}</p>
                 <div id="user_more_img">
                   <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%" />
                 </div>
@@ -156,16 +157,17 @@
       /* 유저 정보 가져온 뒤 렌더링 호출 */
       async function getUsersInfo() {
         try {
-          const userInfo = await getAuthUser();
+          const userInfo = await getUserInfo();
 
           if (!userInfo) {
-            alert("사용자 정보가 조회되지 않습니다.");
+            return;
           } else {
             console.log("불러온 유저 정보:", userInfo);
+            console.log("userInfo : ", userInfo);
 
             // auth.js의 반환 구조에 맞게 가져오기 (displayName 또는 name)
-            email = userInfo.email || "";
-            name = userInfo.displayName || userInfo.name || "";
+            email = userInfo.data.email || "";
+            name = userInfo.data.name || "";
 
             renderUser();
           }
@@ -236,7 +238,7 @@
           res.data.forEach((group) => {
             const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupId}">
           <div class="title_more">
-            <h3>${group.name}</h3>
+            <h3 style="color: ${Choose_color(group.color)}">${group.name}</h3>
             <div class="title_more_img">
               <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
             </div>

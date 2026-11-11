@@ -146,7 +146,6 @@ export async function getUserGroupDocs(uid) {
 
     const userObj = toEntity(userRef);
 
-    // 💡 1. userObj.groupIds가 유효한지 안전하게 추출
     let groupIds = [];
     if (userObj && userObj.groupIds) {
       if (Array.isArray(userObj.groupIds)) {
@@ -155,14 +154,11 @@ export async function getUserGroupDocs(uid) {
         groupIds = Object.keys(userObj.groupIds); // 객체 형태인 경우 Key 배열 추출
       }
     }
-
-    // 💡 2. 가입된 그룹이 없거나 빈 배열이면 Firestore 쿼리를 실행하지 않고 즉시 빈 배열 반환!
     if (!groupIds || groupIds.length === 0) {
       console.log("가입된 그룹이 없습니다.");
       return [];
     }
 
-    // 💡 3. 그룹 ID가 있을 때만 Firestore in 쿼리 실행
     const q = query(collection(db, "groups"), where("groupId", "in", groupIds));
     const docsRef = await getDocs(q);
     const result = docsRef.docs.map(toEntity);

@@ -40,7 +40,7 @@ export async function createUserDoc(uid, email, name) {
       uid: uid,
       name: name,
       email: email,
-      groupIds: {},
+      groupIds: [],
     });
     console.log("Document 생성 완료, name : ", name);
     return true;
