@@ -1,337 +1,362 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weave - 그룹 관리 테스트</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Weave - 그룹 관리 테스트</title>
 
-    <style>
-      * {
-        box-sizing: border-box;
-      }
+        <style>
+            * {
+                box-sizing: border-box;
+            }
 
-      body {
-        margin: 0;
-        padding: 30px;
-        background: #f4f5f7;
-        font-family: Arial, sans-serif;
-        color: #222;
-      }
+            body {
+                margin: 0;
+                padding: 30px;
+                background: #f4f5f7;
+                font-family: Arial, sans-serif;
+                color: #222;
+            }
 
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-      }
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+            }
 
-      h1 {
-        margin-bottom: 8px;
-      }
+            h1 {
+                margin-bottom: 8px;
+            }
 
-      .description {
-        color: #666;
-        margin-bottom: 30px;
-      }
+            .description {
+                color: #666;
+                margin-bottom: 30px;
+            }
 
-      .section {
-        background: white;
-        padding: 24px;
-        margin-bottom: 20px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px #0000000a;
-      }
+            .section {
+                background: white;
+                padding: 24px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px #0000000a;
+            }
 
-      .section h2 {
-        margin-top: 0;
-        font-size: 20px;
-      }
+            .section h2 {
+                margin-top: 0;
+                font-size: 20px;
+            }
 
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-        margin-bottom: 14px;
-      }
+            .field {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                margin-bottom: 14px;
+            }
 
-      input,
-      textarea {
-        width: 100%;
-        padding: 11px;
-        border: 1px solid #ddd;
-        border-radius: 7px;
-        font-size: 14px;
-      }
+            input,
+            textarea {
+                width: 100%;
+                padding: 11px;
+                border: 1px solid #ddd;
+                border-radius: 7px;
+                font-size: 14px;
+            }
 
-      textarea {
-        min-height: 75px;
-        resize: vertical;
-      }
+            textarea {
+                min-height: 75px;
+                resize: vertical;
+            }
 
-      input[type="color"] {
-        width: 65px;
-        height: 40px;
-        padding: 3px;
-      }
+            input[type="color"] {
+                width: 65px;
+                height: 40px;
+                padding: 3px;
+            }
 
-      .checkbox {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 12px 0;
-      }
+            .checkbox {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 12px 0;
+            }
 
-      .checkbox input {
-        width: auto;
-      }
+            .checkbox input {
+                width: auto;
+            }
 
-      button {
-        padding: 10px 16px;
-        border: none;
-        border-radius: 7px;
-        background: #2563eb;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-      }
+            button {
+                padding: 10px 16px;
+                border: none;
+                border-radius: 7px;
+                background: #2563eb;
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+            }
 
-      button:hover {
-        opacity: 0.85;
-      }
+            button:hover {
+                opacity: 0.85;
+            }
 
-      .danger {
-        background: #dc2626;
-      }
+            .danger {
+                background: #dc2626;
+            }
 
-      .secondary {
-        background: #555;
-      }
+            .secondary {
+                background: #555;
+            }
 
-      .result-section {
-        background: #171923;
-        color: white;
-        padding: 24px;
-        border-radius: 12px;
-      }
+            .result-section {
+                background: #171923;
+                color: white;
+                padding: 24px;
+                border-radius: 12px;
+            }
 
-      .result-section h2 {
-        margin-top: 0;
-      }
+            .result-section h2 {
+                margin-top: 0;
+            }
 
-      #result {
-        min-height: 150px;
-        max-height: 500px;
-        overflow: auto;
-        white-space: pre-wrap;
-        word-break: break-all;
-        font-size: 13px;
-        line-height: 1.6;
-        color: #cbd5e1;
-      }
+            #result {
+                min-height: 150px;
+                max-height: 500px;
+                overflow: auto;
+                white-space: pre-wrap;
+                word-break: break-all;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #cbd5e1;
+            }
 
-      .hint {
-        color: #777;
-        font-size: 13px;
-        margin-top: 8px;
-      }
-    </style>
-  </head>
+            .hint {
+                color: #777;
+                font-size: 13px;
+                margin-top: 8px;
+            }
+        </style>
+    </head>
 
-  <body>
-    <div class="container">
-      <h1>Weave 그룹 관리 테스트</h1>
-      <p class="description">
-        Firebase에 로그인한 상태에서 그룹 관리 기능을 테스트합니다.
-      </p>
+    <body>
+        <div class="container">
+            <h1>Weave 그룹 관리 테스트</h1>
+            <p class="description">
+                Firebase에 로그인한 상태에서 그룹 관리 기능을 테스트합니다.
+            </p>
 
-      <!-- 1. 그룹 생성 -->
-      <section class="section">
-        <h2>1. 그룹 생성</h2>
+            <!-- 1. 그룹 생성 -->
+            <section class="section">
+                <h2>1. 그룹 생성</h2>
 
-        <form id="createForm">
-          <div class="field">
-            <label for="createName">그룹 이름</label>
-            <input id="createName" type="text" placeholder="그룹 이름" />
-          </div>
+                <form id="createForm">
+                    <div class="field">
+                        <label for="createName">그룹 이름</label>
+                        <input
+                            id="createName"
+                            type="text"
+                            placeholder="그룹 이름"
+                        />
+                    </div>
 
-          <div class="field">
-            <label for="createDescription">그룹 설명</label>
-            <textarea id="createDescription" placeholder="그룹 설명"></textarea>
-          </div>
+                    <div class="field">
+                        <label for="createDescription">그룹 설명</label>
+                        <textarea
+                            id="createDescription"
+                            placeholder="그룹 설명"
+                        ></textarea>
+                    </div>
 
-          <div class="field">
-            <label for="createColor">그룹 색상</label>
-            <input id="createColor" type="color" value="#2563eb" />
-          </div>
+                    <div class="field">
+                        <label for="createColor">그룹 색상</label>
+                        <input id="createColor" type="color" value="#2563eb" />
+                    </div>
 
-          <button type="submit">그룹 생성</button>
-        </form>
-      </section>
+                    <button type="submit">그룹 생성</button>
+                </form>
+            </section>
 
-      <!-- 2. 내 그룹 전체 조회 -->
-      <section class="section">
-        <h2>2. 내 그룹 전체 조회</h2>
+            <!-- 2. 내 그룹 전체 조회 -->
+            <section class="section">
+                <h2>2. 내 그룹 전체 조회</h2>
 
-        <button id="getUserGroupsBtn">내 그룹 조회</button>
-      </section>
+                <button id="getUserGroupsBtn">내 그룹 조회</button>
+            </section>
 
-      <!-- 3. 특정 그룹 조회 -->
-      <section class="section">
-        <h2>3. 특정 그룹 조회</h2>
+            <!-- 3. 특정 그룹 조회 -->
+            <section class="section">
+                <h2>3. 특정 그룹 조회</h2>
 
-        <div class="field">
-          <label for="readGroupId">그룹 ID</label>
-          <input id="readGroupId" type="text" placeholder="조회할 그룹 ID" />
+                <div class="field">
+                    <label for="readGroupId">그룹 ID</label>
+                    <input
+                        id="readGroupId"
+                        type="text"
+                        placeholder="조회할 그룹 ID"
+                    />
+                </div>
+
+                <button id="getGroupInfoBtn">그룹 정보 조회</button>
+            </section>
+
+            <!-- 4. 그룹 정보 수정 -->
+            <section class="section">
+                <h2>4. 그룹 정보 수정</h2>
+
+                <div class="field">
+                    <label for="updateGroupId">그룹 ID</label>
+                    <input
+                        id="updateGroupId"
+                        type="text"
+                        placeholder="수정할 그룹 ID"
+                    />
+                </div>
+
+                <div class="field">
+                    <label for="updateName">변경할 그룹 이름</label>
+                    <input
+                        id="updateName"
+                        type="text"
+                        placeholder="변경할 이름 (선택)"
+                    />
+                </div>
+
+                <div class="field">
+                    <label for="updateDescription">변경할 그룹 설명</label>
+                    <textarea
+                        id="updateDescription"
+                        placeholder="변경할 설명 (선택)"
+                    ></textarea>
+                </div>
+
+                <div class="checkbox">
+                    <input id="changeColor" type="checkbox" />
+                    <label for="changeColor"> 그룹 색상도 변경하기 </label>
+                </div>
+
+                <div class="field">
+                    <label for="updateColor">변경할 그룹 색상</label>
+                    <input id="updateColor" type="color" value="#2563eb" />
+                </div>
+
+                <button id="updateGroupBtn">그룹 수정</button>
+            </section>
+
+            <!-- 5. 그룹 삭제 -->
+            <section class="section">
+                <h2>5. 그룹 삭제</h2>
+
+                <div class="field">
+                    <label for="deleteGroupId">그룹 ID</label>
+                    <input
+                        id="deleteGroupId"
+                        type="text"
+                        placeholder="삭제할 그룹 ID"
+                    />
+                </div>
+
+                <button id="deleteGroupBtn" class="danger">그룹 삭제</button>
+            </section>
+
+            <!-- 6. 멤버 추가 -->
+            <section class="section">
+                <h2>6. 멤버 추가</h2>
+
+                <div class="field">
+                    <label for="addMemberGroupId">그룹 ID</label>
+                    <input
+                        id="addMemberGroupId"
+                        type="text"
+                        placeholder="멤버를 추가할 그룹 ID"
+                    />
+                </div>
+
+                <button id="addMemberBtn">현재 로그인한 사용자 추가</button>
+
+                <p class="hint">
+                    현재 로그인한 Firebase 사용자의 UID를 그룹에 추가합니다.
+                </p>
+            </section>
+
+            <!-- 7. 멤버 삭제 -->
+            <section class="section">
+                <h2>7. 멤버 삭제</h2>
+
+                <div class="field">
+                    <label for="deleteMemberGroupId">그룹 ID</label>
+                    <input
+                        id="deleteMemberGroupId"
+                        type="text"
+                        placeholder="멤버를 삭제할 그룹 ID"
+                    />
+                </div>
+
+                <button id="deleteMemberBtn" class="danger">
+                    현재 로그인한 사용자 삭제
+                </button>
+
+                <p class="hint">
+                    현재 로그인한 Firebase 사용자를 해당 그룹에서 삭제합니다.
+                </p>
+            </section>
+
+            <!-- 8. 그룹 멤버 목록 조회 -->
+            <section class="section">
+                <h2>8. 그룹 멤버 목록 조회</h2>
+
+                <div class="field">
+                    <label for="getMembersGroupId">그룹 ID</label>
+                    <input
+                        id="getMembersGroupId"
+                        type="text"
+                        placeholder="멤버 목록을 조회할 그룹 ID"
+                    />
+                </div>
+
+                <button id="getMembersBtn">멤버 목록 조회</button>
+
+                <p class="hint">해당 그룹에 소속된 멤버 목록을 조회합니다.</p>
+            </section>
+
+            <!-- 테스트 결과 -->
+            <section class="result-section">
+                <h2>테스트 결과</h2>
+
+                <button id="clearResultBtn" class="secondary">
+                    결과 지우기
+                </button>
+
+                <pre id="result">테스트 결과가 여기에 표시됩니다.</pre>
+            </section>
         </div>
 
-        <button id="getGroupInfoBtn">그룹 정보 조회</button>
-      </section>
-
-      <!-- 4. 그룹 정보 수정 -->
-      <section class="section">
-        <h2>4. 그룹 정보 수정</h2>
-
-        <div class="field">
-          <label for="updateGroupId">그룹 ID</label>
-          <input id="updateGroupId" type="text" placeholder="수정할 그룹 ID" />
-        </div>
-
-        <div class="field">
-          <label for="updateName">변경할 그룹 이름</label>
-          <input id="updateName" type="text" placeholder="변경할 이름 (선택)" />
-        </div>
-
-        <div class="field">
-          <label for="updateDescription">변경할 그룹 설명</label>
-          <textarea
-            id="updateDescription"
-            placeholder="변경할 설명 (선택)"
-          ></textarea>
-        </div>
-
-        <div class="checkbox">
-          <input id="changeColor" type="checkbox" />
-          <label for="changeColor"> 그룹 색상도 변경하기 </label>
-        </div>
-
-        <div class="field">
-          <label for="updateColor">변경할 그룹 색상</label>
-          <input id="updateColor" type="color" value="#2563eb" />
-        </div>
-
-        <button id="updateGroupBtn">그룹 수정</button>
-      </section>
-
-      <!-- 5. 그룹 삭제 -->
-      <section class="section">
-        <h2>5. 그룹 삭제</h2>
-
-        <div class="field">
-          <label for="deleteGroupId">그룹 ID</label>
-          <input id="deleteGroupId" type="text" placeholder="삭제할 그룹 ID" />
-        </div>
-
-        <button id="deleteGroupBtn" class="danger">그룹 삭제</button>
-      </section>
-
-      <!-- 6. 멤버 추가 -->
-      <section class="section">
-        <h2>6. 멤버 추가</h2>
-
-        <div class="field">
-          <label for="addMemberGroupId">그룹 ID</label>
-          <input
-            id="addMemberGroupId"
-            type="text"
-            placeholder="멤버를 추가할 그룹 ID"
-          />
-        </div>
-
-        <button id="addMemberBtn">현재 로그인한 사용자 추가</button>
-
-        <p class="hint">
-          현재 로그인한 Firebase 사용자의 UID를 그룹에 추가합니다.
-        </p>
-      </section>
-
-      <!-- 7. 멤버 삭제 -->
-      <section class="section">
-        <h2>7. 멤버 삭제</h2>
-
-        <div class="field">
-          <label for="deleteMemberGroupId">그룹 ID</label>
-          <input
-            id="deleteMemberGroupId"
-            type="text"
-            placeholder="멤버를 삭제할 그룹 ID"
-          />
-        </div>
-
-        <button id="deleteMemberBtn" class="danger">
-          현재 로그인한 사용자 삭제
-        </button>
-
-        <p class="hint">
-          현재 로그인한 Firebase 사용자를 해당 그룹에서 삭제합니다.
-        </p>
-      </section>
-
-      <!-- 8. 그룹 멤버 목록 조회 -->
-      <section class="section">
-        <h2>8. 그룹 멤버 목록 조회</h2>
-
-        <div class="field">
-          <label for="getMembersGroupId">그룹 ID</label>
-          <input
-            id="getMembersGroupId"
-            type="text"
-            placeholder="멤버 목록을 조회할 그룹 ID"
-          />
-        </div>
-
-        <button id="getMembersBtn">멤버 목록 조회</button>
-
-        <p class="hint">해당 그룹에 소속된 멤버 목록을 조회합니다.</p>
-      </section>
-
-      <!-- 테스트 결과 -->
-      <section class="result-section">
-        <h2>테스트 결과</h2>
-
-        <button id="clearResultBtn" class="secondary">결과 지우기</button>
-
-        <pre id="result">테스트 결과가 여기에 표시됩니다.</pre>
-      </section>
-    </div>
-
-    <script type="module">
-      /*
+        <script type="module">
+            /*
     ===================================
     서비스 함수 import
     ===================================
     */
 
-      import {
-        createGroup,
-        getUserGroups,
-        getGroupInfo,
-        updateGroup,
-        deleteGroup,
-        addMember,
-        deleteMember,
-        getMembers,
-      } from "../src/services/group.js";
+            import {
+                createGroup,
+                getUserGroups,
+                getGroupInfo,
+                updateGroup,
+                deleteGroup,
+                addMember,
+                deleteMember,
+                getMembers,
+            } from "../src/services/group.js";
 
-      /*
+            /*
     ===================================
     테스트 결과 출력
     ===================================
     */
 
-      const resultElement = document.getElementById("result");
+            const resultElement = document.getElementById("result");
 
-      function printResult(title, result) {
-        const time = new Date().toLocaleTimeString();
+            function printResult(title, result) {
+                const time = new Date().toLocaleTimeString();
 
-        const output = `
+                const output = `
 [${time}] ${title}
 
 ${JSON.stringify(result, null, 2)}
@@ -340,212 +365,230 @@ ${JSON.stringify(result, null, 2)}
 
 `;
 
-        resultElement.textContent = output + resultElement.textContent;
-      }
+                resultElement.textContent = output + resultElement.textContent;
+            }
 
-      /*
+            /*
     ===================================
     공통 테스트 실행 함수
     ===================================
     */
 
-      async function runTest(title, callback) {
-        try {
-          const result = await callback();
+            async function runTest(title, callback) {
+                try {
+                    const result = await callback();
 
-          printResult(title, result);
+                    printResult(title, result);
 
-          return result;
-        } catch (error) {
-          const errorResult = {
-            success: false,
-            message: error.message,
-            stack: error.stack,
-          };
+                    return result;
+                } catch (error) {
+                    const errorResult = {
+                        success: false,
+                        message: error.message,
+                        stack: error.stack,
+                    };
 
-          printResult(title + " - 예외 발생", errorResult);
+                    printResult(title + " - 예외 발생", errorResult);
 
-          return errorResult;
-        }
-      }
+                    return errorResult;
+                }
+            }
 
-      /*
+            /*
     ===================================
     1. 그룹 생성
     ===================================
     */
 
-      document
-        .getElementById("createForm")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
+            document
+                .getElementById("createForm")
+                .addEventListener("submit", async (event) => {
+                    event.preventDefault();
 
-          const name = document.getElementById("createName").value.trim();
+                    const name = document
+                        .getElementById("createName")
+                        .value.trim();
 
-          const description = document
-            .getElementById("createDescription")
-            .value.trim();
+                    const description = document
+                        .getElementById("createDescription")
+                        .value.trim();
 
-          const color = document.getElementById("createColor").value;
+                    const color = document.getElementById("createColor").value;
 
-          await runTest("그룹 생성", () =>
-            createGroup({
-              name,
-              description,
-              color,
-            }),
-          );
-        });
+                    await runTest("그룹 생성", () =>
+                        createGroup({
+                            name,
+                            description,
+                            color,
+                        }),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     2. 내 그룹 전체 조회
     ===================================
     */
 
-      document
-        .getElementById("getUserGroupsBtn")
-        .addEventListener("click", async () => {
-          await runTest("내 그룹 전체 조회", () => getUserGroups());
-        });
+            document
+                .getElementById("getUserGroupsBtn")
+                .addEventListener("click", async () => {
+                    await runTest("내 그룹 전체 조회", () => getUserGroups());
+                });
 
-      /*
+            /*
     ===================================
     3. 특정 그룹 조회
     ===================================
     */
 
-      document
-        .getElementById("getGroupInfoBtn")
-        .addEventListener("click", async () => {
-          const groupId = document.getElementById("readGroupId").value.trim();
+            document
+                .getElementById("getGroupInfoBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("readGroupId")
+                        .value.trim();
 
-          await runTest("특정 그룹 조회", () => getGroupInfo(groupId));
-        });
+                    await runTest("특정 그룹 조회", () =>
+                        getGroupInfo(groupId),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     4. 그룹 정보 수정
     ===================================
     */
 
-      document
-        .getElementById("updateGroupBtn")
-        .addEventListener("click", async () => {
-          const groupId = document.getElementById("updateGroupId").value.trim();
+            document
+                .getElementById("updateGroupBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("updateGroupId")
+                        .value.trim();
 
-          const name = document.getElementById("updateName").value.trim();
+                    const name = document
+                        .getElementById("updateName")
+                        .value.trim();
 
-          const description = document
-            .getElementById("updateDescription")
-            .value.trim();
+                    const description = document
+                        .getElementById("updateDescription")
+                        .value.trim();
 
-          const changeColor = document.getElementById("changeColor").checked;
+                    const changeColor =
+                        document.getElementById("changeColor").checked;
 
-          const color = document.getElementById("updateColor").value;
+                    const color = document.getElementById("updateColor").value;
 
-          // 입력한 항목만 수정 내용에 포함
-          const contents = {};
+                    // 입력한 항목만 수정 내용에 포함
+                    const contents = {};
 
-          if (name) {
-            contents.name = name;
-          }
+                    if (name) {
+                        contents.name = name;
+                    }
 
-          if (description) {
-            contents.description = description;
-          }
+                    if (description) {
+                        contents.description = description;
+                    }
 
-          if (changeColor) {
-            contents.color = color;
-          }
+                    if (changeColor) {
+                        contents.color = color;
+                    }
 
-          await runTest("그룹 정보 수정", () => updateGroup(groupId, contents));
-        });
+                    await runTest("그룹 정보 수정", () =>
+                        updateGroup(groupId, contents),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     5. 그룹 삭제
     ===================================
     */
 
-      document
-        .getElementById("deleteGroupBtn")
-        .addEventListener("click", async () => {
-          const groupId = document.getElementById("deleteGroupId").value.trim();
+            document
+                .getElementById("deleteGroupBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("deleteGroupId")
+                        .value.trim();
 
-          if (!confirm("정말 해당 그룹을 삭제하시겠습니까?")) {
-            return;
-          }
+                    if (!confirm("정말 해당 그룹을 삭제하시겠습니까?")) {
+                        return;
+                    }
 
-          await runTest("그룹 삭제", () => deleteGroup(groupId));
-        });
+                    await runTest("그룹 삭제", () => deleteGroup(groupId));
+                });
 
-      /*
+            /*
     ===================================
     6. 멤버 추가
     ===================================
     */
 
-      document
-        .getElementById("addMemberBtn")
-        .addEventListener("click", async () => {
-          const groupId = document
-            .getElementById("addMemberGroupId")
-            .value.trim();
+            document
+                .getElementById("addMemberBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("addMemberGroupId")
+                        .value.trim();
 
-          await runTest("현재 로그인한 사용자 멤버 추가", () =>
-            addMember(groupId),
-          );
-        });
+                    await runTest("현재 로그인한 사용자 멤버 추가", () =>
+                        addMember(groupId),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     7. 멤버 삭제
     ===================================
     */
 
-      document
-        .getElementById("deleteMemberBtn")
-        .addEventListener("click", async () => {
-          const groupId = document
-            .getElementById("deleteMemberGroupId")
-            .value.trim();
+            document
+                .getElementById("deleteMemberBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("deleteMemberGroupId")
+                        .value.trim();
 
-          if (!confirm("정말 해당 그룹에서 나가시겠습니까?")) {
-            return;
-          }
+                    if (!confirm("정말 해당 그룹에서 나가시겠습니까?")) {
+                        return;
+                    }
 
-          await runTest("현재 로그인한 사용자 멤버 삭제", () =>
-            deleteMember(groupId),
-          );
-        });
+                    await runTest("현재 로그인한 사용자 멤버 삭제", () =>
+                        deleteMember(groupId),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     8. 그룹 멤버 목록 조회
     ===================================
     */
-      document
-        .getElementById("getMembersBtn")
-        .addEventListener("click", async () => {
-          const groupId = document
-            .getElementById("getMembersGroupId")
-            .value.trim();
+            document
+                .getElementById("getMembersBtn")
+                .addEventListener("click", async () => {
+                    const groupId = document
+                        .getElementById("getMembersGroupId")
+                        .value.trim();
 
-          await runTest("그룹 멤버 목록 조회", () => getMembers(groupId));
-        });
+                    await runTest("그룹 멤버 목록 조회", () =>
+                        getMembers(groupId),
+                    );
+                });
 
-      /*
+            /*
     ===================================
     결과 초기화
     ===================================
     */
 
-      document
-        .getElementById("clearResultBtn")
-        .addEventListener("click", () => {
-          resultElement.textContent = "테스트 결과가 여기에 표시됩니다.";
-        });
-    </script>
-  </body>
+            document
+                .getElementById("clearResultBtn")
+                .addEventListener("click", () => {
+                    resultElement.textContent =
+                        "테스트 결과가 여기에 표시됩니다.";
+                });
+        </script>
+    </body>
 </html>
