@@ -6,7 +6,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="./combinedPage.css" />
     <link rel="stylesheet" href="./pop_up.css" />
-    <script type="module" src="./calendar.js" defer></script>
+    <script type="module" src="./calendar_screen.js" defer></script>
     <script type="module" src="./pop_up.js"></script>
   </head>
   <body>
@@ -199,9 +199,9 @@
       /* 내 그룹 전체 조회 후 화면에 그리기 */
       async function selectGroup() {
         const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
-        console.log(res);
+        console.log("res: ", res);
 
-        if (!res || res.success === false) {
+        if (res.data.length === 0) {
           document.getElementById("result_group").innerHTML =
             `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
           return;
@@ -237,14 +237,14 @@
           // 5. 그룹 렌더링
           res.data.forEach((group) => {
             const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupId}">
-          <div class="title_more">
-            <h3 style="color: ${Choose_color(group.color)}">${group.name}</h3>
-            <div class="title_more_img">
-              <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
-            </div>
-          </div>
-          <p>${group.description}</p>
-        </div>`;
+              <div class="title_more">
+                <h3 style="color: ${Choose_color(group.color)}">${group.name}</h3>
+                <div class="title_more_img">
+                  <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
+                </div>
+              </div>
+              <p>${group.description}</p>
+            </div>`;
 
             groupListContainer.insertAdjacentHTML("beforeend", groupItem);
           });

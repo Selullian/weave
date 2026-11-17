@@ -87,19 +87,26 @@
         console.log("회원가입 실행됨.", email);
 
         // 사용자 출력 칸
-        const result = await signUp(name, email, password);
+        if (password !== password_check) {
+          alert("비밀번호와 비밀번호 확인이 다릅니다");
+        } else {
+          const result = await signUp(name, email, password);
 
-        if (!result.success) {
-          if (result.error.code === "auth/weak-password") {
-            alert("비밀번호가 너무 약합니다.");
-          } else if (result.error.code === "auth/email-already-in-use") {
-            alert("이미 회원가입된 이메일입니다.");
+          if (!result.success) {
+            if (result.error.code === "auth/weak-password") {
+              alert("비밀번호가 너무 약합니다.");
+            } else if (result.error.code === "auth/email-already-in-use") {
+              alert("이미 회원가입된 이메일입니다.");
+            } else {
+              alert("회원가입에 실패했습니다.");
+              console.error(result.error);
+            }
+
+            return;
           } else {
-            alert("회원가입에 실패했습니다.");
-            console.error(result.error);
+            alert("회원가입에 성공하였습니다.");
+            location.href = "./combinedPage.html";
           }
-
-          return;
         }
       });
     </script>

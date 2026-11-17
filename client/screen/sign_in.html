@@ -66,21 +66,31 @@
         const email = signInEmailInput.value;
         const password = signInPasswordInput.value;
 
-        console.log("로그인 실행 : " + email);
-        // 사용자 출력 칸
-        try {
-          const user = await signIn(email, password);
+        console.log("로그인 실행:", email);
 
-          console.log("로그인 성공:", user.email);
+        try {
+          const result = await signIn(email, password);
+
+          if (!result.success) {
+            if (result.error.code === "auth/missing-password") {
+              alert("비밀번호를 입력해주세요.");
+            } else if (
+              result.error.code === "auth/user-not-found" ||
+              result.error.code === "auth/invalid-credential"
+            ) {
+              alert("가입되지 않았거나 로그인 정보가 올바르지 않습니다.");
+            } else {
+              alert("로그인에 실패했습니다.");
+              console.error("로그인 실패:", result.error);
+            }
+
+            return;
+          }
+
+          console.log("로그인 성공:", result.data.email);
           location.href = "./combinedPage.html";
         } catch (e) {
-          if (e.code === "auth/missing-password") {
-            // 비밀번호 입력X
-            alert("비밀번호를 입력해주세요");
-          } else {
-            alert("로그인이 실패하였습니다 (아이디와 비밀번호를 확인해주세요)");
-            console.log("로그인 실패 : ", e);
-          }
+          console.error("로그인 처리 오류:", e);
         }
       });
     </script>
