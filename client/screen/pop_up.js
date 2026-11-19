@@ -2,6 +2,7 @@ import { logOut } from "../src/services/auth.js";
 import { createGroup, getUserGroups } from "../src/services/group.js";
 import { createEvent } from "../src/services/calendar.js";
 import { getMyEvent } from "./calendar_screen.js";
+import { runTest } from "./test.js";
 
 let color_popup = `
 <div class="group_color_popup">
@@ -364,4 +365,3 @@ async function renderOptionGroups() {
     console.error("그룹 옵션 렌더링 오류:", e);
   }
 }
-renderOptionGroups();

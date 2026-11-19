@@ -48,8 +48,13 @@
           </div>
           <!--제목 및 알람-->
           <div id="group_search_box">
-            <input type="text" placeholder="그룹 검색" />
-            <button>
+            <input
+              type="text"
+              id="group_search_input"
+              placeholder="그룹 검색"
+            />
+
+            <button id="group_search_btn">
               <img
                 src="../assets/Search.png"
                 alt="검색 버튼"
@@ -57,7 +62,6 @@
                 height="100%"
               />
             </button>
-            <!--버튼-->
           </div>
           <!--검색 도구-->
         </div>
@@ -136,9 +140,11 @@
       import { getUserGroups } from "../src/services/group.js";
       import { getUserEvents } from "../src/services/calendar.js";
       import { Choose_color } from "./calendar_screen.js";
+      import { runTest } from "./test.js";
 
       let email = "";
       let name = "";
+      let allGroups = [];
 
       /* 유저 DOM 렌더링 함수 */
       let renderUser = () => {
@@ -176,82 +182,118 @@
         }
       }
 
-      export async function runTest(title, callback) {
-        try {
-          const result = await callback();
-          if (typeof printResult === "function") {
-            printResult(title, result);
-          }
-          return result;
-        } catch (error) {
-          const errorResult = {
-            success: false,
-            message: error.message,
-            stack: error.stack,
-          };
-          if (typeof printResult === "function") {
-            printResult(title + " - 예외 발생", errorResult);
-          }
-          return errorResult;
-        }
-      }
+      /* 그룹 목록을 화면에 렌더링하는 함수 */
+      function renderGroup(
+        groups,
+        emptyMessage = "현재 가입된 그룹이 없습니다.",
+      ) {
+        const groupListContainer = document.getElementById("result_group");
 
-      /* 내 그룹 전체 조회 후 화면에 그리기 */
-      async function selectGroup() {
-        const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
-        console.log("res: ", res);
-
-        if (res.data.length === 0) {
-          document.getElementById("result_group").innerHTML =
-            `<div id="no_group">현재 가입된 그룹이 없습니다.</div>`;
+        if (!groupListContainer) {
+          console.error("result_group 요소를 찾을 수 없습니다.");
           return;
         }
 
-        if (res && res.success && Array.isArray(res.data)) {
-          renderGroup(res.data);
-        } else if (Array.isArray(res)) {
-          renderGroup(res);
-        } else {
-          console.log("실패!");
+        // 기존 그룹 목록 비우기
+        groupListContainer.innerHTML = "";
+
+        // 그룹이 없으면 안내 문구 출력
+        if (groups.length === 0) {
+          groupListContainer.innerHTML = `<div id="no_group">${emptyMessage}</div>`;
+          return;
         }
+
+        // 그룹 목록 렌더링
+        groups.forEach((group) => {
+          const groupItem = `
+      <div class="render_group"
+        style="background-color: ${group.color};"
+        key="${group.groupId}">
+
+        <div class="title_more">
+          <h3 style="color: ${Choose_color(group.color)}">
+            ${group.name}
+          </h3>
+
+          <div class="title_more_img">
+            <img
+              src="../assets/More horizontal.png"
+              alt="이미지"
+              width="100%"
+              height="100%"
+            />
+          </div>
+        </div>
+
+        <p>${group.description}</p>
+      </div>
+    `;
+
+          groupListContainer.insertAdjacentHTML("beforeend", groupItem);
+        });
       }
 
+      /* 내 그룹 전체 조회 */
+      async function selectGroup() {
+        const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
+
+        console.log("res:", res);
+
+        if (!res || !res.success || !Array.isArray(res.data)) {
+          console.log("그룹 조회 실패!");
+          return;
+        }
+
+        // 전체 그룹 데이터 저장
+        allGroups = res.data;
+
+        // 현재 검색어에 맞게 화면 갱신
+        searchGroup(document.getElementById("group_search_input").value);
+      }
+
+      /* 그룹 검색 함수 */
+      function searchGroup(searchText) {
+        const keyword = searchText.trim().toLowerCase();
+
+        // 검색어가 비어 있으면 전체 그룹 출력
+        if (keyword === "") {
+          renderGroup(allGroups);
+          return;
+        }
+
+        // 그룹 이름에 검색어가 포함된 그룹만 추출
+        const filteredGroups = allGroups.filter((group) =>
+          group.name.toLowerCase().includes(keyword),
+        );
+
+        // 검색 결과 출력
+        renderGroup(filteredGroups, "검색 결과가 없습니다.");
+      }
+
+      /* 검색창 이벤트 연결 */
+      const searchInput = document.getElementById("group_search_input");
+      const searchButton = document.getElementById("group_search_btn");
+
+      // 입력할 때마다 검색
+      searchInput.addEventListener("input", (e) => {
+        searchGroup(e.target.value);
+      });
+
+      // 검색 버튼을 눌러도 검색
+      searchButton.addEventListener("click", () => {
+        searchGroup(searchInput.value);
+      });
+
+      /* 앱 초기화 */
       async function initApp() {
         await getUsersInfo();
         await selectGroup();
       }
 
+      // 그룹 생성 등으로 목록을 새로고침할 때 사용할 함수
+      window.renderGroup = selectGroup;
+
       initApp();
-      window.runTest = runTest;
-
-      window.renderGroup = async function () {
-        try {
-          const res = await getUserGroups();
-          const groupListContainer = document.getElementById("result_group");
-          if (!groupListContainer) {
-            console.error("group_list 요소를 찾을 수 없습니다.");
-            return;
-          }
-          groupListContainer.innerHTML = "";
-          console.log("res : ", res.data);
-          // 5. 그룹 렌더링
-          res.data.forEach((group) => {
-            const groupItem = `<div class="render_group" style="background-color: ${group.color};" key="${group.groupId}">
-              <div class="title_more">
-                <h3 style="color: ${Choose_color(group.color)}">${group.name}</h3>
-                <div class="title_more_img">
-                  <img src="../assets/More horizontal.png" alt="이미지" width="100%" height="100%"/>
-                </div>
-              </div>
-              <p>${group.description}</p>
-            </div>`;
-
-            groupListContainer.insertAdjacentHTML("beforeend", groupItem);
-          });
-        } catch (error) {
-          console.error("🚨 renderGroup 실행 중 오류:", error);
-        }
-      };
     </script>
   </body>
 </html>

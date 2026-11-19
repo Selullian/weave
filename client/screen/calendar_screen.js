@@ -4,26 +4,6 @@ import { getGroupInfo } from "../src/services/group.js";
 
 let currentDate = new Date();
 
-export async function runTest(title, callback) {
-  try {
-    const result = await callback();
-    if (typeof printResult === "function") {
-      printResult(title, result);
-    }
-    return result;
-  } catch (error) {
-    const errorResult = {
-      success: false,
-      message: error.message,
-      stack: error.stack,
-    };
-    if (typeof printResult === "function") {
-      printResult(title + " - 예외 발생", errorResult);
-    }
-    return errorResult;
-  }
-}
-
 //클릭 시 보라색 배경 나타나는 로직
 function toggle_click() {
   document.addEventListener("click", async (e) => {
