@@ -145,6 +145,7 @@
       let email = "";
       let name = "";
       let allGroups = [];
+      let selectedGroupIds = [];
 
       /* 유저 DOM 렌더링 함수 */
       let renderUser = () => {
@@ -206,9 +207,9 @@
         // 그룹 목록 렌더링
         groups.forEach((group) => {
           const groupItem = `
-      <div class="render_group"
+        <div class="render_group"
         style="background-color: ${group.color};"
-        key="${group.groupId}">
+        data-group-id="${group.groupId}">
 
         <div class="title_more">
           <h3 style="color: ${Choose_color(group.color)}">

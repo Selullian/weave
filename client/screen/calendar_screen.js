@@ -1,56 +1,131 @@
 import { waitForAuth } from "../src/services/auth.js";
-import { getUserEvents } from "../src/services/calendar.js";
+import { getUserEvents, getGroupEvents } from "../src/services/calendar.js";
 import { getGroupInfo } from "../src/services/group.js";
 
 let currentDate = new Date();
+let eventsData = [];
 
 //클릭 시 보라색 배경 나타나는 로직
+// 그룹 클릭 시 선택된 그룹의 일정 가져오기
 function toggle_click() {
   document.addEventListener("click", async (e) => {
     const targetGroup = e.target.closest(".render_group");
 
     if (!targetGroup) return;
 
-    console.log("그룹 클릭 확인!", targetGroup);
-
     targetGroup.classList.toggle("active");
+    console.log("클릭 직후:", targetGroup.className);
 
     const selectedGroups = document.querySelectorAll(".render_group.active");
 
     const groupIds = Array.from(selectedGroups).map(
       (group) => group.dataset.groupId,
     );
-    console.log("선택된 그룹 목록:", groupIds);
+
+    await getMyEvent(groupIds);
+
+    console.log("getMyEvent 실행 후:", targetGroup.className);
   });
 }
-toggle_click();
 
-export async function getMyEvent() {
+// Firestore Timestamp 또는 Date를 JavaScript Date로 변환
+function convertDate(value) {
+  if (value instanceof Date) return value;
+
+  if (value && typeof value.toDate === "function") {
+    return value.toDate();
+  }
+
+  if (value && typeof value.seconds === "number") {
+    return new Date(value.seconds * 1000);
+  }
+
+  return new Date(value);
+}
+
+// 개인 일정 + 선택한 그룹 일정 가져오기
+export async function getMyEvent(selectedGroupIds = []) {
   await waitForAuth();
-  const result = await getUserEvents();
 
-  if (result.success) {
-    const events = result.data.map((event) => ({
-      ...event,
-      startAt: new Date(event.startAt.seconds * 1000),
-      endAt: new Date(event.endAt.seconds * 1000),
-    }));
+  try {
+    // 1. 개인 일정 가져오기
+    const userResult = await getUserEvents();
 
+    if (!userResult.success) {
+      console.error("개인 일정 조회 실패:", userResult);
+      return;
+    }
+
+    let allEvents = [...(userResult.data ?? [])];
+
+    console.table(
+      allEvents.map((event, index) => ({
+        index,
+        title: event.title,
+        groupId: event.groupId,
+        eventId: event.eventId,
+        source: event.source,
+        userId: event.userId,
+      })),
+    );
+
+    // 2. 선택한 그룹들의 일정 가져오기
+    const groupResults = await Promise.all(
+      selectedGroupIds.map((groupId) => getGroupEvents(groupId)),
+    );
+
+    console.log("개인 일정 원본:", userResult.data);
+
+    console.log(
+      "그룹 일정 원본:",
+      groupResults.map((result) => result.data),
+    );
+
+    for (const result of groupResults) {
+      if (!result.success) {
+        console.error("그룹 일정 조회 실패:", result);
+        continue;
+      }
+
+      allEvents.push(...(result.data ?? []));
+    }
+
+    console.log("개인 일정:", userResult.data);
+    console.log("그룹 일정:", groupResults);
+    console.log("합쳐진 전체 일정:", allEvents);
+
+    // 3. 선택된 그룹들의 색상 가져오기
+    const groupColors = {};
+
+    const groupInfoResults = await Promise.all(
+      selectedGroupIds.map((groupId) => getGroupInfo(groupId)),
+    );
+
+    selectedGroupIds.forEach((groupId, index) => {
+      const info = groupInfoResults[index];
+
+      if (info?.success && info.data) {
+        groupColors[groupId] = info.data.color;
+      }
+    });
+
+    // 4. 날짜별로 일정 묶기
     const eventsByDate = {};
 
-    for (const event of events) {
-      const date = event.startAt;
+    for (const event of allEvents) {
+      const startAt = convertDate(event.startAt);
+      const endAt = convertDate(event.endAt);
 
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
+      if (isNaN(startAt.getTime()) || isNaN(endAt.getTime())) {
+        console.warn("날짜가 올바르지 않은 일정:", event);
+        continue;
+      }
+
+      const year = startAt.getFullYear();
+      const month = String(startAt.getMonth() + 1).padStart(2, "0");
+      const day = String(startAt.getDate()).padStart(2, "0");
 
       const dateKey = `${year}-${month}-${day}`;
-      const get_group_info = await getGroupInfo(event.groupId);
-      console.log("가져온 것 : ", get_group_info);
-      const group_color = get_group_info.data.color;
-      const startTime = event.startAt;
-      const endTime = event.endAt;
 
       const formatTime = (date) => {
         const hours = String(date.getHours()).padStart(2, "0");
@@ -59,33 +134,38 @@ export async function getMyEvent() {
         return `${hours}:${minutes}`;
       };
 
-      const formattedStart = formatTime(startTime);
-      const formattedEnd = formatTime(endTime);
+      const eventColor = groupColors[event.groupId] || event.color || "#808080";
 
-      // 해당 날짜가 아직 없다면 새로 생성
       if (!eventsByDate[dateKey]) {
         eventsByDate[dateKey] = {
           date: dateKey,
-          color: group_color,
           schedule: [],
         };
       }
 
-      // 해당 날짜에 일정 추가
       eventsByDate[dateKey].schedule.push({
-        startTime: formattedStart,
-        endTime: formattedEnd,
+        startTime: formatTime(startAt),
+        endTime: formatTime(endAt),
         info: event.title,
+        color: eventColor,
       });
     }
 
-    const calendarData = Object.values(eventsByDate);
+    // 5. 달력에 사용할 데이터 저장
+    eventsData = Object.values(eventsByDate);
 
-    console.log("날짜별로 묶인 일정:", calendarData);
-    renderSchedule(calendarData);
+    console.log("최종 캘린더 데이터:", eventsData);
+    console.log("날짜별 최종 일정:", eventsByDate);
+
+    renderSchedule(eventsData);
+  } catch (e) {
+    console.error("일정 렌더링 실패:", e);
   }
 }
-getMyEvent();
+
+// 최초 실행: 개인 일정만 표시
+getMyEvent([]);
+toggle_click();
 
 let temp_selected = document.getElementById("select_date");
 console.log(temp_selected.innerHTML);
@@ -167,8 +247,8 @@ let renderSchedule = (arr) => {
           const eventEl = document.createElement("div");
           eventEl.className = "event_tag";
           eventEl.textContent = temp_str.info;
-          eventEl.style.backgroundColor = data.color;
-          eventEl.style.color = Choose_color(data.color);
+          eventEl.style.backgroundColor = temp_str.color;
+          eventEl.style.color = Choose_color(temp_str.color);
           cell.appendChild(eventEl);
         }
       }
@@ -214,59 +294,59 @@ export function Choose_color(hexColor) {
 
 //사이드바에 일정 업로드
 function render_sidebar_schedule(arr, dateKey) {
-  let render_schedule = {};
-  console.log("arr : ", arr);
-  for (let data of arr) {
-    if (data.date === dateKey) {
-      for (let info_time of data.schedule) {
-        let render_time = `${info_time.startTime}~${info_time.endTime}`;
-        if (!render_schedule[render_time]) {
-          render_schedule[render_time] = [];
-        }
-        render_schedule[render_time].push(`${info_time.info}, ${data.color}`);
-      }
-    }
-  }
-
-  console.log("render_schedule", render_schedule);
-
   const container = document.getElementById("sidebar_schedule");
+
   if (!container) return;
 
-  container.innerHTML = ""; // 기존 목록 초기화
+  container.innerHTML = "";
 
-  // 해당 날짜에 일정이 없는 경우 처리
-  if (Object.keys(render_schedule).length === 0) {
+  const selectedDate = arr.find((data) => data.date === dateKey);
+
+  if (!selectedDate || selectedDate.schedule.length === 0) {
     container.innerHTML = "<div class='no_schedule'>일정이 없습니다.</div>";
     return;
   }
 
-  // 3. 시간대별로 순회하며 이미지 형태의 HTML 생성[cite: 3]
-  for (let [time, infoList] of Object.entries(render_schedule)) {
-    let temp_info = infoList.toString().split(",");
-    console.log("infoList : ", infoList);
+  const render_schedule = {};
+
+  for (const event of selectedDate.schedule) {
+    const render_time = `${event.startTime}~${event.endTime}`;
+
+    if (!render_schedule[render_time]) {
+      render_schedule[render_time] = [];
+    }
+
+    render_schedule[render_time].push(event);
+  }
+
+  for (const [time, infoList] of Object.entries(render_schedule)) {
     let card_temp = "";
-    infoList.forEach((infoText) => {
+
+    infoList.forEach((event) => {
       card_temp += `
-      <div class="schedule_card" style="background-color: ${temp_info[1]}; color: ${Choose_color(temp_info[0])}">
-        ${temp_info[0]}
-      </div>
-    `;
+        <div
+          class="schedule_card"
+          style="
+            background-color: ${event.color};
+            color: ${Choose_color(event.color)};
+          "
+        >
+          ${event.info}
+        </div>
+      `;
     });
 
-    // 2. 그룹 전체(시간 + 카드들)를 하나의 HTML 문자열로 만듦
-    let group_str = `
-    <div class="schedule_group">
-      <div class="time_title">${time}</div>
-      ${card_temp}
-    </div>
-  `;
-
-    // 3. 덮어씌우기(=)가 아니라 누적(+=)으로 container에 추가!
-    container.innerHTML += group_str;
+    container.insertAdjacentHTML(
+      "beforeend",
+      `
+        <div class="schedule_group">
+          <div class="time_title">${time}</div>
+          ${card_temp}
+        </div>
+      `,
+    );
   }
 }
-
 //선택한 날짜부터 전하는 함수
 function render_date(date) {
   let temp_date = date.split("-");
