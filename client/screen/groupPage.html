@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./groupPage.css" />
+    <link rel="stylesheet" href="./group_popup.css" />
+    <script type="module" src="./group_screen.js" defer></script>
+    <script type="module" src="./group_pop_up.js"></script>
+  </head>
+  <body>
+    <div id="top_menu">
+      <div id="logo">
+        <img
+          src="../assets/logo.png"
+          alt="로고 이미지"
+          width="100%"
+          height="100%"
+        />
+      </div>
+      <!--로고 이미지-->
+      <div id="texts">
+        <div id="my_calendar">
+          <a href="./combinedPage.html">
+            <p>내 캘린더</p>
+          </a>
+        </div>
+        <div id="group">
+          <p>그룹</p>
+        </div>
+      </div>
+      <!--위에 내 캘린더 그룹 글자-->
+    </div>
+    <!--탑 메뉴-->
+
+    <div id="side_bar">
+      <div id="sidebar_elements">
+        <div id="title_side">
+          <div id="title_alarm">
+            <h1>그룹원</h1>
+            <div id="title_alarm_img">
+              <img
+                src="../assets/alarm.png"
+                alt="알람 이미지"
+                width="100%"
+                height="100%"
+              />
+            </div>
+          </div>
+          <!--제목 및 알람-->
+          <div id="group_search_box">
+            <input
+              type="text"
+              id="group_search_input"
+              placeholder="그룹 검색"
+            />
+
+            <button id="group_search_btn">
+              <img
+                src="../assets/Search.png"
+                alt="검색 버튼"
+                width="100%"
+                height="100%"
+              />
+            </button>
+          </div>
+          <!--검색 도구-->
+        </div>
+        <!--위쪽에 있는 제목-->
+
+        <div id="group_box">
+          <div id="title_button">
+            <p>그룹_</p>
+            <button id="add_btn">+그룹추가</button>
+          </div>
+          <!--제목 및 그룹추가 버튼-->
+          <div id="result_group"></div>
+        </div>
+        <!--아래쪽에 있는 그룹박스-->
+      </div>
+      <!--모든 요소가 들어가는 div-->
+    </div>
+    <!--사이드바 끝-->
+
+    <div id="main_board">
+      <div id="header_profile_btn">
+        <!--가로 1137, 세로 962-->
+        <div id="header">
+          <p id="group_name">그룹캘린더</p>
+          <p id="group_info"></p>
+        </div>
+        <!--통합캘린더 헤더 부분-->
+        <div id="profile_btn">
+          <div id="profile"></div>
+          <div id="upload_button">
+            <button>그룹 관리</button>
+          </div>
+        </div>
+        <!--헤더 옆에 같이 있는 버튼 2개-->
+      </div>
+      <!--헤더+버튼2개-->
+      <div id="calendar_sidebar">
+        <div id="calendar">
+          <div id="calendar_element">
+            <div id="calendar_header">
+              <div id="monthTitle">
+                <div id="month"></div>
+                <div id="year"></div>
+              </div>
+              <button id="prevBtn">&lt;</button>
+              <button id="nextBtn">&gt;</button>
+            </div>
+            <!--달력 헤더-->
+            <div class="grid" id="calendarGrid"></div>
+            <!--달력-->
+          </div>
+          <!--달력 요소-->
+        </div>
+        <!--달력-->
+
+        <div id="right_sidebar">
+          <input type="text" id="sidebar_search" placeholder="일정 검색" />
+
+          <button id="search_button" type="button">
+            <img src="../assets/Search.png" alt="" width="100%" height="100%" />
+          </button>
+
+          <button id="plus_button" type="button">
+            <img src="../assets/Plus.png" alt="" width="100%" height="100%" />
+          </button>
+
+          <!-- JS가 내용을 생성할 영역 -->
+          <div id="sidebar_content"></div>
+        </div>
+        <!--사이드바-->
+      </div>
+    </div>
+    <!--메인보드-->
+
+    <script type="module">
+      import { getUserGroups } from "../src/services/group.js";
+      import { getUserEvents } from "../src/services/calendar.js";
+      import { Choose_color } from "./group_screen.js";
+      import { runTest } from "./test.js";
+      import { waitForAuth } from "../src/services/auth.js";
+
+      let email = "";
+      let name = "";
+      let allGroups = [];
+      let selectedGroupIds = [];
+
+      /* 그룹 목록을 화면에 렌더링하는 함수 */
+      function renderGroup(
+        groups,
+        emptyMessage = "현재 가입된 그룹이 없습니다.",
+      ) {
+        const groupListContainer = document.getElementById("result_group");
+
+        if (!groupListContainer) {
+          console.error("result_group 요소를 찾을 수 없습니다.");
+          return;
+        }
+
+        // 기존 그룹 목록 비우기
+        groupListContainer.innerHTML = "";
+
+        // 그룹이 없으면 안내 문구 출력
+        if (groups.length === 0) {
+          groupListContainer.innerHTML = `<div id="no_group">${emptyMessage}</div>`;
+          return;
+        }
+
+        // 그룹 목록 렌더링
+        groups.forEach((group) => {
+          const groupItem = `
+          <div class="render_group"
+          style="background-color: ${group.color};"
+          data-group-id="${group.groupId}">
+
+          <div class="title_more">
+            <h3 style="color: ${Choose_color(group.color)}">
+              ${group.name}
+            </h3>
+
+            <div class="title_more_img">
+              <img
+                src="../assets/More horizontal.png"
+                alt="이미지"
+                width="100%"
+                height="100%"
+              />
+            </div>
+          </div>
+
+          <p>${group.description}</p>
+        </div>
+      `;
+
+          groupListContainer.insertAdjacentHTML("beforeend", groupItem);
+        });
+      }
+
+      /* 내 그룹 전체 조회 */
+      async function selectGroup() {
+        console.log("1. selectGroup 실행");
+
+        const res = await runTest("내 그룹 전체 조회", () => getUserGroups());
+
+        console.log("2. 그룹 조회 결과:", res);
+
+        if (!res || !res.success || !Array.isArray(res.data)) {
+          console.log("3. 그룹 조회 실패!");
+          return;
+        }
+
+        allGroups = res.data;
+        console.log("4. 가져온 그룹 목록:", allGroups);
+
+        searchGroup(document.getElementById("group_search_input").value);
+      }
+      /* 그룹 검색 함수 */
+      function searchGroup(searchText) {
+        const keyword = searchText.trim().toLowerCase();
+
+        // 검색어가 비어 있으면 전체 그룹 출력
+        if (keyword === "") {
+          renderGroup(allGroups);
+          return;
+        }
+
+        // 그룹 이름에 검색어가 포함된 그룹만 추출
+        const filteredGroups = allGroups.filter((group) =>
+          group.name.toLowerCase().includes(keyword),
+        );
+
+        // 검색 결과 출력
+        renderGroup(filteredGroups, "검색 결과가 없습니다.");
+      }
+
+      /* 검색창 이벤트 연결 */
+      const searchInput = document.getElementById("group_search_input");
+      const searchButton = document.getElementById("group_search_btn");
+
+      // 입력할 때마다 검색
+      searchInput.addEventListener("input", (e) => {
+        searchGroup(e.target.value);
+      });
+
+      // 검색 버튼을 눌러도 검색
+      searchButton.addEventListener("click", () => {
+        searchGroup(searchInput.value);
+      });
+
+      /* 앱 초기화 */
+      async function initApp() {
+        //sawait getUsersInfo();
+        try {
+          await waitForAuth();
+          console.log("인증 준비 완료!");
+
+          await selectGroup();
+        } catch (error) {
+          console.error("앱 초기화 실패:", error);
+        }
+      }
+
+      // 그룹 생성 등으로 목록을 새로고침할 때 사용할 함수
+      window.renderGroup = selectGroup;
+
+      initApp();
+    </script>
+  </body>
+</html>

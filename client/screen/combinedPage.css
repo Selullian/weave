@@ -40,8 +40,16 @@ body {
 }
 
 /*내 캘린더 버튼*/
-#my_calendar {
+#my_calendar,
+#my_calendar p {
   text-decoration: underline;
+}
+
+#group,
+#group a,
+#group a p {
+  text-decoration: none;
+  color: black;
 }
 
 /*버튼에 마우스 올릴 시 커서 모양 바꾸기*/
