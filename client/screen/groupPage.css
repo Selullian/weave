@@ -477,6 +477,10 @@ body {
   box-sizing: border-box;
 }
 
+.event_tag {
+  cursor: pointer;
+}
+
 /*비어있는 셀*/
 .day_cell.empty {
   background-color: #f8f9fa;
