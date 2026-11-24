@@ -19,6 +19,8 @@ import {
   deleteMemberDoc,
   isExistGroup,
   getMemberDocs,
+  updateMemberColorDoc,
+  findGroupDoc,
 } from "../repository/group_repository.js";
 
 /*
@@ -135,6 +137,32 @@ export async function getUserGroups() {
 }
 
 /**
+ * 그룹 검색
+ *
+ * 그룹 이름을 기준으로 현재 로그인한 사용자가 속한 그룹을 검색한다.
+ *
+ * @param {string} name - 검색할 그룹 이름 또는 키워드
+ * @returns {Promise<Object>} 검색된 그룹 목록 (검색어가 없거나 결과가 없으면 null)
+ */
+export async function findGroupByName(name) {
+  try {
+    console.log("그룹 검색 실행");
+
+    name = name.trim();
+    if (!name) return ok(null);
+
+    const uid = requiredUid();
+
+    const groups = await findGroupDoc(uid, name);
+
+    return ok(groups);
+  } catch (e) {
+    console.error("그룹 검색 실패 : ", e);
+    return fail(e);
+  }
+}
+
+/**
  * 그룹 정보 수정
  *
  * 그룹 존재 여부와 로그인 상태를 확인한 후
@@ -246,6 +274,33 @@ export async function addMember(groupId) {
     return ok(true);
   } catch (e) {
     console.error("멤버 추가 실패 : ", e);
+    return fail(e);
+  }
+}
+
+/**
+ * 그룹 내 내 색상 변경
+ *
+ * 그룹 문서의 members와 사용자 문서의 groupIds에 새 색상을 함께 저장한다.
+ *
+ * @param {string} groupId - 그룹 id
+ * @param {string} color - 변경할 색상 (hex 코드, 예: #ff0000)
+ * @returns {Promise<Object>} 변경 결과 (성공 또는 실패 응답)
+ */
+export async function updateMyGroupColor(groupId, color) {
+  try {
+    if (!groupId || !/^#[0-9a-fA-F]{6}$/.test(color ?? ""))
+      return fail({ code: 400, message: "그룹과 색상(#hex)을 확인해주세요." });
+
+    const uid = requiredUid();
+    const group = await getGroupDocById(groupId);
+    if (!group || !(uid in group.members))
+      return fail({ code: 403, message: "그룹의 멤버가 아닙니다." });
+
+    await updateMemberColorDoc(groupId, uid, color);
+    return ok(true);
+  } catch (e) {
+    console.error("그룹 색상 변경 실패 : ", e);
     return fail(e);
   }
 }

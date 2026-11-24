@@ -10,8 +10,10 @@ import {
   doc,
   query,
   writeBatch,
-  arrayUnion,
   where,
+  orderBy,
+  startAt,
+  endAt,
   serverTimestamp,
   deleteField,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
@@ -77,7 +79,7 @@ export async function createGroupDoc({ name, description, color, ownerId }) {
       description,
       ownerId,
       members: {
-        [ownerId]: true,
+        [ownerId]: color, // 기본값은 그룹 색상
       },
       color,
       updateAt: serverTimestamp(),
@@ -87,8 +89,9 @@ export async function createGroupDoc({ name, description, color, ownerId }) {
     batch.set(newRef, groupData);
 
     // 생성자의 그룹 목록 업데이트
+    // groupIds는 { 그룹id: #hex } 형태, 기본 색상은 그룹 색상
     batch.update(userRef, {
-      groupIds: arrayUnion(newRef.id),
+      [`groupIds.${newRef.id}`]: color,
     });
 
     // 두 작업을 동시에 확정
@@ -170,6 +173,51 @@ export async function getUserGroupDocs(uid) {
   }
 }
 /**
+ * 그룹 이름 검색
+ *
+ * 사용자 uid를 기준으로 사용자가 속한 그룹 중에서
+ * 그룹 이름이 검색어와 일치하거나 검색어로 시작하는 문서를 조회한다.
+ *
+ * @param {string} uid - 검색을 수행하는 사용자의 uid
+ * @param {string} name - 검색할 그룹 이름 또는 키워드
+ * @returns {Promise<Object[]|null>} 검색된 그룹 정보 객체 배열 (결과가 없으면 null)
+ */
+export async function findGroupDoc(uid, name) {
+  try {
+    const userDoc = await getDoc(doc(db, "users", uid));
+
+    // 사용자 문서 존재 여부 확인
+    if (!userDoc.exists()) {
+      throw new Error("존재하지 않는 사용자입니다.");
+    }
+
+    const userData = userDoc.data();
+
+    // 사용자 그룹 소속 여부 확인
+    const groupIds = userData.groupIds ? Object.keys(userData.groupIds) : [];
+    if (groupIds.length === 0) return null;
+
+    // 소속 그룹 중 이름이 검색어로 시작하는 그룹 검색
+    const q = query(
+      collection(db, "groups"),
+      where("groupId", "in", groupIds),
+      orderBy("name"),
+      startAt(name),
+      endAt(name + ""),
+    );
+
+    const result = await getDocs(q);
+    const dataList = result.docs.map(toEntity);
+
+    // 검색 결과가 없으면 null 반환
+    return dataList.length === 0 ? null : dataList;
+  } catch (e) {
+    console.error("그룹 검색 실패 : ", e);
+    throw e;
+  }
+}
+
+/**
  * 기존 그룹 문서의 정보를 수정
  *
  * contents의 필드를 기존 문서에 덮어쓰고
@@ -215,24 +263,10 @@ export async function deleteGroupDoc(groupId) {
 }
 
 /**
- * 그룹 멤버에게 할당할 랜덤 hex 색상 생성
- *
- * @returns {string} #을 포함한 6자리 hex 색상 코드
- */
-const getRandomHexColor = () => {
-  return (
-    "#" +
-    Math.floor(Math.random() * 16777215)
-      .toString(16)
-      .padStart(6, "0")
-  );
-};
-
-/**
  * 그룹 문서에 새로운 멤버 추가
  *
  * 이미 그룹에 속한 사용자는 추가하지 않는다.
- * 신규 멤버에게 랜덤 색상을 할당하고 members에 uid와 색상을 저장한다
+ * 신규 멤버의 색상은 기본적으로 그룹 대표 색상으로 설정하고 members에 uid와 색상을 저장한다
  *
  * @param {string} groupId - 멤버를 추가할 그룹 id
  * @param {string} uid - 추가할 사용자의 uid
@@ -247,17 +281,47 @@ export async function addMemberDoc(groupId, uid) {
 
     if (Object.keys(groupInfo.members).includes(uid)) return null;
 
-    const memberColor = getRandomHexColor();
-    const members = { ...groupInfo.members, [uid]: memberColor };
+    const memberColor = groupInfo.color;
 
     await updateDoc(doc(db, "groups", groupId), {
-      members,
+      [`members.${uid}`]: memberColor,
       updateAt: serverTimestamp(),
     });
 
     return memberColor;
   } catch (e) {
     console.error("그룹 문서 멤버 추가 실패 : ", e);
+    throw e;
+  }
+}
+
+/**
+ * 그룹 문서와 사용자 문서에서 멤버의 개인 색상을 변경
+ *
+ * @param {string} groupId - 그룹 id
+ * @param {string} uid - 색상을 변경할 사용자의 uid
+ * @param {string} color - 변경할 색상 (hex 코드)
+ * @returns {Promise<boolean>} 변경 성공 여부
+ */
+export async function updateMemberColorDoc(groupId, uid, color) {
+  try {
+    console.log("멤버 색상 변경 실행");
+
+    const batch = writeBatch(db);
+
+    batch.update(doc(db, "groups", groupId), {
+      [`members.${uid}`]: color,
+      updateAt: serverTimestamp(),
+    });
+    batch.update(doc(db, "users", uid), {
+      [`groupIds.${groupId}`]: color,
+      updateAt: serverTimestamp(),
+    });
+
+    await batch.commit();
+    return true;
+  } catch (e) {
+    console.error("멤버 색상 변경 실패 : ", e);
     throw e;
   }
 }
